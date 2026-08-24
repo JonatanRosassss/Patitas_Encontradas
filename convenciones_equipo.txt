@@ -1,0 +1,9 @@
+﻿Convenciones del equipo
+-----------------------
+- PascalCase para componentes
+- camelCase para funciones y variables
+- Un componente por archivo
+- Props siempre tipadas con interfaces
+- Estilos al final del archivo
+- Sin magic numbers ni hardcoded strings
+- Sin console.log en Pull Requests
