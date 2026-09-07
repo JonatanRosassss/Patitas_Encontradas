@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
@@ -26,3 +27,14 @@ const styles = StyleSheet.create({
     color: Colors.error,
   },
 });
+=======
+import { View, Text } from 'react-native';
+
+export default function Reporte() {
+  return (
+    <View>
+      <Text>Reportar un problema</Text>
+    </View>
+  );
+}
+>>>>>>> 93ded8feafd170c22e01103b5c528f8b12a6b1cb
