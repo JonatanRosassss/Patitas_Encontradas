@@ -1,153 +1,113 @@
-<<<<<<< HEAD
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Colors, Typography } from '../../constants/theme';
-
-interface HomeScreenProps {}
-
-export default function HomeScreen({}: HomeScreenProps) {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Patitas Encontradas</Text>
-      <Text style={styles.subtitulo}>Feed de Mascotas</Text>
-    </View>
-=======
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet, Pressable, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
-import { PetCard } from '@/components/pet-card';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-
+import { PetCard } from '@/components/ui/pet-card';
+import { BottomTabInset, MaxContentWidth, Colors, Typography } from '@/constants/theme';
 
 export default function HomeScreen() {
-
-
   function publicarMascota() {
-  console.log('Mascota publicada');
+    console.log('Mascota publicada');
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <ThemedText type="small" style={styles.title}>
-            HOLA, SOY MAXI
-          </ThemedText>
+        <View style={styles.heroSection}>
+          <Text style={styles.title}>
+            HOLA, USUARIO
+          </Text>
+          <Text style={styles.subtitle}>
+            ¿Perdiste a tu mascota?
+          </Text>
+        </View>
 
-          <ThemedText type="small" style={styles.subtitle}>
-            Perdiste a tu mascota?
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
+        <View style={styles.stepContainer}>
           <Pressable
             style={styles.publishButton}
             onPress={publicarMascota}>
-            <ThemedText>PUBLICAR MASCOTA</ThemedText>
+            <Text style={styles.publishButtonText}>PUBLICAR MASCOTA</Text>
           </Pressable>
 
           <PetCard tipo="PERRO" estado="PERDIDO" nombre="Sebastian" />
           <PetCard tipo="GATO" estado="ENCONTRADO" nombre="Michi" />
-        </ThemedView>
+        </View>
       </SafeAreaView>
-    </ThemedView>
->>>>>>> 93ded8feafd170c22e01103b5c528f8b12a6b1cb
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-<<<<<<< HEAD
-    alignItems: 'center',
-    backgroundColor: Colors.backgroundLight,
-    padding: 20,
-  },
-  titulo: {
-    fontSize: Typography.sizes.xxl,
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.primary,
-    marginBottom: 8,
-  },
-  subtitulo: {
-    fontSize: Typography.sizes.md,
-    fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.textSecondary,
-  },
-});
-=======
-    flexDirection: 'row',
+    backgroundColor: Colors?.backgroundLight ?? '#FFFFFF',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'flex-start',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
+    paddingHorizontal: 24,
+    alignItems: 'stretch',
+    gap: 16,
+    paddingBottom: BottomTabInset + 16,
     maxWidth: MaxContentWidth,
+    alignSelf: 'center',
+    width: '100%',
   },
   heroSection: {
     alignItems: 'flex-start',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.three,
+    paddingVertical: 16,
+    gap: 8,
   },
-
   title: {
-    alignItems: 'flex-start',
+    fontSize: Typography?.sizes?.xxl ?? 24,
+    fontFamily: Typography?.fonts?.titleBold,
+    color: Colors?.primary ?? '#000000',
     textAlign: 'left',
   },
-
   subtitle: {
-  textAlign: 'left',
+    fontSize: Typography?.sizes?.md ?? 16,
+    fontFamily: Typography?.fonts?.bodyRegular,
+    color: Colors?.textSecondary ?? '#666666',
+    textAlign: 'left',
   },
-
+  stepContainer: {
+    gap: 12,
+    alignSelf: 'stretch',
+    paddingVertical: 16,
+  },
   publishButton: {
-  paddingHorizontal: 20,
-  paddingVertical: 10,
-  backgroundColor: '#ff8c00',
-  alignItems: 'center',
-  borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: Colors?.primary ?? '#ff8c00',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
   },
-
+  publishButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: Typography?.sizes?.sm ?? 14,
+  },
   petCard: {
-  width: '100%',
-  height: 150,
-  backgroundColor: '#ddd',
-  flexDirection: 'row',
-  borderRadius: 5,
+    width: '100%',
+    height: 150,
+    backgroundColor: '#ddd',
+    flexDirection: 'row',
+    borderRadius: 5,
   },
-
   petImage: {
-  width: 100,
-  height: 100,
-  backgroundColor: '#999',
-  borderRadius: 5,
+    width: 100,
+    height: 100,
+    backgroundColor: '#999',
+    borderRadius: 5,
   },
-
   petInfo: {
-  flex: 1,
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'flex-start',
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
   },
-
   code: {
     textTransform: 'uppercase',
   },
-  stepContainer: {
-    gap: Spacing.two,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-
 });
->>>>>>> 93ded8feafd170c22e01103b5c528f8b12a6b1cb
