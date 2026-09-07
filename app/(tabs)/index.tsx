@@ -1,46 +1,41 @@
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet, Pressable, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
-import { PetCard } from '@/components/pet-card';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { PetCard } from '@/components/ui/pet-card';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-
 
 export default function HomeScreen() {
 
-
   function publicarMascota() {
-  console.log('Mascota publicada');
+    console.log('Mascota publicada');
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <ThemedText type="small" style={styles.title}>
+
+        <View style={styles.heroSection}>
+          <Text style={styles.title}>
             HOLA, USUARIO
-          </ThemedText>
-
-          <ThemedText type="small" style={styles.subtitle}>
+          </Text>
+          <Text style={styles.subtitle}>
             Perdiste a tu mascota?
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
+        <View style={styles.stepContainer}>
           <Pressable
-            style={styles.publishButton}
+            style={styles.publishButtonText}
             onPress={publicarMascota}>
-            <ThemedText>PUBLICAR MASCOTA</ThemedText>
+            <Text style={styles.publishButtonText}>PUBLICAR MASCOTA</Text>
           </Pressable>
 
           <PetCard tipo="PERRO" estado="PERDIDO" nombre="Sebastian" />
           <PetCard tipo="GATO" estado="ENCONTRADO" nombre="Michi" />
-        </ThemedView>
+        </View>
+
       </SafeAreaView>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -52,18 +47,18 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: 24,
     alignItems: 'flex-start',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
+    gap: 16,
+    paddingBottom: BottomTabInset + 16,
     maxWidth: MaxContentWidth,
   },
   heroSection: {
     alignItems: 'flex-start',
     justifyContent: 'center',
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.three,
+    paddingHorizontal: 24,
+    gap: 16,
   },
 
   title: {
@@ -75,7 +70,7 @@ const styles = StyleSheet.create({
   textAlign: 'left',
   },
 
-  publishButton: {
+  publishButtonText: {
   paddingHorizontal: 20,
   paddingVertical: 10,
   backgroundColor: '#ff8c00',
@@ -109,11 +104,11 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   stepContainer: {
-    gap: Spacing.two,
+    gap: 8,
     alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    borderRadius: 24,
   },
 
 });
