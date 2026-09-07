@@ -21,7 +21,7 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ThemedView style={styles.heroSection}>
           <ThemedText type="small" style={styles.title}>
-            HOLA, USUARIO
+            HOLA, SOY MAXI
           </ThemedText>
 
           <ThemedText type="small" style={styles.subtitle}>
