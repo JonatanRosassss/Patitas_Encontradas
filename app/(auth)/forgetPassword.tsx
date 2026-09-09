@@ -10,24 +10,25 @@ import {
   Image,
 } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
-import { useFonts, Baloo2_700Bold } from '@expo-google-fonts/baloo-2';
+import { useFonts, Baloo2_700Bold, Baloo2_500Medium, Baloo2_400Regular } from '@expo-google-fonts/baloo-2';
 import { Nunito_400Regular, Nunito_700Bold, Nunito_300Light } from '@expo-google-fonts/nunito';
 import { Button } from '../../components/ui/Button';
 import { loginSchema } from '@/schemas/authScheama';
 import { router } from 'expo-router';
 
-interface LoginScreenProps {}
+interface ForgetPasswordProps {}
 
-export default function LoginScreen({ }: LoginScreenProps) {
+export default function ForgetPassword({ }: ForgetPasswordProps) {
   const [fontsLoaded] = useFonts({
     Baloo2_700Bold,
+    Baloo2_400Regular,
+    Baloo2_500Medium,
     Nunito_400Regular,
     Nunito_700Bold,
     Nunito_300Light,
   });
 
   const [email, setEmail] = useState('');
-  const [contrasenia, setContrasenia] = useState('');
 
   if (!fontsLoaded) {
     return (
@@ -37,50 +38,38 @@ export default function LoginScreen({ }: LoginScreenProps) {
     );
   }
 
-  const handleLogin = () => {
-    const resultado = loginSchema.safeParse({ email, contrasenia });
+  const handleValidation = () => {
+    const resultado = loginSchema.safeParse({ email});
     if (!resultado.success) {
       //no paso
       return;
     }
     //paso
   };
-
-  const handleCreateAccount = () => {
-    router.push('./createAccount.tsx');
-    // Lógica para ir a crear cuenta / registro
-  };
-  const handleContinueGoogle = () => {
-
-  };
-  const handleForgetPassword = () => {
-    router.push('/(auth)/forgetPassword')
-  };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <View style={styles.contenedorTitulo}>
+         <Image
+          source={require('assets/logo_patitas_crop.png')}
+          style={styles.logo}
+          resizeMode='contain'
+        />
 
         <Text style={styles.tituloNegro}>
           PATITAS
           <Text style={styles.titulo}> ENCONTRADAS</Text>
         </Text>
         <Text style={styles.textoAbajo}> Ayudanos a que vuelvan a casa</Text>
-        <Image
-          source={require('assets/logo_patitas_crop.png')}
-          style={styles.logo}
-          resizeMode='contain'
-        />
       </View>
 
       <View style={styles.contenedorInicio}>
-        <Text style={styles.textoIniciarSesion}>Iniciar Sesion</Text>
-        <Text style={styles.textoAbajo}> Bienvenido de vuelta</Text>
-      </View>
-
+        <Text style={styles.textoSemiTitulo}>Olvidaste tu Contrasenia?</Text>
+        <Text style={styles.textoAbajo}> Ingresa tu correo electronico y se te enviara un codigo de recuperacion</Text>
+       </View>
+      <Text style={styles.textoCorreo}> CORREO: </Text>
       <TextInput
         style={styles.input}
         placeholder="Mail"
@@ -92,45 +81,12 @@ export default function LoginScreen({ }: LoginScreenProps) {
         onChangeText={setEmail}
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        placeholderTextColor={Colors.textMuted}
-        value={contrasenia}
-        onChangeText={setContrasenia}
-        secureTextEntry={true}
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-      <Text
-        style={styles.linkTexto}
-        onPress={handleForgetPassword}
-      >
-        Olvidaste tu contrasenia?
-      </Text>
-
       <Button
-        label="Ingresar"
-        onClick={handleLogin}
+        label="Enviar codigo de verificacion"
+        onClick={handleValidation}
         color="orange"
         colorText="white"
       />
-
-      <Button
-        label="Crear cuenta"
-        onClick={handleCreateAccount}
-        color="bWhite"
-        colorText="black"
-      />
-
-      <Button
-        label="Continuar con Google"
-        onClick={handleContinueGoogle}
-        color="white"
-        colorText="black"
-
-      />
-
     </KeyboardAvoidingView>
   );
 }
@@ -147,7 +103,7 @@ const styles = StyleSheet.create({
   loadingContainer: {
     alignItems: 'center',
   },
-  textoIniciarSesion: {
+  textoSemiTitulo: {
     fontSize: Typography.sizes.xxxl,
     lineHeight: Typography.lineHeights.xxxl,
     textAlign: 'center',
@@ -186,6 +142,17 @@ const styles = StyleSheet.create({
 
     fontFamily: Typography.fonts.bodyRegular,
     marginBottom: 20,
+  },
+  textoCorreo: {
+    fontSize: Typography.sizes.sm,
+    lineHeight: Typography.lineHeights.sm,
+    marginTop: 5,
+    opacity: 0.9,
+    textAlign: 'left',
+    fontFamily: Typography.fonts.titleRegular,
+    marginBottom: 20,
+    color: Colors.text
+
   },
   input: {
     height: 52,
