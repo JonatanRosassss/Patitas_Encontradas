@@ -15,7 +15,7 @@
  * - Textos: Nunito
  */
 
-import { Platform } from "react-native/Libraries/Utilities/Platform";
+import { Platform } from 'react-native';
 
 export const Colors = {
   // Colores de Marca Principales

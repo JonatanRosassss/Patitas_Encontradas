@@ -5,21 +5,24 @@ import {
   TextInput,
   Platform,
   StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
   View,
+  Image,
 } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
-import { useFonts, Baloo2_700Bold , Baloo2_500Medium} from '@expo-google-fonts/baloo-2';
-import { Nunito_400Regular, Nunito_700Bold,Nunito_300Light } from '@expo-google-fonts/nunito';
+import { useFonts, Baloo2_700Bold } from '@expo-google-fonts/baloo-2';
+import { Nunito_400Regular, Nunito_700Bold, Nunito_300Light } from '@expo-google-fonts/nunito';
+import { Button } from '../../components/ui/Button';
+import { loginSchema } from '@/schemas/authScheama';
 
 interface LoginScreenProps {}
 
-export default function LoginScreen({}: LoginScreenProps) {
+export default function LoginScreen({ }: LoginScreenProps) {
   const [fontsLoaded] = useFonts({
     Baloo2_700Bold,
     Nunito_400Regular,
     Nunito_700Bold,
+    Nunito_300Light,
   });
 
   const [email, setEmail] = useState('');
@@ -34,7 +37,22 @@ export default function LoginScreen({}: LoginScreenProps) {
   }
 
   const handleLogin = () => {
-    // Lógica de autenticación
+    const resultado = loginSchema.safeParse({ email, contrasenia });
+    if (!resultado.success) {
+      //no paso
+      return;
+    }
+    //paso
+  };
+
+  const handleCreateAccount = () => {
+    // Lógica para ir a crear cuenta / registro
+  };
+  const handleContinueGoogle = () => {
+
+  };
+  const handleForgetPassword = () => {
+
   };
 
   return (
@@ -43,19 +61,24 @@ export default function LoginScreen({}: LoginScreenProps) {
       style={styles.container}
     >
       <View style={styles.contenedorTitulo}>
-      <Text style={styles.tituloNegro}>PATITAS
-        <Text style={styles.titulo}> ENCONTRADAS</Text>
 
-      </Text>
-      <Text style={styles.textoAbajo}> Ayudanos a que vuelvan a casa</Text>
-
-      </View>
-      <View style={styles.contenedorInicio}>
-        <Text style={styles.textoIniciarSesion}>Iniciar Sesion
+        <Text style={styles.tituloNegro}>
+          PATITAS
+          <Text style={styles.titulo}> ENCONTRADAS</Text>
         </Text>
-        <Text style={styles.textoAbajo}> Bienvenido de vuelta</Text>
-
+        <Text style={styles.textoAbajo}> Ayudanos a que vuelvan a casa</Text>
+        <Image
+          source={require('assets/logo_patitas_crop.png')}
+          style={styles.logo}
+          resizeMode='contain'
+        />
       </View>
+
+      <View style={styles.contenedorInicio}>
+        <Text style={styles.textoIniciarSesion}>Iniciar Sesion</Text>
+        <Text style={styles.textoAbajo}> Bienvenido de vuelta</Text>
+      </View>
+
       <TextInput
         style={styles.input}
         placeholder="Mail"
@@ -67,34 +90,45 @@ export default function LoginScreen({}: LoginScreenProps) {
         onChangeText={setEmail}
       />
 
-      {/* Input de Contraseña */}
       <TextInput
         style={styles.input}
         placeholder="Contraseña"
         placeholderTextColor={Colors.textMuted}
         value={contrasenia}
         onChangeText={setContrasenia}
-        // C. ¿Qué booleano oculta los caracteres de la contraseña?
         secureTextEntry={true}
         autoCapitalize="none"
         autoCorrect={false}
       />
-
-      <TouchableOpacity
-        style={styles.boton}
-        activeOpacity={0.8}
-        onPress={handleLogin}
+      <Text
+        style={styles.linkTexto}
+        onPress={handleForgetPassword}
       >
-        <Text style={styles.textoBoton}>Ingresar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.botonCrearCuenta}
-        activeOpacity={0.6}
-      >
-        <Text style={styles.textoBotonCrearCuenta}>Crear cuenta</Text>
+        Olvidaste tu contrasenia?
+      </Text>
 
+      <Button
+        label="Ingresar"
+        onClick={handleLogin}
+        color="orange"
+        colorText="white"
+      />
 
-      </TouchableOpacity>
+      <Button
+        label="Crear cuenta"
+        onClick={handleCreateAccount}
+        color="bWhite"
+        colorText="black"
+      />
+
+      <Button
+        label="Continuar con Google"
+        onClick={handleContinueGoogle}
+        color="white"
+        colorText="black"
+
+      />
+
     </KeyboardAvoidingView>
   );
 }
@@ -115,7 +149,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.xxxl,
     lineHeight: Typography.lineHeights.xxxl,
     textAlign: 'center',
-    fontFamily: Typography.fonts.titleMedium
+    fontFamily: Typography.fonts.titleMedium,
   },
   titulo: {
     fontSize: Typography.sizes.display,
@@ -128,19 +162,27 @@ const styles = StyleSheet.create({
   tituloNegro: {
     fontSize: Typography.sizes.display,
     lineHeight: Typography.lineHeights.display,
-     textAlign: 'center',
+    textAlign: 'center',
     fontFamily: Typography.fonts.titleBold,
     color: Colors.black,
-
-
   },
   textoAbajo: {
     fontSize: Typography.sizes.sm,
     lineHeight: Typography.lineHeights.sm,
-    marginTop:5,
+    marginTop: 5,
     opacity: 0.3,
     textAlign: 'center',
     fontFamily: Typography.fonts.bodyLight,
+    marginBottom: 20,
+  },
+  linkTexto: {
+
+    fontSize: Typography.sizes.sm,
+    lineHeight: Typography.lineHeights.sm,
+    marginTop: 5,
+    marginLeft: 10,
+
+    fontFamily: Typography.fonts.bodyRegular,
     marginBottom: 20,
   },
   input: {
@@ -155,52 +197,14 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.text,
   },
-  boton: {
-    height: 52,
-    backgroundColor: Colors.primary,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  botonCrearCuenta: {
-    height: 52,
-    backgroundColor: Colors.card,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  textoBoton: {
-    fontSize: Typography.sizes.md,
-    fontFamily: Typography.fonts.bodyBold,
-    color: Colors.white,
-  },
-  textoBotonCrearCuenta: {
-    fontSize: Typography.sizes.md,
-    fontFamily: Typography.fonts.bodyBold,
-    color: Colors.black,
-
-  },
   contenedorTitulo: {
     alignSelf: 'stretch',
-    marginTop: 100,
-    marginBottom:160,
+    marginTop: 120,
     paddingHorizontal: 20,
-
-  }
+  },
+  logo: {
+    width: 180,
+    height: 250,
+    alignSelf: 'center'
+  },
 });

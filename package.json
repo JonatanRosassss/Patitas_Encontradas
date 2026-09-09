@@ -10,12 +10,15 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo-google-fonts/baloo-2": "^0.4.2",
+    "@expo-google-fonts/nunito": "^0.4.2",
     "@hookform/resolvers": "^3.9.0",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@shopify/flash-list": "2.0.2",
     "expo": "^57.0.0",
     "expo-camera": "~57.0.4",
     "expo-constants": "~57.0.17",
+    "expo-font": "^57.0.3",
     "expo-image-picker": "~57.0.16",
     "expo-linking": "~57.0.9",
     "expo-location": "~57.0.16",
@@ -38,5 +41,6 @@
     "@types/react": "~18.2.79",
     "tailwindcss": "^3.4.7",
     "typescript": "^7.0.2"
+
   }
 }
