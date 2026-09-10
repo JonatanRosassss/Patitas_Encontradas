@@ -1,63 +1,69 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  KeyboardAvoidingView,
   Text,
-  TextInput,
-  Platform,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  View,
   ViewStyle,
   TextStyle,
 } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
-export type ButtonColor = 'orange' | 'white' | 'bWhite' | 'lightOrange' ;
+
+export type ButtonColor = 'orange' | 'white' | 'bWhite' | 'lightOrange';
 export type TextColor = 'orange' | 'white' | 'bWhite' | 'lightOrange' | 'black';
 
-interface ButtonProps {
-  label: string,
+export interface ButtonProps {
+  label?: string;
+  title?: string;
   onClick?: () => void;
+  onPress?: () => void;
   type?: 'button' | 'submit' | 'reset';
   color?: ButtonColor;
-  colorText?: TextColor,
-  disabled?: false,
-
+  colorText?: TextColor;
+  variant?: 'primary' | 'outline';
+  disabled?: boolean;
+  loading?: boolean;
 }
-
 
 export const Button: React.FC<ButtonProps> = ({
   label,
+  title,
   onClick,
-  type = 'button',
-  color = 'orange',
+  onPress,
+  color,
+  colorText,
+  variant,
   disabled = false,
-  colorText = 'black',
-
-
+  loading = false,
 }) => {
+  const handler = onPress || onClick;
+  const textLabel = label || title || '';
+
+  // Determinar variante o color segun props pasadas
+  let effectiveColor: ButtonColor = color || (variant === 'outline' ? 'bWhite' : 'orange');
+  let effectiveColorText: TextColor =
+    colorText || (effectiveColor === 'orange' ? 'white' : effectiveColor === 'bWhite' ? 'orange' : 'black');
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      onPress={onClick}
-      disabled={disabled}
-
-      style={
-        [
-          styles.button,
-          buttonVariantStyles[color],
-
-        ]
-      }
-
+      onPress={handler}
+      disabled={disabled || loading}
+      style={[
+        styles.button,
+        buttonVariantStyles[effectiveColor] || buttonVariantStyles.orange,
+        disabled && styles.buttonDisabled,
+      ]}
     >
-      <Text style={[styles.ButtonText, textVariantStyles[colorText]]}>
-        {label}
-      </Text>
-
+      {loading ? (
+        <ActivityIndicator color={effectiveColorText === 'white' ? '#FFFFFF' : Colors.primary} />
+      ) : (
+        <Text style={[styles.buttonText, textVariantStyles[effectiveColorText] || styles.defaultText]}>
+          {textLabel}
+        </Text>
+      )}
     </TouchableOpacity>
   );
-
 };
 
 const buttonVariantStyles: Record<ButtonColor, ViewStyle> = {
@@ -72,12 +78,11 @@ const buttonVariantStyles: Record<ButtonColor, ViewStyle> = {
   },
   bWhite: {
     backgroundColor: Colors.white,
-    borderColor: '#272424',
-    borderWidth: 1,
+    borderColor: Colors.primary,
+    borderWidth: 1.5,
   },
-
-
 };
+
 const textVariantStyles: Record<TextColor, TextStyle> = {
   orange: {
     color: Colors.primary,
@@ -86,34 +91,38 @@ const textVariantStyles: Record<TextColor, TextStyle> = {
     color: Colors.secondary,
   },
   white: {
-    color: Colors.white
+    color: Colors.white,
   },
   bWhite: {
     color: Colors.white,
-
   },
   black: {
     color: Colors.black,
-  }
+  },
 };
-
 
 const styles = StyleSheet.create({
   button: {
-      height: 52,
-      borderRadius: 25,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 8,
-      shadowColor: Colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-  ButtonText: {
+    height: 52,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    paddingHorizontal: 20,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  buttonText: {
     fontSize: Typography.sizes.md,
     fontFamily: Typography.fonts.bodyBold,
-   },
-
+  },
+  defaultText: {
+    color: Colors.text,
+  },
 });

@@ -12,8 +12,9 @@
   "dependencies": {
     "@expo-google-fonts/baloo-2": "^0.4.2",
     "@expo-google-fonts/nunito": "^0.4.2",
+    "@expo/vector-icons": "^15.0.2",
     "@hookform/resolvers": "^3.9.0",
-    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@shopify/flash-list": "2.0.2",
     "expo": "^57.0.0",
     "expo-camera": "~57.0.4",
