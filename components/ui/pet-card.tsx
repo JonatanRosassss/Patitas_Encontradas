@@ -1,13 +1,16 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 
-export function PetCard({ tipo, estado, nombre }: { tipo: string; estado: string; nombre: string }) {
+export function PetCard({ tipo, estado, nombre, imagen }: { tipo: string; estado: string; nombre: string; imagen: string }) {
   return (
     <View style={styles.petCard}>
-      <View style={styles.petImage} />
+      <Image source={{ uri: imagen }} style={styles.petImage} />
 
       <View style={styles.petInfo}>
-        <Text>{tipo}</Text>
+        <View style={styles.petStatusRow}>
+          <Text>{tipo}</Text>
+        </View>
+
         <Text>{estado}</Text>
         <Text>{nombre}</Text>
       </View>
@@ -26,7 +29,9 @@ const styles = StyleSheet.create({
   petImage: {
   width: 100,
   height: 100,
-  backgroundColor: '#999',
+  backgroundColor: '#fff',
+  margin: 10,
+  borderRadius: 8,
   },
 
   petInfo: {
@@ -34,6 +39,9 @@ const styles = StyleSheet.create({
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
+  },
+  petStatusRow: {
+  flexDirection: 'row',
   },
 
 });

@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -34,7 +35,7 @@ export default function LoginScreen({}: LoginScreenProps) {
   }
 
   const handleLogin = () => {
-    // Lógica de autenticación
+    router.replace('/(tabs)');
   };
 
   return (

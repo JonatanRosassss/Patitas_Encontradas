@@ -1,9 +1,36 @@
-import React from 'react';
-import { StyleSheet, Pressable, View, Text } from 'react-native';
+import { StyleSheet, Pressable, View, Text, FlatList, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PetCard } from '@/components/ui/pet-card';
 import { BottomTabInset, MaxContentWidth, Colors, Typography } from '@/constants/theme';
+
+const MASCOTAS = [
+  {
+    id: '1',
+    tipo: 'PERRO',
+    estado: 'PERDIDO',
+    nombre: 'Sebastian',
+    descripcion: 'Macho, mediano, collar azul.',
+    imagen: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500',
+  },
+  {
+    id: '2',
+    tipo: 'GATO',
+    estado: 'ENCONTRADO',
+    nombre: 'Michi',
+    descripcion: 'Gata mestiza, pelaje tricolor.',
+    imagen: 'https://images.unsplash.com/photo-1601758123927-1c2a0f3b8e5d?w=500',
+  },
+  {
+    id: '3',
+    tipo: 'LORO',
+    estado: 'PERDIDO',
+    nombre: 'GERARDO',
+    descripcion: 'Morado cuando come mucho maiz, verde cuando come mucho pasto.',
+    imagen: 'https://images.unsplash.com/photo-1601758123927-1c2a0f3b8e5d?w=500',
+  },
+];
+
 
 export default function HomeScreen() {
   function publicarMascota() {
@@ -29,8 +56,14 @@ export default function HomeScreen() {
             <Text style={styles.publishButtonText}>PUBLICAR MASCOTA</Text>
           </Pressable>
 
-          <PetCard tipo="PERRO" estado="PERDIDO" nombre="Sebastian" />
-          <PetCard tipo="GATO" estado="ENCONTRADO" nombre="Michi" />
+          <FlatList
+            data={MASCOTAS}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <PetCard tipo={item.tipo} estado={item.estado} nombre={item.nombre} imagen={item.imagen} />
+            )}
+          />
+
         </View>
       </SafeAreaView>
     </View>
@@ -74,6 +107,7 @@ const styles = StyleSheet.create({
     gap: 12,
     alignSelf: 'stretch',
     paddingVertical: 16,
+    color: Colors?.textSecondary ?? '#ffffff',
   },
   publishButton: {
     paddingHorizontal: 20,
@@ -87,25 +121,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: Typography?.sizes?.sm ?? 14,
-  },
-  petCard: {
-    width: '100%',
-    height: 150,
-    backgroundColor: '#ddd',
-    flexDirection: 'row',
-    borderRadius: 5,
-  },
-  petImage: {
-    width: 100,
-    height: 100,
-    backgroundColor: '#999',
-    borderRadius: 5,
-  },
-  petInfo: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
   },
   code: {
     textTransform: 'uppercase',
