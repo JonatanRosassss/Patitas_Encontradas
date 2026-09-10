@@ -1,119 +1,74 @@
-import React, { useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Text,
-  TextInput,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  View,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
-import { Colors, Typography } from '../../constants/theme';
-export type ButtonColor = 'orange' | 'white' | 'bWhite' | 'lightOrange' ;
-export type TextColor = 'orange' | 'white' | 'bWhite' | 'lightOrange' | 'black';
+import React from 'react';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { Colors } from '../../constants/theme';
 
 interface ButtonProps {
-  label: string,
-  onClick?: () => void;
-  type?: 'button' | 'submit' | 'reset';
-  color?: ButtonColor;
-  colorText?: TextColor,
-  disabled?: false,
-
+  title: string;
+  onPress: () => void;
+  variant?: 'primary' | 'outline';
+  disabled?: boolean;
+  loading?: boolean;
 }
 
-
 export const Button: React.FC<ButtonProps> = ({
-  label,
-  onClick,
-  type = 'button',
-  color = 'orange',
+  title,
+  onPress,
+  variant = 'primary',
   disabled = false,
-  colorText = 'black',
-
-
+  loading = false,
 }) => {
+  const esOutline = variant === 'outline';
+
   return (
     <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={onClick}
-      disabled={disabled}
-
-      style={
-        [
-          styles.button,
-          buttonVariantStyles[color],
-
-        ]
-      }
-
+      style={[
+        estilos.boton,
+        esOutline ? estilos.botonOutline : estilos.botonPrimario,
+        disabled && estilos.botonDeshabilitado,
+      ]}
+      onPress={onPress}
+      disabled={disabled || loading}
+      activeOpacity={0.8}
     >
-      <Text style={[styles.ButtonText, textVariantStyles[colorText]]}>
-        {label}
-      </Text>
-
+      {loading ? (
+        <ActivityIndicator color={esOutline ? (Colors.primary || '#EE6C4D') : '#FFFFFF'} />
+      ) : (
+        <Text style={[estilos.texto, esOutline ? estilos.textoOutline : estilos.textoPrimario]}>
+          {title}
+        </Text>
+      )}
     </TouchableOpacity>
   );
-
 };
 
-const buttonVariantStyles: Record<ButtonColor, ViewStyle> = {
-  orange: {
-    backgroundColor: Colors.primary,
+const estilos = StyleSheet.create({
+  boton: {
+    height: 52,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginVertical: 4,
   },
-  lightOrange: {
-    backgroundColor: Colors.secondary,
+  botonPrimario: {
+    backgroundColor: Colors.primary || '#EE6C4D',
   },
-  white: {
-    backgroundColor: Colors.white,
+  botonOutline: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: Colors.primary || '#EE6C4D',
   },
-  bWhite: {
-    backgroundColor: Colors.white,
-    borderColor: '#272424',
-    borderWidth: 1,
+  botonDeshabilitado: {
+    opacity: 0.5,
   },
-
-
-};
-const textVariantStyles: Record<TextColor, TextStyle> = {
-  orange: {
-    color: Colors.primary,
+  texto: {
+    fontSize: 16,
+    fontWeight: '700',
   },
-  lightOrange: {
-    color: Colors.secondary,
+  textoPrimario: {
+    color: '#FFFFFF', // Texto blanco bien visible
   },
-  white: {
-    color: Colors.white
+  textoOutline: {
+    color: Colors.primary || '#EE6C4D', // Texto naranja bien visible
   },
-  bWhite: {
-    color: Colors.white,
-
-  },
-  black: {
-    color: Colors.black,
-  }
-};
-
-
-const styles = StyleSheet.create({
-  button: {
-      height: 52,
-      borderRadius: 25,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 8,
-      shadowColor: Colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-  ButtonText: {
-    fontSize: Typography.sizes.md,
-    fontFamily: Typography.fonts.bodyBold,
-   },
-
 });

@@ -5,69 +5,54 @@ import {
   TextInput,
   Platform,
   StyleSheet,
-  ActivityIndicator,
   View,
-  Image,
   Alert,
-  TouchableOpacity,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useFonts, Baloo2_700Bold } from '@expo-google-fonts/baloo-2';
-import { Nunito_400Regular, Nunito_700Bold, Nunito_300Light } from '@expo-google-fonts/nunito';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography } from '../../constants/theme';
 import { Button } from '../../components/ui/Button';
-import { simularInicioSesion } from '../../services/authMock';
 
-export default function PantallaInicioSesion() {
+export default function PantallaRegistro() {
   const enrutador = useRouter();
-  const [fuentesCargadas] = useFonts({
-    Baloo2_700Bold,
-    Nunito_400Regular,
-    Nunito_700Bold,
-    Nunito_300Light,
-  });
+  const [nombre, setNombre] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [contrasenia, setContrasenia] = useState('');
+  const [confirmarContrasenia, setConfirmarContrasenia] = useState('');
 
-  const [correo, setCorreo] = useState('profesor@patitas.com');
-  const [contrasenia, setContrasenia] = useState('123456');
   const [verContrasenia, setVerContrasenia] = useState(false);
+  const [verConfirmarContrasenia, setVerConfirmarContrasenia] = useState(false);
 
-  if (!fuentesCargadas) {
-    return (
-      <View style={[estilos.contenedor, estilos.contenedorCarga]}>
-        <ActivityIndicator size="large" color={Colors.primary || '#EE6C4D'} />
-      </View>
-    );
-  }
-
-  const manejarInicioSesion = () => {
-    if (!correo.trim() || !contrasenia.trim()) {
-      Alert.alert('Atención', 'Por favor ingresá tu correo y contraseña.');
+  const manejarRegistro = () => {
+    if (!nombre.trim() || !correo.trim() || !telefono.trim() || !contrasenia.trim()) {
+      Alert.alert('Atención', 'Por favor completá todos los campos requeridos.');
       return;
     }
 
-    const usuario = simularInicioSesion(correo, contrasenia);
-
-    if (usuario) {
-      Alert.alert('¡Bienvenido!', `Inicio de sesión exitoso como ${usuario.nombre}.`, [
-        {
-          text: 'Continuar',
-          onPress: () => enrutador.replace('/'),
-        },
-      ]);
-    } else {
-      Alert.alert(
-        'Acceso denegado',
-        'Correo o contraseña incorrectos.\n\nDatos de prueba:\nprofesor@patitas.com / 123456'
-      );
+    if (contrasenia !== confirmarContrasenia) {
+      Alert.alert('Atención', 'Las contraseñas no coinciden.');
+      return;
     }
+
+    Alert.alert(
+      '¡Cuenta creada!',
+      `Registro simulado exitoso para ${nombre.trim()}.\nYa podés iniciar sesión.`,
+      [
+        {
+          text: 'Ir a Iniciar Sesión',
+          onPress: () => enrutador.push('/(auth)/login'),
+        },
+      ]
+    );
   };
 
-  const manejarLoginSocial = (proveedor: string) => {
+  const manejarRegistroSocial = (proveedor: string) => {
     Alert.alert(
-      `Acceso con ${proveedor} (Simulación)`,
-      `Inicio de sesión exitoso utilizando tu cuenta de ${proveedor}.`,
+      `Registro con ${proveedor} (Simulación)`,
+      `Cuenta creada e inicio de sesión exitoso mediante ${proveedor}.`,
       [
         {
           text: 'Continuar',
@@ -83,26 +68,28 @@ export default function PantallaInicioSesion() {
       style={estilos.contenedor}
     >
       <ScrollView contentContainerStyle={estilos.scrollContenido} keyboardShouldPersistTaps="handled">
-        <View style={estilos.contenedorTitulo}>
-          <Text style={estilos.titulo}>
-            PATITAS <Text style={estilos.tituloNegro}>ENCONTRADAS</Text>
+        <View style={estilos.contenido}>
+          <Text style={estilos.titulo}>Crear Cuenta</Text>
+          <Text style={estilos.subtitulo}>
+            Sumate a la comunidad para ayudar a que más mascotas vuelvan a casa.
           </Text>
-          <Text style={estilos.subtituloBajada}>Ayudanos a que vuelvan a casa</Text>
-          <Image
-            source={require('../../assets/logo_patitas_crop.png')}
-            style={estilos.logo}
-            resizeMode="contain"
+
+          {/* Campo: Nombre completo */}
+          <Text style={estilos.etiqueta}>Nombre completo</Text>
+          <TextInput
+            style={estilos.campoTexto}
+            placeholder="Ej. Juan Pérez"
+            placeholderTextColor="#7D8597"
+            value={nombre}
+            onChangeText={setNombre}
+            autoCapitalize="words"
           />
-        </View>
 
-        <View style={estilos.contenedorFormulario}>
-          <Text style={estilos.textoIniciarSesion}>Iniciar Sesión</Text>
-
-          {/* Campo: Correo */}
+          {/* Campo: Correo electrónico */}
           <Text style={estilos.etiqueta}>Correo electrónico</Text>
           <TextInput
             style={estilos.campoTexto}
-            placeholder="Correo electrónico"
+            placeholder="ejemplo@correo.com"
             placeholderTextColor="#7D8597"
             value={correo}
             onChangeText={setCorreo}
@@ -110,12 +97,23 @@ export default function PantallaInicioSesion() {
             autoCapitalize="none"
           />
 
-          {/* Campo: Contraseña con ojo */}
+          {/* Campo: Teléfono */}
+          <Text style={estilos.etiqueta}>Teléfono de contacto</Text>
+          <TextInput
+            style={estilos.campoTexto}
+            placeholder="Ej. 11 1234-5678"
+            placeholderTextColor="#7D8597"
+            value={telefono}
+            onChangeText={setTelefono}
+            keyboardType="phone-pad"
+          />
+
+          {/* Campo: Contraseña */}
           <Text style={estilos.etiqueta}>Contraseña</Text>
           <View style={estilos.contenedorInputPassword}>
             <TextInput
               style={estilos.campoTextoPassword}
-              placeholder="Contraseña"
+              placeholder="Mínimo 6 caracteres"
               placeholderTextColor="#7D8597"
               value={contrasenia}
               onChangeText={setContrasenia}
@@ -134,33 +132,45 @@ export default function PantallaInicioSesion() {
             </TouchableOpacity>
           </View>
 
-          <Text
-            style={estilos.enlaceTexto}
-            onPress={() => enrutador.push('/(auth)/forgot-password')}
-          >
-            ¿Olvidaste tu contraseña?
-          </Text>
+          {/* Campo: Confirmar Contraseña */}
+          <Text style={estilos.etiqueta}>Confirmar contraseña</Text>
+          <View style={estilos.contenedorInputPassword}>
+            <TextInput
+              style={estilos.campoTextoPassword}
+              placeholder="Repetir contraseña"
+              placeholderTextColor="#7D8597"
+              value={confirmarContrasenia}
+              onChangeText={setConfirmarContrasenia}
+              secureTextEntry={!verConfirmarContrasenia}
+            />
+            <TouchableOpacity
+              style={estilos.botonOjo}
+              onPress={() => setVerConfirmarContrasenia(!verConfirmarContrasenia)}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name={verConfirmarContrasenia ? 'eye-outline' : 'eye-off-outline'}
+                size={22}
+                color="#7D8597"
+              />
+            </TouchableOpacity>
+          </View>
 
-          <Button title="Iniciar Sesión" onPress={manejarInicioSesion} />
-          <View style={estilos.espaciadorPequeno} />
-          <Button
-            title="Crear cuenta"
-            onPress={() => enrutador.push('/(auth)/register')}
-            variant="outline"
-          />
+          <View style={estilos.espacioBoton} />
+          <Button title="Registrarme" onPress={manejarRegistro} />
 
           {/* Divisor social */}
           <View style={estilos.contenedorDivisor}>
             <View style={estilos.lineaDivisora} />
-            <Text style={estilos.textoDivisor}>o continuar con</Text>
+            <Text style={estilos.textoDivisor}>o registrarse con</Text>
             <View style={estilos.lineaDivisora} />
           </View>
 
-          {/* Botones de Login Social */}
+          {/* Botones Sociales */}
           <View style={estilos.filaBotonesSociales}>
             <TouchableOpacity
               style={estilos.botonSocial}
-              onPress={() => manejarLoginSocial('Google')}
+              onPress={() => manejarRegistroSocial('Google')}
               activeOpacity={0.8}
             >
               <Ionicons name="logo-google" size={24} color="#DB4437" />
@@ -168,7 +178,7 @@ export default function PantallaInicioSesion() {
 
             <TouchableOpacity
               style={estilos.botonSocial}
-              onPress={() => manejarLoginSocial('Apple')}
+              onPress={() => manejarRegistroSocial('Apple')}
               activeOpacity={0.8}
             >
               <Ionicons name="logo-apple" size={24} color="#000000" />
@@ -176,12 +186,16 @@ export default function PantallaInicioSesion() {
 
             <TouchableOpacity
               style={estilos.botonSocial}
-              onPress={() => manejarLoginSocial('Facebook')}
+              onPress={() => manejarRegistroSocial('Facebook')}
               activeOpacity={0.8}
             >
               <Ionicons name="logo-facebook" size={24} color="#4267B2" />
             </TouchableOpacity>
           </View>
+
+          <Text style={estilos.enlaceVolver} onPress={() => enrutador.push('/(auth)/login')}>
+            ¿Ya tenés una cuenta? Iniciar sesión
+          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -196,69 +210,39 @@ const estilos = StyleSheet.create({
   scrollContenido: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingVertical: 20,
+    paddingVertical: 30,
     paddingHorizontal: 20,
   },
-  contenedorCarga: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  contenedorTitulo: {
-    alignSelf: 'stretch',
-    marginTop: 10,
+  contenido: {
     paddingHorizontal: 10,
   },
   titulo: {
-    fontSize: Typography.sizes.display || 32,
-    lineHeight: Typography.lineHeights.display || 38,
+    fontSize: Typography.sizes.xxxl || 28,
+    lineHeight: Typography.lineHeights.xxxl || 34,
     textAlign: 'center',
     fontFamily: Typography.fonts.titleBold,
     color: Colors.primary || '#EE6C4D',
+    marginBottom: 6,
   },
-  tituloNegro: {
-    fontSize: Typography.sizes.display || 32,
-    lineHeight: Typography.lineHeights.display || 38,
-    textAlign: 'center',
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.black || '#2B2D42',
-  },
-  subtituloBajada: {
+  subtitulo: {
     fontSize: Typography.sizes.sm || 14,
     lineHeight: Typography.lineHeights.sm || 20,
-    marginTop: 4,
-    opacity: 0.5,
     textAlign: 'center',
     fontFamily: Typography.fonts.bodyLight,
-    marginBottom: 8,
-  },
-  logo: {
-    width: 120,
-    height: 150,
-    alignSelf: 'center',
-  },
-  contenedorFormulario: {
-    paddingHorizontal: 10,
-    marginTop: 10,
-  },
-  textoIniciarSesion: {
-    fontSize: Typography.sizes.xxxl || 26,
-    lineHeight: Typography.lineHeights.xxxl || 32,
-    textAlign: 'center',
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.primary || '#EE6C4D',
-    marginBottom: 12,
+    color: Colors.text || '#2B2D42',
+    opacity: 0.7,
+    marginBottom: 20,
   },
   etiqueta: {
     fontSize: Typography.sizes.sm || 14,
     fontFamily: Typography.fonts.bodyBold || 'System',
     color: Colors.text || '#2B2D42',
-    marginBottom: 4,
-    marginTop: 6,
+    marginBottom: 6,
+    marginTop: 8,
     fontWeight: '600',
   },
   campoTexto: {
-    height: 48,
+    height: 50,
     backgroundColor: Colors.white || '#FFFFFF',
     borderRadius: 8,
     borderWidth: 1,
@@ -278,7 +262,7 @@ const estilos = StyleSheet.create({
   },
   campoTextoPassword: {
     flex: 1,
-    height: 48,
+    height: 50,
     paddingHorizontal: 14,
     fontSize: Typography.sizes.md || 15,
     fontFamily: Typography.fonts.bodyRegular,
@@ -286,26 +270,17 @@ const estilos = StyleSheet.create({
   },
   botonOjo: {
     paddingHorizontal: 14,
-    height: 48,
+    height: 50,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  enlaceTexto: {
-    fontSize: Typography.sizes.sm || 14,
-    lineHeight: Typography.lineHeights.sm || 20,
-    marginTop: 8,
-    textAlign: 'right',
-    fontFamily: Typography.fonts.bodyRegular,
-    marginBottom: 16,
-    color: Colors.primary || '#EE6C4D',
-  },
-  espaciadorPequeno: {
-    height: 8,
+  espacioBoton: {
+    height: 16,
   },
   contenedorDivisor: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 18,
   },
   lineaDivisora: {
     flex: 1,
@@ -324,18 +299,21 @@ const estilos = StyleSheet.create({
     gap: 16,
   },
   botonSocial: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.white || '#FFFFFF',
     borderWidth: 1,
     borderColor: Colors.border || '#E0E0E0',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
     elevation: 2,
+  },
+  enlaceVolver: {
+    fontSize: Typography.sizes.sm || 14,
+    textAlign: 'center',
+    fontFamily: Typography.fonts.bodyRegular,
+    marginTop: 20,
+    color: Colors.primary || '#EE6C4D',
   },
 });

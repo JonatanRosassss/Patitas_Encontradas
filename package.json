@@ -12,8 +12,9 @@
   "dependencies": {
     "@expo-google-fonts/baloo-2": "^0.4.2",
     "@expo-google-fonts/nunito": "^0.4.2",
+    "@expo/vector-icons": "^15.0.2",
     "@hookform/resolvers": "^3.9.0",
-    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@shopify/flash-list": "2.0.2",
     "expo": "^57.0.0",
     "expo-camera": "~57.0.4",
@@ -28,12 +29,14 @@
     "lucide-react-native": "^0.468.0",
     "nativewind": "^4.0.36",
     "react": "19.2.3",
+    "react-dom": "19.2.3",
     "react-hook-form": "^7.52.1",
     "react-native": "0.86.3",
     "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
     "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2",
     "zod": "^3.23.8",
     "zustand": "^4.5.4"
   },
@@ -41,6 +44,5 @@
     "@types/react": "~18.2.79",
     "tailwindcss": "^3.4.7",
     "typescript": "^7.0.2"
-
   }
 }
