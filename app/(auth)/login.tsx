@@ -8,52 +8,60 @@ import {
   ActivityIndicator,
   View,
   Image,
-  Alert,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Colors, Typography } from '../../constants/theme';
 import { useFonts, Baloo2_700Bold } from '@expo-google-fonts/baloo-2';
 import { Nunito_400Regular, Nunito_700Bold, Nunito_300Light } from '@expo-google-fonts/nunito';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography } from '../../constants/theme';
 import { Button } from '../../components/ui/Button';
+import { loginSchema } from '@/schemas/authScheama';
+import { router } from 'expo-router';
 import { simularInicioSesion } from '../../services/authMock';
 
-export default function PantallaInicioSesion() {
-  const enrutador = useRouter();
-  const [fuentesCargadas] = useFonts({
+interface LoginScreenProps {}
+
+export default function LoginScreen({ }: LoginScreenProps) {
+  const [fontsLoaded] = useFonts({
     Baloo2_700Bold,
     Nunito_400Regular,
     Nunito_700Bold,
     Nunito_300Light,
   });
 
-  const [correo, setCorreo] = useState('profesor@patitas.com');
-  const [contrasenia, setContrasenia] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [contrasenia, setContrasenia] = useState('');
   const [verContrasenia, setVerContrasenia] = useState(false);
 
-  if (!fuentesCargadas) {
+  if (!fontsLoaded) {
     return (
-      <View style={[estilos.contenedor, estilos.contenedorCarga]}>
-        <ActivityIndicator size="large" color={Colors.primary || '#EE6C4D'} />
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
 
-  const manejarInicioSesion = () => {
-    if (!correo.trim() || !contrasenia.trim()) {
-      Alert.alert('Atención', 'Por favor ingresá tu correo y contraseña.');
+  const handleLogin = () => {
+    const resultado = loginSchema.safeParse({
+      email,
+      contrasenia,
+      constrasenia: contrasenia,
+    });
+
+    if (!resultado.success) {
+      const errorMsg = resultado.error.errors[0]?.message || 'Por favor revisa los campos ingresados.';
+      Alert.alert('Atención', errorMsg);
       return;
     }
 
-    const usuario = simularInicioSesion(correo, contrasenia);
-
+    const usuario = simularInicioSesion(email, contrasenia);
     if (usuario) {
       Alert.alert('¡Bienvenido!', `Inicio de sesión exitoso como ${usuario.nombre}.`, [
         {
           text: 'Continuar',
-          onPress: () => enrutador.replace('/'),
+          onPress: () => router.replace('/'),
         },
       ]);
     } else {
@@ -64,119 +72,139 @@ export default function PantallaInicioSesion() {
     }
   };
 
-  const manejarLoginSocial = (proveedor: string) => {
+  const handleCreateAccount = () => {
+    router.push('/(auth)/register');
+  };
+
+  const handleForgetPassword = () => {
+    router.push('/(auth)/forgetPassword');
+  };
+
+  const handleSocialLogin = (proveedor: 'Google' | 'Apple' | 'Facebook') => {
     Alert.alert(
-      `Acceso con ${proveedor} (Simulación)`,
+      `Acceso con ${proveedor}`,
       `Inicio de sesión exitoso utilizando tu cuenta de ${proveedor}.`,
       [
         {
           text: 'Continuar',
-          onPress: () => enrutador.replace('/'),
+          onPress: () => router.replace('/'),
         },
       ]
     );
   };
 
+  const handleContinueGoogle = () => {
+    handleSocialLogin('Google');
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={estilos.contenedor}
+      style={styles.container}
     >
-      <ScrollView contentContainerStyle={estilos.scrollContenido} keyboardShouldPersistTaps="handled">
-        <View style={estilos.contenedorTitulo}>
-          <Text style={estilos.titulo}>
-            PATITAS <Text style={estilos.tituloNegro}>ENCONTRADAS</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContenido}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.contenedorTitulo}>
+          <Text style={styles.tituloNegro}>
+            PATITAS
+            <Text style={styles.titulo}> ENCONTRADAS</Text>
           </Text>
-          <Text style={estilos.subtituloBajada}>Ayudanos a que vuelvan a casa</Text>
+          <Text style={styles.textoAbajo}>Ayudanos a que vuelvan a casa</Text>
           <Image
             source={require('../../assets/logo_patitas_crop.png')}
-            style={estilos.logo}
+            style={styles.logo}
             resizeMode="contain"
           />
         </View>
 
-        <View style={estilos.contenedorFormulario}>
-          <Text style={estilos.textoIniciarSesion}>Iniciar Sesión</Text>
+        <View style={styles.contenedorInicio}>
+          <Text style={styles.textoIniciarSesion}>Iniciar Sesion</Text>
+          <Text style={styles.textoAbajo}>Bienvenido de vuelta</Text>
 
-          {/* Campo: Correo */}
-          <Text style={estilos.etiqueta}>Correo electrónico</Text>
           <TextInput
-            style={estilos.campoTexto}
-            placeholder="Correo electrónico"
-            placeholderTextColor="#7D8597"
-            value={correo}
-            onChangeText={setCorreo}
+            style={styles.input}
+            placeholder="Mail"
+            placeholderTextColor={Colors.textMuted}
+            value={email}
             keyboardType="email-address"
             autoCapitalize="none"
+            autoCorrect={false}
+            onChangeText={setEmail}
           />
 
-          {/* Campo: Contraseña con ojo */}
-          <Text style={estilos.etiqueta}>Contraseña</Text>
-          <View style={estilos.contenedorInputPassword}>
+          <View style={styles.contenedorInputPassword}>
             <TextInput
-              style={estilos.campoTextoPassword}
+              style={styles.inputPassword}
               placeholder="Contraseña"
-              placeholderTextColor="#7D8597"
+              placeholderTextColor={Colors.textMuted}
               value={contrasenia}
               onChangeText={setContrasenia}
               secureTextEntry={!verContrasenia}
+              autoCapitalize="none"
+              autoCorrect={false}
             />
             <TouchableOpacity
-              style={estilos.botonOjo}
+              style={styles.botonOjo}
               onPress={() => setVerContrasenia(!verContrasenia)}
               activeOpacity={0.7}
             >
               <Ionicons
                 name={verContrasenia ? 'eye-outline' : 'eye-off-outline'}
                 size={22}
-                color="#7D8597"
+                color={Colors.textMuted}
               />
             </TouchableOpacity>
           </View>
 
-          <Text
-            style={estilos.enlaceTexto}
-            onPress={() => enrutador.push('/(auth)/forgot-password')}
-          >
-            ¿Olvidaste tu contraseña?
+          <Text style={styles.linkTexto} onPress={handleForgetPassword}>
+            Olvidaste tu contrasenia?
           </Text>
 
-          <Button title="Iniciar Sesión" onPress={manejarInicioSesion} />
-          <View style={estilos.espaciadorPequeno} />
           <Button
-            title="Crear cuenta"
-            onPress={() => enrutador.push('/(auth)/register')}
-            variant="outline"
+            label="Ingresar"
+            onClick={handleLogin}
+            color="orange"
+            colorText="white"
+          />
+
+          <Button
+            label="Crear cuenta"
+            onClick={handleCreateAccount}
+            color="bWhite"
+            colorText="black"
           />
 
           {/* Divisor social */}
-          <View style={estilos.contenedorDivisor}>
-            <View style={estilos.lineaDivisora} />
-            <Text style={estilos.textoDivisor}>o continuar con</Text>
-            <View style={estilos.lineaDivisora} />
+          <View style={styles.contenedorDivisor}>
+            <View style={styles.lineaDivisora} />
+            <Text style={styles.textoDivisor}>o continuar con</Text>
+            <View style={styles.lineaDivisora} />
           </View>
 
           {/* Botones de Login Social */}
-          <View style={estilos.filaBotonesSociales}>
+          <View style={styles.filaBotonesSociales}>
             <TouchableOpacity
-              style={estilos.botonSocial}
-              onPress={() => manejarLoginSocial('Google')}
+              style={styles.botonSocial}
+              onPress={handleContinueGoogle}
               activeOpacity={0.8}
             >
               <Ionicons name="logo-google" size={24} color="#DB4437" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={estilos.botonSocial}
-              onPress={() => manejarLoginSocial('Apple')}
+              style={styles.botonSocial}
+              onPress={() => handleSocialLogin('Apple')}
               activeOpacity={0.8}
             >
               <Ionicons name="logo-apple" size={24} color="#000000" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={estilos.botonSocial}
-              onPress={() => manejarLoginSocial('Facebook')}
+              style={styles.botonSocial}
+              onPress={() => handleSocialLogin('Facebook')}
               activeOpacity={0.8}
             >
               <Ionicons name="logo-facebook" size={24} color="#4267B2" />
@@ -188,119 +216,110 @@ export default function PantallaInicioSesion() {
   );
 }
 
-const estilos = StyleSheet.create({
-  contenedor: {
+const styles = StyleSheet.create({
+  container: {
     flex: 1,
-    backgroundColor: Colors.backgroundLight || '#F8F9FA',
+    backgroundColor: Colors.backgroundLight,
   },
   scrollContenido: {
     flexGrow: 1,
     justifyContent: 'center',
     paddingVertical: 20,
+    paddingHorizontal: 24,
+  },
+  contenedorInicio: {
     paddingHorizontal: 20,
   },
-  contenedorCarga: {
+  loadingContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: Colors.backgroundLight,
   },
-  contenedorTitulo: {
-    alignSelf: 'stretch',
-    marginTop: 10,
-    paddingHorizontal: 10,
+  textoIniciarSesion: {
+    fontSize: Typography.sizes.xxxl,
+    lineHeight: Typography.lineHeights.xxxl,
+    textAlign: 'center',
+    fontFamily: Typography.fonts.titleMedium,
   },
   titulo: {
-    fontSize: Typography.sizes.display || 32,
-    lineHeight: Typography.lineHeights.display || 38,
+    fontSize: Typography.sizes.display,
+    lineHeight: Typography.lineHeights.display,
+    marginBottom: 40,
     textAlign: 'center',
     fontFamily: Typography.fonts.titleBold,
-    color: Colors.primary || '#EE6C4D',
+    color: Colors.primary,
   },
   tituloNegro: {
-    fontSize: Typography.sizes.display || 32,
-    lineHeight: Typography.lineHeights.display || 38,
+    fontSize: Typography.sizes.display,
+    lineHeight: Typography.lineHeights.display,
     textAlign: 'center',
     fontFamily: Typography.fonts.titleBold,
-    color: Colors.black || '#2B2D42',
+    color: Colors.black,
   },
-  subtituloBajada: {
-    fontSize: Typography.sizes.sm || 14,
-    lineHeight: Typography.lineHeights.sm || 20,
-    marginTop: 4,
+  textoAbajo: {
+    fontSize: Typography.sizes.sm,
+    lineHeight: Typography.lineHeights.sm,
+    marginTop: 5,
     opacity: 0.5,
     textAlign: 'center',
     fontFamily: Typography.fonts.bodyLight,
-    marginBottom: 8,
+    marginBottom: 20,
   },
-  logo: {
-    width: 120,
-    height: 150,
-    alignSelf: 'center',
+  linkTexto: {
+    fontSize: Typography.sizes.sm,
+    lineHeight: Typography.lineHeights.sm,
+    marginTop: 5,
+    marginLeft: 10,
+    fontFamily: Typography.fonts.bodyRegular,
+    marginBottom: 20,
+    color: Colors.primary,
   },
-  contenedorFormulario: {
-    paddingHorizontal: 10,
-    marginTop: 10,
-  },
-  textoIniciarSesion: {
-    fontSize: Typography.sizes.xxxl || 26,
-    lineHeight: Typography.lineHeights.xxxl || 32,
-    textAlign: 'center',
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.primary || '#EE6C4D',
-    marginBottom: 12,
-  },
-  etiqueta: {
-    fontSize: Typography.sizes.sm || 14,
-    fontFamily: Typography.fonts.bodyBold || 'System',
-    color: Colors.text || '#2B2D42',
-    marginBottom: 4,
-    marginTop: 6,
-    fontWeight: '600',
-  },
-  campoTexto: {
-    height: 48,
-    backgroundColor: Colors.white || '#FFFFFF',
+  input: {
+    height: 52,
+    backgroundColor: Colors.white,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.border || '#E0E0E0',
+    borderColor: Colors.border,
     paddingHorizontal: 14,
-    fontSize: Typography.sizes.md || 15,
+    marginBottom: 16,
+    fontSize: Typography.sizes.md,
     fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.text || '#2B2D42',
+    color: Colors.text,
   },
   contenedorInputPassword: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white || '#FFFFFF',
+    height: 52,
+    backgroundColor: Colors.white,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.border || '#E0E0E0',
+    borderColor: Colors.border,
+    marginBottom: 16,
   },
-  campoTextoPassword: {
+  inputPassword: {
     flex: 1,
-    height: 48,
+    height: 52,
     paddingHorizontal: 14,
-    fontSize: Typography.sizes.md || 15,
+    fontSize: Typography.sizes.md,
     fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.text || '#2B2D42',
+    color: Colors.text,
   },
   botonOjo: {
     paddingHorizontal: 14,
-    height: 48,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  enlaceTexto: {
-    fontSize: Typography.sizes.sm || 14,
-    lineHeight: Typography.lineHeights.sm || 20,
-    marginTop: 8,
-    textAlign: 'right',
-    fontFamily: Typography.fonts.bodyRegular,
-    marginBottom: 16,
-    color: Colors.primary || '#EE6C4D',
+  contenedorTitulo: {
+    alignSelf: 'stretch',
+    marginTop: 20,
+    paddingHorizontal: 20,
   },
-  espaciadorPequeno: {
-    height: 8,
+  logo: {
+    width: 180,
+    height: 200,
+    alignSelf: 'center',
   },
   contenedorDivisor: {
     flexDirection: 'row',
@@ -310,31 +329,32 @@ const estilos = StyleSheet.create({
   lineaDivisora: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.border || '#E0E0E0',
+    backgroundColor: Colors.border,
   },
   textoDivisor: {
     marginHorizontal: 12,
-    fontSize: 13,
-    color: '#7D8597',
+    fontSize: Typography.sizes.sm,
+    color: Colors.textMuted,
     fontFamily: Typography.fonts.bodyRegular,
   },
   filaBotonesSociales: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 16,
+    marginBottom: 10,
   },
   botonSocial: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.white || '#FFFFFF',
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: Colors.white,
     borderWidth: 1,
-    borderColor: Colors.border || '#E0E0E0',
+    borderColor: Colors.border,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
