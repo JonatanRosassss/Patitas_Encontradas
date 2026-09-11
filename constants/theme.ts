@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Patitas Encontradas - Design System Theme
  * Basado en la guia de estilos oficial de la aplicacion
  *
@@ -15,7 +15,7 @@
  * - Textos: Nunito
  */
 
-import { Platform } from "react-native";
+import { Platform } from 'react-native';
 
 export const Colors = {
   // Colores de Marca Principales
