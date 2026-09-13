@@ -60,7 +60,13 @@ export default function HomeScreen() {
             data={MASCOTAS}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <PetCard tipo={item.tipo} estado={item.estado} nombre={item.nombre} imagen={item.imagen} />
+              <PetCard 
+              tipo={item.tipo}
+              estado={item.estado}
+              nombre={item.nombre}
+              //descripcion={item.descripcion}
+              imagen={item.imagen}
+               />
             )}
           />
 
