@@ -19,7 +19,7 @@ const MASCOTAS = [
     estado: 'ENCONTRADO',
     nombre: 'Michi',
     descripcion: 'Gata mestiza, pelaje tricolor.',
-    imagen: 'https://images.unsplash.com/photo-1601758123927-1c2a0f3b8e5d?w=500',
+    imagen: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500', // URL actualizada
   },
   {
     id: '3',
@@ -27,9 +27,9 @@ const MASCOTAS = [
     estado: 'PERDIDO',
     nombre: 'GERARDO',
     descripcion: 'Morado cuando come mucho maiz, verde cuando come mucho pasto.',
-    imagen: 'https://images.unsplash.com/photo-1601758123927-1c2a0f3b8e5d?w=500',
+    imagen: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=500', // URL actualizada
   },
-];
+  ];
 
 
 export default function HomeScreen() {
@@ -59,6 +59,7 @@ export default function HomeScreen() {
           <FlatList
             data={MASCOTAS}
             keyExtractor={(item) => item.id}
+            ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
             renderItem={({ item }) => (
               <PetCard 
               tipo={item.tipo}
@@ -110,6 +111,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   stepContainer: {
+    flex: 1,
     gap: 12,
     alignSelf: 'stretch',
     paddingVertical: 16,

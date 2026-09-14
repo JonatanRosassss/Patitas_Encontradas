@@ -1,5 +1,6 @@
 import { Image, StyleSheet, Text, View, Pressable } from 'react-native';
 
+import { Colors } from '@/constants/theme';
 
 export function PetCard({ tipo, estado, nombre, imagen }: { tipo: string; estado: string; nombre: string; imagen: string }) {
   return (
@@ -9,9 +10,11 @@ export function PetCard({ tipo, estado, nombre, imagen }: { tipo: string; estado
       <View style={styles.petInfo}>
 
         <View style={styles.petTopRow}>
-          <View style={styles.petStatus}>
-            <Text>{estado}</Text>
-          </View>
+
+          
+        <View style={[styles.petStatus, { backgroundColor: estado === 'ENCONTRADO' ? '#a2e6b3' : '#eda8a5' }]}>
+          <Text>{estado}</Text>
+        </View>
 
           <Pressable style={styles.saveButton}>
             <Text>G</Text>
@@ -33,8 +36,12 @@ const styles = StyleSheet.create({
   petCard: {
   width: '100%',
   height: 150,
-  backgroundColor: '#ddd',
+  backgroundColor: '#FFFFFF',
   flexDirection: 'row',
+  borderRadius: 16,
+  borderWidth: 1,
+  borderColor: '#DDDDDD',
+  padding: 10,
   },
 
   petImage: {
@@ -48,7 +55,7 @@ const styles = StyleSheet.create({
   petInfo: {
   flex: 1,
   flexDirection: 'column',
-  justifyContent: 'space-between',
+  justifyContent: 'flex-start',
   alignItems: 'center',
   },
 
@@ -60,15 +67,15 @@ const styles = StyleSheet.create({
   },
 
   petStatus: {
-  paddingHorizontal: 12,
-  paddingVertical: 6,
+  paddingHorizontal: 5,
+  paddingVertical: 5,
   borderRadius: 5,
   backgroundColor: '#FF8A00',
   },
 
   saveButton: {
-  width: 40,
-  height: 40,
+  width: 34,
+  height: 34,
   borderRadius: 10,
   backgroundColor: '#FF8A00',
   alignItems: 'center',
@@ -84,3 +91,4 @@ const styles = StyleSheet.create({
   justifyContent: 'center',
   },
 });
+
