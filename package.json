@@ -13,16 +13,17 @@
     "@hookform/resolvers": "^3.9.0",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@shopify/flash-list": "2.0.2",
-    "expo": "^57.0.0",
-    "expo-camera": "~57.0.4",
+    "expo": "~57.0.22",
+    "expo-camera": "~57.0.5",
     "expo-constants": "~57.0.17",
+    "expo-font": "~57.0.3",
     "expo-image-picker": "~57.0.16",
     "expo-linking": "~57.0.9",
     "expo-location": "~57.0.16",
     "expo-router": "~57.0.19",
     "expo-status-bar": "~57.0.1",
     "firebase": "^10.12.2",
-    "lucide-react-native": "^0.468.0",
+    "lucide-react-native": "^1.45.0",
     "nativewind": "^4.0.36",
     "react": "19.2.3",
     "react-hook-form": "^7.52.1",
@@ -35,8 +36,8 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
-    "typescript": "~5.3.3",
-    "@types/react": "~18.2.79",
-    "tailwindcss": "^3.4.7"
+    "@types/react": "~19.2.4",
+    "tailwindcss": "^3.4.7",
+    "typescript": "~6.0.3"
   }
 }
