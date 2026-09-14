@@ -20,6 +20,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="mapa"
+        options={{
+          title: 'Mapa',
+        }}
+      />
+      <Tabs.Screen
         name="perfil"
         options={{
           title: 'Perfil',

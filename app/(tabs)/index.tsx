@@ -1,5 +1,6 @@
 import { StyleSheet, Pressable, View, Text, FlatList, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 import { PetCard } from '@/components/ui/pet-card';
 import { BottomTabInset, MaxContentWidth, Colors, Typography } from '@/constants/theme';
@@ -50,11 +51,19 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.stepContainer}>
-          <Pressable
-            style={styles.publishButton}
-            onPress={publicarMascota}>
-            <Text style={styles.publishButtonText}>PUBLICAR MASCOTA</Text>
-          </Pressable>
+          <View style={styles.actionButtonsRow}>
+            <Pressable
+              style={styles.publishButton}
+              onPress={publicarMascota}>
+              <Text style={styles.publishButtonText}>PUBLICAR MASCOTA</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.mapButton}
+              onPress={() => router.push('/(tabs)/mapa')}>
+              <Text style={styles.mapButtonText}>VER MAPA</Text>
+            </Pressable>
+          </View>
 
           <FlatList
             data={MASCOTAS}
@@ -117,8 +126,13 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     color: Colors?.textSecondary ?? '#ffffff',
   },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
   publishButton: {
-    paddingHorizontal: 20,
+    flex: 1,
+    paddingHorizontal: 12,
     paddingVertical: 12,
     backgroundColor: Colors?.primary ?? '#ff8c00',
     alignItems: 'center',
@@ -127,6 +141,22 @@ const styles = StyleSheet.create({
   },
   publishButtonText: {
     color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: Typography?.sizes?.sm ?? 14,
+  },
+  mapButton: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: Colors?.secondary ?? '#FFC28A',
+    borderWidth: 1,
+    borderColor: Colors?.primary ?? '#FF8A00',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+  mapButtonText: {
+    color: Colors?.text ?? '#5A3A1F',
     fontWeight: 'bold',
     fontSize: Typography?.sizes?.sm ?? 14,
   },

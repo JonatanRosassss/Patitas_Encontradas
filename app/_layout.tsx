@@ -1,6 +1,19 @@
 import { Stack } from 'expo-router';
+import { useFonts, Baloo2_700Bold, Baloo2_600SemiBold, Baloo2_500Medium, Baloo2_400Regular } from '@expo-google-fonts/baloo-2';
+import { Nunito_700Bold, Nunito_600SemiBold, Nunito_400Regular, Nunito_300Light } from '@expo-google-fonts/nunito';
 
 export default function RootLayout() {
+  useFonts({
+    Baloo2_700Bold,
+    Baloo2_600SemiBold,
+    Baloo2_500Medium,
+    Baloo2_400Regular,
+    Nunito_700Bold,
+    Nunito_600SemiBold,
+    Nunito_400Regular,
+    Nunito_300Light,
+  });
+
   return (
     <Stack
       screenOptions={{
