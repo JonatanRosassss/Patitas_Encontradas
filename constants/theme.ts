@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Patitas Encontradas - Design System Theme
  * Basado en la guia de estilos oficial de la aplicacion
  *
@@ -14,6 +14,8 @@
  * - Titulos / Logo: Baloo 2
  * - Textos: Nunito
  */
+
+import { Platform } from 'react-native';
 
 export const Colors = {
   // Colores de Marca Principales
@@ -109,3 +111,17 @@ export const Typography = {
     extraBold: '800',
   },
 } as const;
+
+
+export const Spacing = {
+  half: 2,
+  one: 4,
+  two: 8,
+  three: 16,
+  four: 24,
+  five: 32,
+  six: 64,
+} as const;
+
+export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+export const MaxContentWidth = 800;
