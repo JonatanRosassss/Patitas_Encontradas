@@ -13,7 +13,7 @@ export function PetCard({ tipo, estado, nombre, imagen }: { tipo: string; estado
 
           
         <View style={[styles.petStatus, { backgroundColor: estado === 'ENCONTRADO' ? '#a2e6b3' : '#eda8a5' }]}>
-          <Text>{estado}</Text>
+          <Text style={styles.petStatusText}>{estado}</Text>
         </View>
 
           <Pressable style={styles.saveButton}>
@@ -23,10 +23,10 @@ export function PetCard({ tipo, estado, nombre, imagen }: { tipo: string; estado
 
 
         <Pressable style={styles.infoButton}>
-          <Text>{tipo} | informacion de la mascota logica</Text>
+          <Text style={styles.infoText}>{tipo} | informacion de la mascota</Text>
         </Pressable>
 
-        <Text>{nombre}</Text>
+        <Text style={styles.petName}>{nombre}</Text>
       </View>
     </View>
   );
@@ -89,6 +89,21 @@ const styles = StyleSheet.create({
   backgroundColor: '#FFF',
   alignItems: 'center',
   justifyContent: 'center',
+  },
+
+  infoText: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  },
+
+  petStatusText: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  },
+
+  petName: {
+  fontSize: 18,
+  fontWeight: 'bold',
   },
 });
 

@@ -1,6 +1,7 @@
 import { StyleSheet, Pressable, View, Text, FlatList, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useState } from 'react';
 import { PetCard } from '@/components/ui/pet-card';
 import { BottomTabInset, MaxContentWidth, Colors, Typography } from '@/constants/theme';
 
@@ -33,9 +34,19 @@ const MASCOTAS = [
 
 
 export default function HomeScreen() {
+  const [estadoSeleccionado, setEstadoSeleccionado] = useState('Todos');
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
   function publicarMascota() {
     console.log('Mascota publicada');
   }
+
+  const mascotasFiltradas = MASCOTAS.filter((item) => {
+  const coincideEstado =
+    estadoSeleccionado === 'Todos' ||
+    item.estado === estadoSeleccionado;
+
+  return coincideEstado;
+  });
 
   return (
     <View style={styles.container}>
@@ -56,10 +67,42 @@ export default function HomeScreen() {
             <Text style={styles.publishButtonText}>PUBLICAR MASCOTA</Text>
           </Pressable>
 
+          <Pressable style={styles.filterButton}
+            onPress={() => setMostrarFiltros(!mostrarFiltros)}>
+            <Text style={styles.filterButtonText}>...</Text>
+          </Pressable>
+          {mostrarFiltros && (
+          <View style={styles.filterPanel}>
+            <Text style={styles.filterTitle}>FILTROS</Text>
+
+            <View style={styles.filterOptions}>
+
+              <Pressable
+                style={styles.filterOption}
+                onPress={() => setEstadoSeleccionado('Todos')}>
+                <Text>Todos</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.filterOption}
+                onPress={() => setEstadoSeleccionado('PERDIDO')}>
+                <Text>Perdido</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.filterOption}
+                onPress={() => setEstadoSeleccionado('ENCONTRADO')}>
+                <Text>Encontrado</Text>
+              </Pressable>
+
+            </View>
+          </View>
+          )}
+
           <FlatList
-            data={MASCOTAS}
+            data={mascotasFiltradas}
             keyExtractor={(item) => item.id}
-            ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
             renderItem={({ item }) => (
               <PetCard 
               tipo={item.tipo}
@@ -111,7 +154,6 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   stepContainer: {
-    flex: 1,
     gap: 12,
     alignSelf: 'stretch',
     paddingVertical: 16,
@@ -133,4 +175,59 @@ const styles = StyleSheet.create({
   code: {
     textTransform: 'uppercase',
   },
+
+  filterButton: {
+  width: 50,
+  height: 40,
+  borderRadius: 10,
+  backgroundColor: '#EEEEEE',
+  alignItems: 'center',
+  justifyContent: 'center',
+  },
+
+filterButtonText: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  },
+
+  filterPanel: {
+  padding: 16,
+  backgroundColor: '#EEEEEE',
+  borderRadius: 10,
+},
+
+filterTitle: {
+  fontSize: 16,
+  fontWeight: 'bold',
+},
+
+filterSubtitle: {
+  fontSize: 14,
+  fontWeight: 'bold',
+  marginTop: 10,
+  },
+
+  filterOptions: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  marginTop: 10,
+  },
+
+  filterOption: {
+  paddingHorizontal: 12,
+  paddingVertical: 8,
+  backgroundColor: '#FFFFFF',
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: '#DDDDDD',
+  alignItems: 'center',
+  justifyContent: 'center',
+  },
+
+prueba: {
+  alignItems: 'flex-start',
+  justifyContent: 'flex-start',
+  backgroundColor: '#FF8A00',
+  padding: 10,
+}
 });
