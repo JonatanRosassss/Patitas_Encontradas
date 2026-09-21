@@ -2020,3 +2020,204 @@
 {"_e":"metro:bundling:failed","_t":1789422595597,"id":null,"message":"SyntaxError: C:\\Users\\Yerik R\\Desktop\\REPOSITORIOS\\Patitas_Encontradas\\app\\(tabs)\\index.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (117:6)\n\n  115 |\n  116 |         </View>\n> 117 |       </SafeAreaView>\n      |       ^\n  118 |     </View>\n  119 |   );\n  120 | }","importStack":null,"filename":"app\\(tabs)\\index.tsx","targetModuleName":null,"originModulePath":null}
 {"_e":"metro:bundling:failed","_t":1789422624240,"id":null,"message":"SyntaxError: C:\\Users\\Yerik R\\Desktop\\REPOSITORIOS\\Patitas_Encontradas\\app\\(tabs)\\index.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (117:6)\n\n  115 |\n  116 |         </View>\n> 117 |       </SafeAreaView>\n      |       ^\n  118 |     </View>\n  119 |   );\n  120 | }","importStack":null,"filename":"app\\(tabs)\\index.tsx","targetModuleName":null,"originModulePath":null}
 {"_e":"metro:bundling:failed","_t":1789422664438,"id":null,"message":"SyntaxError: C:\\Users\\Yerik R\\Desktop\\REPOSITORIOS\\Patitas_Encontradas\\app\\(tabs)\\index.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (117:6)\n\n  115 |\n  116 |         </View>\n> 117 |       </SafeAreaView>\n      |       ^\n  118 |     </View>\n  119 |   );\n  120 | }","importStack":null,"filename":"app\\(tabs)\\index.tsx","targetModuleName":null,"originModulePath":null}
+{"_e":"root:init","_t":1789957863853,"format":"v0-jsonl","version":"57.0.22"}
+{"_e":"env:mode","_t":1789957863893,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1789957863936,"mode":"development","files":[],"env":{}}
+{"_e":"devserver:start","_t":1789957875231,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1789957891966,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"expo:dev-tools-plugin:load","_t":1789957899588,"plugins":[]}
+{"_e":"metro:instantiate","_t":1789957923184,"atlas":false,"workers":10,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1789957966559,"id":"1","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1789957966561,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789957966577,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789957966678,"id":"1","progress":0.1024,"total":25,"current":8}
+{"_e":"metro:bundling:progress","_t":1789957966778,"id":"1","progress":0.1181640625,"total":64,"current":22}
+{"_e":"metro:bundling:progress","_t":1789957966880,"id":"1","progress":0.1181640625,"total":242,"current":54}
+{"_e":"metro:bundling:progress","_t":1789957966982,"id":"1","progress":0.1181640625,"total":320,"current":83}
+{"_e":"metro:bundling:progress","_t":1789957967084,"id":"1","progress":0.1181640625,"total":349,"current":105}
+{"_e":"metro:bundling:progress","_t":1789957967189,"id":"1","progress":0.12369713628316147,"total":381,"current":134}
+{"_e":"metro:bundling:progress","_t":1789957967290,"id":"1","progress":0.1632079402491278,"total":401,"current":162}
+{"_e":"metro:bundling:progress","_t":1789957967389,"id":"1","progress":0.19243948024207905,"total":424,"current":186}
+{"_e":"metro:bundling:progress","_t":1789957967489,"id":"1","progress":0.23666910153396642,"total":444,"current":216}
+{"_e":"metro:bundling:progress","_t":1789957967589,"id":"1","progress":0.23666910153396642,"total":515,"current":243}
+{"_e":"metro:bundling:progress","_t":1789957967689,"id":"1","progress":0.25370365327269506,"total":542,"current":273}
+{"_e":"metro:bundling:progress","_t":1789957967789,"id":"1","progress":0.26747735619560475,"total":582,"current":301}
+{"_e":"metro:bundling:progress","_t":1789957967902,"id":"1","progress":0.2780165289256198,"total":605,"current":319}
+{"_e":"metro:bundling:progress","_t":1789957968020,"id":"1","progress":0.279762311317533,"total":605,"current":320}
+{"_e":"metro:bundling:progress","_t":1789957968121,"id":"1","progress":0.29674272800534296,"total":637,"current":347}
+{"_e":"metro:bundling:progress","_t":1789957968224,"id":"1","progress":0.3156731617067304,"total":671,"current":377}
+{"_e":"metro:bundling:progress","_t":1789957968324,"id":"1","progress":0.334228515625,"total":704,"current":407}
+{"_e":"metro:bundling:progress","_t":1789957968425,"id":"1","progress":0.334228515625,"total":775,"current":432}
+{"_e":"metro:bundling:progress","_t":1789957968528,"id":"1","progress":0.334228515625,"total":808,"current":455}
+{"_e":"metro:bundling:progress","_t":1789957968629,"id":"1","progress":0.334228515625,"total":832,"current":481}
+{"_e":"metro:bundling:progress","_t":1789957968730,"id":"1","progress":0.334228515625,"total":873,"current":500}
+{"_e":"metro:bundling:progress","_t":1789957968835,"id":"1","progress":0.34145790002783694,"total":907,"current":530}
+{"_e":"metro:bundling:progress","_t":1789957968937,"id":"1","progress":0.3610419676173178,"total":922,"current":554}
+{"_e":"metro:bundling:progress","_t":1789957969037,"id":"1","progress":0.37699339555062755,"total":943,"current":579}
+{"_e":"metro:bundling:progress","_t":1789957969137,"id":"1","progress":0.39257244193453966,"total":964,"current":604}
+{"_e":"metro:bundling:progress","_t":1789957969237,"id":"1","progress":0.4214307185557757,"total":972,"current":631}
+{"_e":"metro:bundling:progress","_t":1789957969340,"id":"1","progress":0.45266204139326954,"total":978,"current":658}
+{"_e":"metro:bundling:progress","_t":1789957969444,"id":"1","progress":0.4894299011535541,"total":982,"current":687}
+{"_e":"metro:bundling:progress","_t":1789957969545,"id":"1","progress":0.5211993199205416,"total":989,"current":714}
+{"_e":"metro:bundling:progress","_t":1789957969650,"id":"1","progress":0.554675952203211,"total":1003,"current":747}
+{"_e":"metro:bundling:progress","_t":1789957969760,"id":"1","progress":0.554675952203211,"total":1047,"current":776}
+{"_e":"metro:bundling:progress","_t":1789957969867,"id":"1","progress":0.577195892168985,"total":1053,"current":800}
+{"_e":"metro:bundling:progress","_t":1789957969969,"id":"1","progress":0.6042862228551087,"total":1060,"current":824}
+{"_e":"metro:bundling:progress","_t":1789957970070,"id":"1","progress":0.6381967606987393,"total":1064,"current":850}
+{"_e":"metro:bundling:progress","_t":1789957970174,"id":"1","progress":0.6712149804035419,"total":1079,"current":884}
+{"_e":"metro:bundling:progress","_t":1789957970278,"id":"1","progress":0.7023889421608048,"total":1087,"current":911}
+{"_e":"metro:bundling:progress","_t":1789957970379,"id":"1","progress":0.7271438016528926,"total":1100,"current":938}
+{"_e":"metro:bundling:progress","_t":1789957970485,"id":"1","progress":0.7486214136776106,"total":1113,"current":963}
+{"_e":"metro:bundling:progress","_t":1789957970588,"id":"1","progress":0.7623520735896291,"total":1135,"current":991}
+{"_e":"metro:bundling:progress","_t":1789957970688,"id":"1","progress":0.8044588484154555,"total":1135,"current":1018}
+{"_e":"metro:bundling:progress","_t":1789957970788,"id":"1","progress":0.8148133310483329,"total":1161,"current":1048}
+{"_e":"metro:bundling:progress","_t":1789957970888,"id":"1","progress":0.8414503946061169,"total":1173,"current":1076}
+{"_e":"metro:bundling:progress","_t":1789957970997,"id":"1","progress":0.8751300728407907,"total":1178,"current":1102}
+{"_e":"metro:bundling:progress","_t":1789957971103,"id":"1","progress":0.883317315846006,"total":1197,"current":1125}
+{"_e":"metro:bundling:progress","_t":1789957971203,"id":"1","progress":0.883317315846006,"total":1231,"current":1147}
+{"_e":"metro:bundling:progress","_t":1789957971303,"id":"1","progress":0.892396121180006,"total":1247,"current":1178}
+{"_e":"metro:bundling:progress","_t":1789957971406,"id":"1","progress":0.9127480516182284,"total":1255,"current":1199}
+{"_e":"metro:bundling:progress","_t":1789957971506,"id":"1","progress":0.9259522961908152,"total":1272,"current":1224}
+{"_e":"metro:bundling:progress","_t":1789957971608,"id":"1","progress":0.9553387729156356,"total":1284,"current":1255}
+{"_e":"metro:bundling:progress","_t":1789957971736,"id":"1","progress":0.9553387729156356,"total":1332,"current":1279}
+{"_e":"metro:bundling:progress","_t":1789957971846,"id":"1","progress":0.9553387729156356,"total":1341,"current":1285}
+{"_e":"metro:bundling:progress","_t":1789957971947,"id":"1","progress":0.9553387729156356,"total":1414,"current":1349}
+{"_e":"metro:bundling:progress","_t":1789957972046,"id":"1","progress":0.9553387729156356,"total":1423,"current":1382}
+{"_e":"metro:bundling:progress","_t":1789957972148,"id":"1","progress":0.9553387729156356,"total":1449,"current":1409}
+{"_e":"metro:bundling:progress","_t":1789957972253,"id":"1","progress":0.964556344117352,"total":1454,"current":1428}
+{"_e":"metro:bundling:progress","_t":1789957972352,"id":"1","progress":0.9918589212423649,"total":1471,"current":1465}
+{"_e":"metro:bundling:progress","_t":1789957972452,"id":"1","progress":0.9986417658612949,"total":1472,"current":1471}
+{"_e":"metro:bundling:progress","_t":1789957981912,"id":"1","progress":0.999,"total":1472,"current":1472}
+{"_e":"metro:bundling:progress","_t":1789957982012,"id":"1","progress":0.999,"total":1473,"current":1472}
+{"_e":"metro:bundling:progress","_t":1789957982035,"id":"1","progress":0.999,"total":1473,"current":1473}
+{"_e":"metro:bundling:done","_t":1789957982483,"id":"1","total":1473,"ms":15922.9748}
+{"_e":"metro:client_log","_t":1789957988263,"level":"warn","data":["Route \"./(auth)/createAccount.tsx\" is missing the required default export. Ensure a React component is exported as default."]}
+{"_e":"metro:client_log","_t":1789957988264,"level":"warn","data":["Linking requires a build-time setting `scheme` in the project's Expo config (app.config.js or app.json) for production apps, if it's left blank, your app may crash. The scheme does not apply to development in the Expo client but you should add it as soon as you start working with Linking to avoid creating a broken build. Learn more: https://docs.expo.dev/guides/linking/"]}
+{"_e":"metro:client_log","_t":1789958015913,"level":"log","data":["Mascota publicada"]}
+{"_e":"metro:bundling:started","_t":1789958305085,"id":"5","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1789958305085,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789958305087,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:failed","_t":1789958305123,"id":"5","message":"SyntaxError: C:\\Users\\Yerik R\\Desktop\\REPOSITORIOS\\Patitas_Encontradas\\app\\(tabs)\\index.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (136:8)\n\n  134 |   )}\n  135 |       /> \n> 136 |         </View>\n      |         ^\n  137 |       </SafeAreaView>\n  138 |     </View>\n  139 |   );","importStack":null,"filename":"app\\(tabs)\\index.tsx","targetModuleName":null,"originModulePath":null}
+{"_e":"metro:bundling:started","_t":1789958395798,"id":"6","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1789958395798,"id":"6","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789958395800,"id":"6","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1789958395969,"id":"6","total":1,"ms":171.7654}
+{"_e":"metro:client_log","_t":1789958403414,"level":"warn","data":["Route \"./(auth)/createAccount.tsx\" is missing the required default export. Ensure a React component is exported as default."]}
+{"_e":"metro:client_log","_t":1789958403414,"level":"warn","data":["Linking requires a build-time setting `scheme` in the project's Expo config (app.config.js or app.json) for production apps, if it's left blank, your app may crash. The scheme does not apply to development in the Expo client but you should add it as soon as you start working with Linking to avoid creating a broken build. Learn more: https://docs.expo.dev/guides/linking/"]}
+{"_e":"root:init","_t":1789958581625,"format":"v0-jsonl","version":"57.0.22"}
+{"_e":"env:mode","_t":1789958581626,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1789958581634,"mode":"development","files":[],"env":{}}
+{"_e":"devserver:start","_t":1789958582281,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1789958583134,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"expo:dev-tools-plugin:load","_t":1789958583746,"plugins":[]}
+{"_e":"metro:instantiate","_t":1789958599649,"atlas":false,"workers":10,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1789958603118,"id":"1","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1789958603119,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789958603126,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789958603240,"id":"1","progress":0.09910836762688616,"total":54,"current":17}
+{"_e":"metro:bundling:progress","_t":1789958603343,"id":"1","progress":0.09910836762688616,"total":229,"current":51}
+{"_e":"metro:bundling:progress","_t":1789958603445,"id":"1","progress":0.09910836762688616,"total":293,"current":88}
+{"_e":"metro:bundling:progress","_t":1789958603544,"id":"1","progress":0.1695501730103806,"total":408,"current":168}
+{"_e":"metro:bundling:progress","_t":1789958603645,"id":"1","progress":0.20790744520739424,"total":511,"current":233}
+{"_e":"metro:bundling:progress","_t":1789958603745,"id":"1","progress":0.2721361111111111,"total":600,"current":313}
+{"_e":"metro:bundling:progress","_t":1789958603845,"id":"1","progress":0.32931947314049587,"total":704,"current":404}
+{"_e":"metro:bundling:progress","_t":1789958603946,"id":"1","progress":0.36304438391283445,"total":790,"current":476}
+{"_e":"metro:bundling:progress","_t":1789958604047,"id":"1","progress":0.36304438391283445,"total":892,"current":523}
+{"_e":"metro:bundling:progress","_t":1789958604166,"id":"1","progress":0.4129687929078688,"total":929,"current":597}
+{"_e":"metro:bundling:progress","_t":1789958604358,"id":"1","progress":0.4143534316446148,"total":929,"current":598}
+{"_e":"metro:bundling:progress","_t":1789958604501,"id":"1","progress":0.4157403877683679,"total":929,"current":599}
+{"_e":"metro:bundling:progress","_t":1789958604600,"id":"1","progress":0.45757079027438935,"total":955,"current":646}
+{"_e":"metro:bundling:progress","_t":1789958604700,"id":"1","progress":0.5531173455215778,"total":995,"current":740}
+{"_e":"metro:bundling:progress","_t":1789958604800,"id":"1","progress":0.6923134309113215,"total":1042,"current":867}
+{"_e":"metro:bundling:progress","_t":1789958604900,"id":"1","progress":0.757487325258937,"total":1126,"current":980}
+{"_e":"metro:bundling:progress","_t":1789958605000,"id":"1","progress":0.8514749228223711,"total":1191,"current":1099}
+{"_e":"metro:bundling:progress","_t":1789958605100,"id":"1","progress":0.8935800741594604,"total":1243,"current":1175}
+{"_e":"metro:bundling:progress","_t":1789958605200,"id":"1","progress":0.9095105244253495,"total":1317,"current":1256}
+{"_e":"metro:bundling:progress","_t":1789958605327,"id":"1","progress":0.9181045902189777,"total":1339,"current":1283}
+{"_e":"metro:bundling:progress","_t":1789958605427,"id":"1","progress":0.9181045902189777,"total":1417,"current":1347}
+{"_e":"metro:bundling:progress","_t":1789958605527,"id":"1","progress":0.9495823254037314,"total":1449,"current":1412}
+{"_e":"metro:bundling:progress","_t":1789958605632,"id":"1","progress":0.9986417658612949,"total":1472,"current":1471}
+{"_e":"metro:bundling:progress","_t":1789958606223,"id":"1","progress":0.999,"total":1472,"current":1472}
+{"_e":"metro:bundling:progress","_t":1789958606366,"id":"1","progress":0.999,"total":1473,"current":1473}
+{"_e":"metro:bundling:done","_t":1789958606589,"id":"1","total":1473,"ms":3469.9994}
+{"_e":"metro:bundling:started","_t":1789958608596,"id":"2","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1789958608596,"id":"2","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1789958608666,"id":"2","total":1,"ms":69.8006}
+{"_e":"metro:client_log","_t":1789958614282,"level":"warn","data":["Route \"./(auth)/createAccount.tsx\" is missing the required default export. Ensure a React component is exported as default."]}
+{"_e":"metro:client_log","_t":1789958614282,"level":"warn","data":["Linking requires a build-time setting `scheme` in the project's Expo config (app.config.js or app.json) for production apps, if it's left blank, your app may crash. The scheme does not apply to development in the Expo client but you should add it as soon as you start working with Linking to avoid creating a broken build. Learn more: https://docs.expo.dev/guides/linking/"]}
+{"_e":"metro:bundling:started","_t":1789958881158,"id":"5","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1789958881158,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1789958881223,"id":"5","total":1,"ms":64.661}
+{"_e":"metro:client_log","_t":1789958887318,"level":"warn","data":["Route \"./(auth)/createAccount.tsx\" is missing the required default export. Ensure a React component is exported as default."]}
+{"_e":"metro:client_log","_t":1789958887319,"level":"warn","data":["Linking requires a build-time setting `scheme` in the project's Expo config (app.config.js or app.json) for production apps, if it's left blank, your app may crash. The scheme does not apply to development in the Expo client but you should add it as soon as you start working with Linking to avoid creating a broken build. Learn more: https://docs.expo.dev/guides/linking/"]}
+{"_e":"metro:server_log","_t":1789959767250,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","host.exp.exponent","motorola edge 30 - 14 - API 34","60"]}
+{"_e":"metro:server_log","_t":1789959770610,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","host.exp.exponent","motorola edge 30 - 14 - API 34","60"]}
+{"_e":"metro:client_log","_t":1789961028407,"level":"error","data":["[Error: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:\n1. You might have mismatching versions of React and the renderer (such as React DOM)\n2. You might be breaking the Rules of Hooks\n3. You might have more than one copy of React in the same app\nSee https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.]","\n\n\u001b[1mCode: index.tsx\u001b[22m\n\u001b[0m \u001b[90m 4 |\u001b[39m\n \u001b[90m 5 |\u001b[39m \u001b[36mimport\u001b[39m { \u001b[33mPetCard\u001b[39m } \u001b[36mfrom\u001b[39m \u001b[32m'@/components/ui/pet-card'\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 6 |\u001b[39m \u001b[36mconst\u001b[39m [mostrarMensaje\u001b[33m,\u001b[39m setMostrarMensaje] \u001b[33m=\u001b[39m useState(\u001b[36mfalse\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m   |\u001b[39m                                                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 7 |\u001b[39m \u001b[36mimport\u001b[39m {\u001b[33mBottomTabInset\u001b[39m\u001b[33m,\u001b[39m \u001b[33mMaxContentWidth\u001b[39m\u001b[33m,\u001b[39m \u001b[33mColors\u001b[39m\u001b[33m,\u001b[39m \u001b[33mTypography\u001b[39m} \u001b[36mfrom\u001b[39m \u001b[32m'@/constants/theme'\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 8 |\u001b[39m\n \u001b[90m 9 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mMASCOTAS\u001b[39m \u001b[33m=\u001b[39m [\u001b[0m\n\u001b[1mCall Stack\u001b[22m\n\u001b[90m  <global> (app\\(tabs)\\index.tsx:6:53)\u001b[39m"]}
+{"_e":"metro:bundling:failed","_t":1789961229009,"id":null,"message":"Unable to resolve \"node_modules/@types/react\" from \"components\\ui\\pet-card.tsx\"","importStack":null,"filename":null,"targetModuleName":"node_modules/@types/react","originModulePath":"components\\ui\\pet-card.tsx"}
+{"_e":"metro:bundling:failed","_t":1789961230697,"id":null,"message":"Unable to resolve \"node_modules/@types/react\" from \"components\\ui\\pet-card.tsx\"","importStack":null,"filename":null,"targetModuleName":"node_modules/@types/react","originModulePath":"components\\ui\\pet-card.tsx"}
+{"_e":"metro:client_log","_t":1789961235740,"level":"error","data":["[TypeError: undefined is not a function]","\n\n","\n\n"]}
+{"_e":"metro:client_log","_t":1789961235742,"level":"error","data":["[TypeError: An error was thrown when attempting to render log messages via LogBox.\n\nundefined is not a function]","\n\n","\n    at LogBoxStateSubscription (<anonymous>)"]}
+{"_e":"metro:bundling:started","_t":1789961246311,"id":"h","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1789961246311,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961246314,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961246468,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961246469,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961246569,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961246669,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961246769,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961246869,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961246971,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961247071,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961247171,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961247271,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961247371,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961247471,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961247580,"id":"h","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:failed","_t":1789961247608,"id":"h","message":"Unable to resolve \"node_modules/@types/react\" from \"components\\ui\\pet-card.tsx\"","importStack":null,"filename":null,"targetModuleName":"node_modules/@types/react","originModulePath":"components\\ui\\pet-card.tsx"}
+{"_e":"metro:bundling:started","_t":1789961327101,"id":"i","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1789961327101,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961327104,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961327233,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961327234,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961327334,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961327435,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961327537,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961327636,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961327737,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961327839,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961327940,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961328045,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961328147,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961328248,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961328348,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:failed","_t":1789961328463,"id":"i","message":"Unable to resolve \"node_modules/@types/react\" from \"components\\ui\\pet-card.tsx\"","importStack":null,"filename":null,"targetModuleName":"node_modules/@types/react","originModulePath":"components\\ui\\pet-card.tsx"}
+{"_e":"metro:bundling:started","_t":1789961422271,"id":"j","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1789961422271,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961422274,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961422395,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961422495,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961422595,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961422695,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961422796,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961422898,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961422998,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961423098,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961423199,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961423299,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1789961423399,"id":"j","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1789961423525,"id":"j","total":1,"ms":1253.5537}
+{"_e":"metro:client_log","_t":1789961430163,"level":"warn","data":["Route \"./(auth)/createAccount.tsx\" is missing the required default export. Ensure a React component is exported as default."]}
+{"_e":"metro:client_log","_t":1789961430163,"level":"warn","data":["Linking requires a build-time setting `scheme` in the project's Expo config (app.config.js or app.json) for production apps, if it's left blank, your app may crash. The scheme does not apply to development in the Expo client but you should add it as soon as you start working with Linking to avoid creating a broken build. Learn more: https://docs.expo.dev/guides/linking/"]}
+{"_e":"metro:client_log","_t":1789961450165,"level":"log","data":["Mascota publicada"]}
+{"_e":"metro:client_log","_t":1789961453309,"level":"log","data":["Mascota publicada"]}
+{"_e":"metro:client_log","_t":1789961454325,"level":"log","data":["Mascota publicada"]}
+{"_e":"metro:client_log","_t":1789961672085,"level":"log","data":["Mascota publicada"]}
+{"_e":"metro:client_log","_t":1789963385667,"level":"log","data":["Mascota publicada"]}
+{"_e":"metro:client_log","_t":1789963386093,"level":"log","data":["Mascota publicada"]}
+{"_e":"metro:client_log","_t":1789963386516,"level":"log","data":["Mascota publicada"]}
+{"_e":"metro:bundling:started","_t":1789963456983,"id":"o","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1789963456983,"id":"o","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1789963457054,"id":"o","total":1,"ms":70.4888}
+{"_e":"metro:client_log","_t":1789963462228,"level":"warn","data":["Route \"./(auth)/createAccount.tsx\" is missing the required default export. Ensure a React component is exported as default."]}
+{"_e":"metro:client_log","_t":1789963462228,"level":"warn","data":["Linking requires a build-time setting `scheme` in the project's Expo config (app.config.js or app.json) for production apps, if it's left blank, your app may crash. The scheme does not apply to development in the Expo client but you should add it as soon as you start working with Linking to avoid creating a broken build. Learn more: https://docs.expo.dev/guides/linking/"]}
+{"_e":"metro:client_log","_t":1789963573095,"level":"log","data":["Mascota publicada"]}
