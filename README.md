@@ -31,7 +31,6 @@ Esta aplicación nace para solucionar un problema super común que vemos todos l
 * 🚨 **CRUD Completo de Búsquedas:** Crear, consultar, editar datos/señas particulares y dar de baja o marcar como "Encontrado" los reportes.
 * 📸 **Integración de Cámara Nativa:** Captura inmediata de foto con la cámara del celular o selección desde la galería (`expo-image-picker`) subiendo directo a **Firebase Storage**.
 * 📍 **Geolocalización GPS:** Obtención de coordenadas en tiempo real (`expo-location`) para ubicar exactamente dónde se perdió la mascota o dónde fue vista.
-* 🛒 **Tienda Solidaria y Carrito de Compras:** Catálogo de productos con carrito global gestionado por **Zustand**, cálculo de totales en tiempo real y simulación de Checkout.
 * ⚡ **Feed Fluido de Alta Performance:** Renderizado de publicaciones con `@shopify/flash-list` para soportar cientos de avisos sin tirones visuales.
 * 💬 **Contacto Rápido e Inmediato:** Botón de contacto directo por WhatsApp al dueño sin vueltas ni configuraciones raras.
 
