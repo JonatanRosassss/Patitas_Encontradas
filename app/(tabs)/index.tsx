@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { StyleSheet, Pressable, View, Text, FlatList } from 'react-native';
+import { StyleSheet, Pressable, View, Text, FlatList, Modal, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PetCard } from '@/components/ui/pet-card';
-import {BottomTabInset, MaxContentWidth, Colors, Typography} from '@/constants/theme';
+import {MaxContentWidth, Colors, Typography} from '@/constants/theme';
 
 const MASCOTAS = [
   {
@@ -36,9 +36,19 @@ const MASCOTAS = [
   },
 ];
 
+type Mascota = {
+  id: string;
+  tipo: string;
+  estado: string;
+  nombre: string;
+  descripcion: string;
+  imagen: string;
+};
+
 export default function HomeScreen() {
   const [estadoSeleccionado, setEstadoSeleccionado] = useState('Todos');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null);
 
   function publicarMascota() {
     console.log('Mascota publicada');
@@ -139,7 +149,7 @@ export default function HomeScreen() {
               <View style={{height: 10}} />
             )}
             renderItem={({ item }) => (
-              <PetCard
+              <PetCard onPress={() => setMascotaSeleccionada(item)}
                 tipo={item.tipo}
                 estado={item.estado}
                 nombre={item.nombre}
@@ -149,8 +159,43 @@ export default function HomeScreen() {
           />
 
         </View>
+
+        <Modal
+          visible={mascotaSeleccionada !== null}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setMascotaSeleccionada(null)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {mascotaSeleccionada && (
+                <>
+                  <Image
+                    source={{ uri: mascotaSeleccionada.imagen }}
+                    style={styles.modalImage}
+                  />
+                  <Text style={styles.modalTitle}>{mascotaSeleccionada.nombre}</Text>
+                  <Text style={styles.modalSubtitle}>
+                    {mascotaSeleccionada.tipo} - {mascotaSeleccionada.estado}
+                  </Text>
+                  <Text style={styles.modalDescription}>
+                    {mascotaSeleccionada.descripcion}
+                  </Text>
+
+                  <Pressable
+                    style={styles.closeButton}
+                    onPress={() => setMascotaSeleccionada(null)}
+                  >
+                    <Text style={styles.closeButtonText}>Cerrar</Text>
+                  </Pressable>
+                </>
+              )}
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </View>
+
   );
 }
 
@@ -278,6 +323,55 @@ const styles = StyleSheet.create({
 },
 
   filterOptionTextActive: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+},
+
+//modal styles
+
+/* ESTILOS DEL MODAL */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+},
+  modalContent: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+},
+  modalImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 12,
+    marginBottom: 16,
+},
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 4,
+},
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 12,
+},
+  modalDescription: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+},
+  closeButton: {
+    backgroundColor: Colors?.primary ?? '#FF8C00',
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 8,
+},
+  closeButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
 },
