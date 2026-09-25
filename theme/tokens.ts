@@ -1,16 +1,16 @@
-import { Colors as AppColors } from '../constants/theme';
+import { Colors as AppColors, Spacing as AppSpacing, Radius as AppRadius } from '../constants/theme';
 
 export const Colors = {
-  primary: AppColors?.primary || '#FF8A00',
-  secondary: '#5A3A1F',
-  background: AppColors?.backgroundLight || '#FAF8F5',
-  surface: '#FFFFFF',
-  text: AppColors?.text || '#5A3A1F',
-  textMuted: AppColors?.textSecondary || '#8D735C',
-  border: AppColors?.border || '#E8DFD8',
-  danger: '#EF4444',
-  success: '#16A34A',
-  warning: '#F59E0B',
+  primary: AppColors.primary,
+  secondary: AppColors.secondary,
+  background: AppColors.backgroundLight,
+  surface: AppColors.card,
+  text: AppColors.text,
+  textMuted: AppColors.textSecondary,
+  border: AppColors.border,
+  danger: AppColors.error,
+  success: AppColors.success,
+  warning: AppColors.warning,
 };
 
 export const Typography = {
@@ -22,19 +22,5 @@ export const Typography = {
   button: { fontSize: 16, fontWeight: '600' as const },
 };
 
-export const Spacing = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  base: 16,
-  lg: 20,
-  xl: 24,
-  xxl: 32,
-};
-
-export const Radius = {
-  sm: 8,
-  md: 14,
-  lg: 20,
-  full: 9999,
-};
+export const Spacing = AppSpacing;
+export const Radius = AppRadius;

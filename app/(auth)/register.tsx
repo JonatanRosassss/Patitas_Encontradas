@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography } from '../../constants/theme';
+import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 import { Button } from '../../components/ui/Button';
 
 export default function PantallaRegistro() {
@@ -79,7 +79,7 @@ export default function PantallaRegistro() {
           <TextInput
             style={estilos.campoTexto}
             placeholder="Ej. Juan Pérez"
-            placeholderTextColor="#7D8597"
+            placeholderTextColor={Colors.textMuted}
             value={nombre}
             onChangeText={setNombre}
             autoCapitalize="words"
@@ -90,7 +90,7 @@ export default function PantallaRegistro() {
           <TextInput
             style={estilos.campoTexto}
             placeholder="ejemplo@correo.com"
-            placeholderTextColor="#7D8597"
+            placeholderTextColor={Colors.textMuted}
             value={correo}
             onChangeText={setCorreo}
             keyboardType="email-address"
@@ -102,7 +102,7 @@ export default function PantallaRegistro() {
           <TextInput
             style={estilos.campoTexto}
             placeholder="Ej. 11 1234-5678"
-            placeholderTextColor="#7D8597"
+            placeholderTextColor={Colors.textMuted}
             value={telefono}
             onChangeText={setTelefono}
             keyboardType="phone-pad"
@@ -114,7 +114,7 @@ export default function PantallaRegistro() {
             <TextInput
               style={estilos.campoTextoPassword}
               placeholder="Mínimo 6 caracteres"
-              placeholderTextColor="#7D8597"
+              placeholderTextColor={Colors.textMuted}
               value={contrasenia}
               onChangeText={setContrasenia}
               secureTextEntry={!verContrasenia}
@@ -127,7 +127,7 @@ export default function PantallaRegistro() {
               <Ionicons
                 name={verContrasenia ? 'eye-outline' : 'eye-off-outline'}
                 size={22}
-                color="#7D8597"
+                color={Colors.textMuted}
               />
             </TouchableOpacity>
           </View>
@@ -138,7 +138,7 @@ export default function PantallaRegistro() {
             <TextInput
               style={estilos.campoTextoPassword}
               placeholder="Repetir contraseña"
-              placeholderTextColor="#7D8597"
+              placeholderTextColor={Colors.textMuted}
               value={confirmarContrasenia}
               onChangeText={setConfirmarContrasenia}
               secureTextEntry={!verConfirmarContrasenia}
@@ -151,7 +151,7 @@ export default function PantallaRegistro() {
               <Ionicons
                 name={verConfirmarContrasenia ? 'eye-outline' : 'eye-off-outline'}
                 size={22}
-                color="#7D8597"
+                color={Colors.textMuted}
               />
             </TouchableOpacity>
           </View>
@@ -173,7 +173,7 @@ export default function PantallaRegistro() {
               onPress={() => manejarRegistroSocial('Google')}
               activeOpacity={0.8}
             >
-              <Ionicons name="logo-google" size={24} color="#DB4437" />
+              <Ionicons name="logo-google" size={24} color={Colors.google} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -181,7 +181,7 @@ export default function PantallaRegistro() {
               onPress={() => manejarRegistroSocial('Apple')}
               activeOpacity={0.8}
             >
-              <Ionicons name="logo-apple" size={24} color="#000000" />
+              <Ionicons name="logo-apple" size={24} color={Colors.black} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -189,7 +189,7 @@ export default function PantallaRegistro() {
               onPress={() => manejarRegistroSocial('Facebook')}
               activeOpacity={0.8}
             >
-              <Ionicons name="logo-facebook" size={24} color="#4267B2" />
+              <Ionicons name="logo-facebook" size={24} color={Colors.facebook} />
             </TouchableOpacity>
           </View>
 
@@ -205,115 +205,113 @@ export default function PantallaRegistro() {
 const estilos = StyleSheet.create({
   contenedor: {
     flex: 1,
-    backgroundColor: Colors.backgroundLight || '#F8F9FA',
+    backgroundColor: Colors.backgroundLight,
   },
   scrollContenido: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    paddingVertical: Spacing.four,
+    paddingHorizontal: Spacing.four,
   },
   contenido: {
-    paddingHorizontal: 10,
+    paddingHorizontal: Spacing.two,
   },
   titulo: {
-    fontSize: Typography.sizes.xxxl || 28,
-    lineHeight: Typography.lineHeights.xxxl || 34,
+    fontSize: Typography.sizes.xxxl,
+    lineHeight: Typography.lineHeights.xxxl,
     textAlign: 'center',
     fontFamily: Typography.fonts.titleBold,
-    color: Colors.primary || '#EE6C4D',
-    marginBottom: 6,
+    color: Colors.primary,
+    marginBottom: Spacing.two,
   },
   subtitulo: {
-    fontSize: Typography.sizes.sm || 14,
-    lineHeight: Typography.lineHeights.sm || 20,
+    fontSize: Typography.sizes.sm,
+    lineHeight: Typography.lineHeights.sm,
     textAlign: 'center',
     fontFamily: Typography.fonts.bodyLight,
-    color: Colors.text || '#2B2D42',
-    opacity: 0.7,
-    marginBottom: 20,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.four,
   },
   etiqueta: {
-    fontSize: Typography.sizes.sm || 14,
-    fontFamily: Typography.fonts.bodyBold || 'System',
-    color: Colors.text || '#2B2D42',
-    marginBottom: 6,
-    marginTop: 8,
-    fontWeight: '600',
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.bodyBold,
+    color: Colors.text,
+    marginBottom: Spacing.two,
+    marginTop: Spacing.two,
   },
   campoTexto: {
     height: 50,
-    backgroundColor: Colors.white || '#FFFFFF',
-    borderRadius: 8,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.sm,
     borderWidth: 1,
-    borderColor: Colors.border || '#E0E0E0',
-    paddingHorizontal: 14,
-    fontSize: Typography.sizes.md || 15,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.three,
+    fontSize: Typography.sizes.md,
     fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.text || '#2B2D42',
+    color: Colors.text,
   },
   contenedorInputPassword: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white || '#FFFFFF',
-    borderRadius: 8,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.sm,
     borderWidth: 1,
-    borderColor: Colors.border || '#E0E0E0',
+    borderColor: Colors.border,
   },
   campoTextoPassword: {
     flex: 1,
     height: 50,
-    paddingHorizontal: 14,
-    fontSize: Typography.sizes.md || 15,
+    paddingHorizontal: Spacing.three,
+    fontSize: Typography.sizes.md,
     fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.text || '#2B2D42',
+    color: Colors.text,
   },
   botonOjo: {
-    paddingHorizontal: 14,
+    paddingHorizontal: Spacing.three,
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
   },
   espacioBoton: {
-    height: 16,
+    height: Spacing.three,
   },
   contenedorDivisor: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 18,
+    marginVertical: Spacing.three,
   },
   lineaDivisora: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.border || '#E0E0E0',
+    backgroundColor: Colors.border,
   },
   textoDivisor: {
-    marginHorizontal: 12,
-    fontSize: 13,
-    color: '#7D8597',
+    marginHorizontal: Spacing.md,
+    fontSize: Typography.sizes.xs,
+    color: Colors.textMuted,
     fontFamily: Typography.fonts.bodyRegular,
   },
   filaBotonesSociales: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
+    gap: Spacing.three,
   },
   botonSocial: {
     width: 52,
     height: 52,
-    borderRadius: 26,
-    backgroundColor: Colors.white || '#FFFFFF',
+    borderRadius: Radius.full,
+    backgroundColor: Colors.white,
     borderWidth: 1,
-    borderColor: Colors.border || '#E0E0E0',
+    borderColor: Colors.border,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,
   },
   enlaceVolver: {
-    fontSize: Typography.sizes.sm || 14,
+    fontSize: Typography.sizes.sm,
     textAlign: 'center',
     fontFamily: Typography.fonts.bodyRegular,
-    marginTop: 20,
-    color: Colors.primary || '#EE6C4D',
+    marginTop: Spacing.four,
+    color: Colors.primary,
   },
 });

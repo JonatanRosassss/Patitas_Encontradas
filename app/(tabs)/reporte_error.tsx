@@ -1,10 +1,12 @@
+import React from 'react';
 import { StyleSheet, View, Text, TextInput, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors, Typography, Spacing, Radius, BottomTabInset } from '../../constants/theme';
 
 export default function ReportarErrorScreen() {
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>Reportar un error</Text>
 
@@ -35,7 +37,7 @@ export default function ReportarErrorScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: No puedo publicar una mascota"
-            placeholderTextColor="#999"
+            placeholderTextColor={Colors.textMuted}
           />
 
           <Text style={styles.label}>Descripción</Text>
@@ -43,7 +45,7 @@ export default function ReportarErrorScreen() {
           <TextInput
             style={styles.textArea}
             placeholder="Contanos qué ocurrió..."
-            placeholderTextColor="#999"
+            placeholderTextColor={Colors.textMuted}
             multiline
           />
 
@@ -61,93 +63,104 @@ export default function ReportarErrorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F2',
+    backgroundColor: Colors.backgroundLight,
   },
-
+  scrollContent: {
+    paddingBottom: BottomTabInset + Spacing.four,
+  },
   header: {
-    backgroundColor: '#FFFFFF',
-    padding: 25,
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
+    backgroundColor: Colors.card,
+    padding: Spacing.four,
+    borderBottomLeftRadius: Radius.lg,
+    borderBottomRightRadius: Radius.lg,
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#5A3A1F',
+    fontSize: Typography.sizes.xxxl,
+    fontFamily: Typography.fonts.titleBold,
+    color: Colors.text,
   },
-
   subtitle: {
-    marginTop: 5,
-    fontSize: 16,
-    color: '#777',
+    marginTop: Spacing.one,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.textSecondary,
   },
-
   form: {
-    backgroundColor: '#FFFFFF',
-    margin: 20,
-    padding: 20,
-    borderRadius: 20,
+    backgroundColor: Colors.card,
+    margin: Spacing.four,
+    padding: Spacing.four,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-
   label: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#5A3A1F',
-    marginTop: 15,
-    marginBottom: 8,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyBold,
+    color: Colors.text,
+    marginTop: Spacing.three,
+    marginBottom: Spacing.two,
   },
-
   options: {
     flexDirection: 'row',
-    gap: 10,
+    gap: Spacing.two,
   },
-
   option: {
     flex: 1,
-    padding: 15,
-    borderRadius: 12,
+    padding: Spacing.three,
+    borderRadius: Radius.md,
     borderWidth: 1,
-    borderColor: '#FFC28A',
-    backgroundColor: '#FFE7D2',
+    borderColor: Colors.secondary,
+    backgroundColor: Colors.accent,
     alignItems: 'center',
   },
-
   optionText: {
-    color: '#5A3A1F',
-    fontWeight: 'bold',
+    color: Colors.text,
+    fontFamily: Typography.fonts.bodyBold,
+    fontSize: Typography.sizes.sm,
   },
-
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 15,
+    borderColor: Colors.border,
+    borderRadius: Radius.sm,
+    paddingHorizontal: Spacing.three,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.text,
+    backgroundColor: Colors.card,
   },
-
   textArea: {
     height: 130,
     borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 10,
-    padding: 15,
-    fontSize: 15,
+    borderColor: Colors.border,
+    borderRadius: Radius.sm,
+    padding: Spacing.three,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.text,
+    backgroundColor: Colors.card,
     textAlignVertical: 'top',
   },
-
   button: {
-    backgroundColor: '#FF8A00',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: Colors.primary,
+    padding: Spacing.three,
+    borderRadius: Radius.md,
     alignItems: 'center',
-    marginTop: 25,
+    marginTop: Spacing.four,
   },
-
   buttonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: 'bold',
+    color: Colors.white,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyBold,
   },
-});
+});

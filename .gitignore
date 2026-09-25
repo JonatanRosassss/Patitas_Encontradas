@@ -1,2 +1,6 @@
-node_modules
+node_modules/
 .expo/
+.agents/
+dist/
+web-build/
+*.log

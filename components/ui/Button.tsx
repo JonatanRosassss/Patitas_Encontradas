@@ -7,7 +7,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { Colors, Typography } from '../../constants/theme';
+import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 
 export type ButtonColor = 'orange' | 'white' | 'bWhite' | 'lightOrange';
 export type TextColor = 'orange' | 'white' | 'bWhite' | 'lightOrange' | 'black';
@@ -56,7 +56,7 @@ export const Button: React.FC<ButtonProps> = ({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={effectiveColorText === 'white' ? '#FFFFFF' : Colors.primary} />
+        <ActivityIndicator color={effectiveColorText === 'white' ? Colors.white : Colors.primary} />
       ) : (
         <Text style={[styles.buttonText, textVariantStyles[effectiveColorText] || styles.defaultText]}>
           {textLabel}
@@ -94,7 +94,7 @@ const textVariantStyles: Record<TextColor, TextStyle> = {
     color: Colors.white,
   },
   bWhite: {
-    color: Colors.white,
+    color: Colors.primary,
   },
   black: {
     color: Colors.black,
@@ -104,16 +104,16 @@ const textVariantStyles: Record<TextColor, TextStyle> = {
 const styles = StyleSheet.create({
   button: {
     height: 52,
-    borderRadius: 25,
+    borderRadius: Radius.full,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: Spacing.two,
     shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-    paddingHorizontal: 20,
+    paddingHorizontal: Spacing.four,
   },
   buttonDisabled: {
     opacity: 0.5,

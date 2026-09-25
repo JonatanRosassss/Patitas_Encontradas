@@ -9,7 +9,7 @@ import {
   View,
   Image,
 } from 'react-native';
-import { Colors, Typography } from '../../constants/theme';
+import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 import { useFonts, Baloo2_700Bold, Baloo2_500Medium, Baloo2_400Regular } from '@expo-google-fonts/baloo-2';
 import { Nunito_400Regular, Nunito_700Bold, Nunito_300Light } from '@expo-google-fonts/nunito';
 import { Button } from '../../components/ui/Button';
@@ -94,11 +94,11 @@ export default function ForgetPassword({ }: ForgetPasswordProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    padding: Spacing.four,
     backgroundColor: Colors.backgroundLight,
   },
   contenedorInicio: {
-    paddingHorizontal: 20,
+    paddingHorizontal: Spacing.four,
   },
   loadingContainer: {
     alignItems: 'center',
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: Typography.sizes.display,
     lineHeight: Typography.lineHeights.display,
-    marginBottom: 40,
+    marginBottom: Spacing.five,
     textAlign: 'center',
     fontFamily: Typography.fonts.titleBold,
     color: Colors.primary,
@@ -127,53 +127,50 @@ const styles = StyleSheet.create({
   textoAbajo: {
     fontSize: Typography.sizes.sm,
     lineHeight: Typography.lineHeights.sm,
-    marginTop: 5,
+    marginTop: Spacing.one,
     opacity: 0.3,
     textAlign: 'center',
     fontFamily: Typography.fonts.bodyLight,
-    marginBottom: 20,
+    marginBottom: Spacing.four,
   },
   linkTexto: {
-
     fontSize: Typography.sizes.sm,
     lineHeight: Typography.lineHeights.sm,
-    marginTop: 5,
-    marginLeft: 10,
-
+    marginTop: Spacing.one,
+    marginLeft: Spacing.two,
     fontFamily: Typography.fonts.bodyRegular,
-    marginBottom: 20,
+    marginBottom: Spacing.four,
   },
   textoCorreo: {
     fontSize: Typography.sizes.sm,
     lineHeight: Typography.lineHeights.sm,
-    marginTop: 5,
+    marginTop: Spacing.one,
     opacity: 0.9,
     textAlign: 'left',
     fontFamily: Typography.fonts.titleRegular,
-    marginBottom: 20,
-    color: Colors.text
-
+    marginBottom: Spacing.two,
+    color: Colors.text,
   },
   input: {
     height: 52,
     backgroundColor: Colors.white,
-    borderRadius: 8,
+    borderRadius: Radius.sm,
     borderWidth: 1,
     borderColor: Colors.border,
-    paddingHorizontal: 14,
-    marginBottom: 16,
+    paddingHorizontal: Spacing.three,
+    marginBottom: Spacing.three,
     fontSize: Typography.sizes.md,
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.text,
   },
   contenedorTitulo: {
     alignSelf: 'stretch',
-    marginTop: 120,
-    paddingHorizontal: 20,
+    marginTop: Spacing.six,
+    paddingHorizontal: Spacing.four,
   },
   logo: {
     width: 180,
     height: 250,
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
 });

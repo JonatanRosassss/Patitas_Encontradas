@@ -12,7 +12,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { Colors, Typography } from '../../constants/theme';
+import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 import { useFonts, Baloo2_700Bold } from '@expo-google-fonts/baloo-2';
 import { Nunito_400Regular, Nunito_700Bold, Nunito_300Light } from '@expo-google-fonts/nunito';
 import { Ionicons } from '@expo/vector-icons';
@@ -191,7 +191,7 @@ export default function LoginScreen({ }: LoginScreenProps) {
               onPress={handleContinueGoogle}
               activeOpacity={0.8}
             >
-              <Ionicons name="logo-google" size={24} color="#DB4437" />
+              <Ionicons name="logo-google" size={24} color={Colors.google} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -199,7 +199,7 @@ export default function LoginScreen({ }: LoginScreenProps) {
               onPress={() => handleSocialLogin('Apple')}
               activeOpacity={0.8}
             >
-              <Ionicons name="logo-apple" size={24} color="#000000" />
+              <Ionicons name="logo-apple" size={24} color={Colors.black} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -207,7 +207,7 @@ export default function LoginScreen({ }: LoginScreenProps) {
               onPress={() => handleSocialLogin('Facebook')}
               activeOpacity={0.8}
             >
-              <Ionicons name="logo-facebook" size={24} color="#4267B2" />
+              <Ionicons name="logo-facebook" size={24} color={Colors.facebook} />
             </TouchableOpacity>
           </View>
         </View>
@@ -224,11 +224,11 @@ const styles = StyleSheet.create({
   scrollContenido: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 24,
+    paddingVertical: Spacing.four,
+    paddingHorizontal: Spacing.four,
   },
   contenedorInicio: {
-    paddingHorizontal: 20,
+    paddingHorizontal: Spacing.four,
   },
   loadingContainer: {
     flex: 1,
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: Typography.sizes.display,
     lineHeight: Typography.lineHeights.display,
-    marginBottom: 40,
+    marginBottom: Spacing.five,
     textAlign: 'center',
     fontFamily: Typography.fonts.titleBold,
     color: Colors.primary,
@@ -260,29 +260,29 @@ const styles = StyleSheet.create({
   textoAbajo: {
     fontSize: Typography.sizes.sm,
     lineHeight: Typography.lineHeights.sm,
-    marginTop: 5,
+    marginTop: Spacing.one,
     opacity: 0.5,
     textAlign: 'center',
     fontFamily: Typography.fonts.bodyLight,
-    marginBottom: 20,
+    marginBottom: Spacing.four,
   },
   linkTexto: {
     fontSize: Typography.sizes.sm,
     lineHeight: Typography.lineHeights.sm,
-    marginTop: 5,
-    marginLeft: 10,
+    marginTop: Spacing.one,
+    marginLeft: Spacing.two,
     fontFamily: Typography.fonts.bodyRegular,
-    marginBottom: 20,
+    marginBottom: Spacing.four,
     color: Colors.primary,
   },
   input: {
     height: 52,
     backgroundColor: Colors.white,
-    borderRadius: 8,
+    borderRadius: Radius.sm,
     borderWidth: 1,
     borderColor: Colors.border,
-    paddingHorizontal: 14,
-    marginBottom: 16,
+    paddingHorizontal: Spacing.three,
+    marginBottom: Spacing.three,
     fontSize: Typography.sizes.md,
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.text,
@@ -292,29 +292,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 52,
     backgroundColor: Colors.white,
-    borderRadius: 8,
+    borderRadius: Radius.sm,
     borderWidth: 1,
     borderColor: Colors.border,
-    marginBottom: 16,
+    marginBottom: Spacing.three,
   },
   inputPassword: {
     flex: 1,
     height: 52,
-    paddingHorizontal: 14,
+    paddingHorizontal: Spacing.three,
     fontSize: Typography.sizes.md,
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.text,
   },
   botonOjo: {
-    paddingHorizontal: 14,
+    paddingHorizontal: Spacing.three,
     height: 52,
     justifyContent: 'center',
     alignItems: 'center',
   },
   contenedorTitulo: {
     alignSelf: 'stretch',
-    marginTop: 20,
-    paddingHorizontal: 20,
+    marginTop: Spacing.four,
+    paddingHorizontal: Spacing.four,
   },
   logo: {
     width: 180,
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   contenedorDivisor: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: Spacing.four,
   },
   lineaDivisora: {
     flex: 1,
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
   },
   textoDivisor: {
-    marginHorizontal: 12,
+    marginHorizontal: Spacing.md,
     fontSize: Typography.sizes.sm,
     color: Colors.textMuted,
     fontFamily: Typography.fonts.bodyRegular,
@@ -340,13 +340,13 @@ const styles = StyleSheet.create({
   filaBotonesSociales: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
-    marginBottom: 10,
+    gap: Spacing.three,
+    marginBottom: Spacing.two,
   },
   botonSocial: {
     width: 54,
     height: 54,
-    borderRadius: 27,
+    borderRadius: Radius.full,
     backgroundColor: Colors.white,
     borderWidth: 1,
     borderColor: Colors.border,
