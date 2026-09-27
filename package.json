@@ -20,12 +20,11 @@
     "expo-camera": "~57.0.5",
     "expo-constants": "~57.0.17",
     "expo-font": "~57.0.3",
-    "expo-image-picker": "~57.0.16",
+    "expo-image-picker": "~57.0.20",
     "expo-linking": "~57.0.9",
     "expo-location": "~57.0.16",
     "expo-router": "~57.0.19",
     "expo-status-bar": "~57.0.1",
-    "firebase": "^10.12.2",
     "lucide-react-native": "^1.45.0",
     "nativewind": "^4.0.36",
     "react": "19.2.3",
@@ -46,5 +45,9 @@
     "@types/react": "~18.2.79",
     "tailwindcss": "^3.4.7",
     "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "node@26.8.1": true,
+    "protobufjs@7.6.6": true
   }
 }
