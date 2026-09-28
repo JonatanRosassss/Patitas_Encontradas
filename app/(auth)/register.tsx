@@ -1,3 +1,6 @@
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../../constants/firebaseConfig';
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -26,28 +29,95 @@ export default function PantallaRegistro() {
   const [verContrasenia, setVerContrasenia] = useState(false);
   const [verConfirmarContrasenia, setVerConfirmarContrasenia] = useState(false);
 
-  const manejarRegistro = () => {
-    if (!nombre.trim() || !correo.trim() || !telefono.trim() || !contrasenia.trim()) {
-      Alert.alert('Atención', 'Por favor completá todos los campos requeridos.');
-      return;
-    }
+ const manejarRegistro = async () => {
+  if (
+    !nombre.trim() ||
+    !correo.trim() ||
+    !telefono.trim() ||
+    !contrasenia.trim() ||
+    !confirmarContrasenia.trim()
+  ) {
+    Alert.alert(
+      'Atención',
+      'Por favor completá todos los campos requeridos.'
+    );
+    return;
+  }
 
-    if (contrasenia !== confirmarContrasenia) {
-      Alert.alert('Atención', 'Las contraseñas no coinciden.');
-      return;
-    }
+  if (contrasenia !== confirmarContrasenia) {
+    Alert.alert(
+      'Atención',
+      'Las contraseñas no coinciden.'
+    );
+    return;
+  }
 
+  if (contrasenia.length < 6) {
+    Alert.alert(
+      'Atención',
+      'La contraseña debe tener al menos 6 caracteres.'
+    );
+    return;
+  }
+
+  try {
+    // 1. Crear usuario en Firebase Authentication
+    const resultado = await createUserWithEmailAndPassword(
+      auth,
+      correo.trim(),
+      contrasenia
+    );
+
+    const usuario = resultado.user;
+
+    // 2. Guardar información adicional en Firestore
+    await setDoc(doc(db, 'usuarios', usuario.uid), {
+      nombre: nombre.trim(),
+      correo: correo.trim(),
+      telefono: telefono.trim(),
+      uid: usuario.uid,
+      fechaRegistro: new Date(),
+    });
+
+    // 3. Mostrar confirmación
     Alert.alert(
       '¡Cuenta creada!',
-      `Registro simulado exitoso para ${nombre.trim()}.\nYa podés iniciar sesión.`,
+      `Bienvenida/o ${nombre.trim()}. Ya podés iniciar sesión.`,
       [
         {
           text: 'Ir a Iniciar Sesión',
-          onPress: () => enrutador.push('/(auth)/login'),
+          onPress: () => enrutador.replace('/(auth)/login'),
         },
       ]
     );
-  };
+
+  } catch (error: any) {
+
+    console.error('Error al registrar usuario:', error);
+
+    if (error.code === 'auth/email-already-in-use') {
+      Alert.alert(
+        'Correo registrado',
+        'Ya existe una cuenta registrada con este correo electrónico.'
+      );
+    } else if (error.code === 'auth/invalid-email') {
+      Alert.alert(
+        'Correo inválido',
+        'Ingresá una dirección de correo electrónico válida.'
+      );
+    } else if (error.code === 'auth/weak-password') {
+      Alert.alert(
+        'Contraseña débil',
+        'La contraseña debe tener al menos 6 caracteres.'
+      );
+    } else {
+      Alert.alert(
+        'Error',
+        'No se pudo crear la cuenta. Intentá nuevamente.'
+      );
+    }
+  }
+};
 
   const manejarRegistroSocial = (proveedor: string) => {
     Alert.alert(
