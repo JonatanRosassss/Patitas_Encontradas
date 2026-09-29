@@ -1,0 +1,363 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Pressable,
+  TextInput,
+  Alert,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+
+export default function PublicarAlertaScreen() {
+  const router = useRouter();
+
+  // Estados del formulario
+  const [tipoAlerta, setTipoAlerta] = useState<'perdi' | 'encontre'>('perdi');
+  const [nombre, setNombre] = useState('');
+  const [raza, setRaza] = useState('');
+  const [ubicacion, setUbicacion] = useState('');
+  const [recompensa, setRecompensa] = useState('');
+  const [descripcion, setDescripcion] = useState('');
+
+  // Estados para fotos y carga
+  const [imagenes, setImagenes] = useState<string[]>([]);
+  const [guardando, setGuardando] = useState(false);
+
+  // Función para seleccionar fotos
+  const handleSeleccionarFotos = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permiso requerido',
+        'Necesitamos acceso a tu galería para subir las fotos de la mascota.'
+      );
+      return;
+    }
+
+    const resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 0.8,
+    });
+
+    if (!resultado.canceled) {
+      const uris = resultado.assets.map((asset) => asset.uri);
+      setImagenes((prev) => [...prev, ...uris]);
+    }
+  };
+
+  // Función para quitar una foto
+  const handleQuitarFoto = (index: number) => {
+    setImagenes((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Función para guardar / publicar
+  const handlePublicar = async () => {
+    if (!nombre.trim() || !ubicacion.trim()) {
+      Alert.alert('Campos requeridos', 'Por favor completa al menos el nombre y la ubicación.');
+      return;
+    }
+
+    setGuardando(true);
+
+    // Simulación de envío
+    setTimeout(() => {
+      setGuardando(false);
+      Alert.alert('¡Alerta Publicada!', 'Tu publicación se ha registrado con éxito.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    }, 1000);
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* BOTÓN VOLVER */}
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backButtonText}>← Volver</Text>
+        </TouchableOpacity>
+
+        {/* TÍTULO */}
+        <Text style={styles.title}>Publicar Alerta</Text>
+
+        {/* SELECTOR PERDÍ / ENCONTRÉ */}
+        <View style={styles.toggleContainer}>
+          <Pressable
+            style={[
+              styles.toggleButton,
+              tipoAlerta === 'perdi' && styles.toggleButtonActive,
+            ]}
+            onPress={() => setTipoAlerta('perdi')}
+          >
+            <Text
+              style={[
+                styles.toggleText,
+                tipoAlerta === 'perdi' && styles.toggleTextActive,
+              ]}
+            >
+              Perdí
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={[
+              styles.toggleButton,
+              tipoAlerta === 'encontre' && styles.toggleButtonActive,
+            ]}
+            onPress={() => setTipoAlerta('encontre')}
+          >
+            <Text
+              style={[
+                styles.toggleText,
+                tipoAlerta === 'encontre' && styles.toggleTextActive,
+              ]}
+            >
+              Encontré
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* FORMULARIO DE CAMPOS */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Nombre de la mascota *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Firulais"
+            placeholderTextColor="#9CA3AF"
+            value={nombre}
+            onChangeText={setNombre}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Raza</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Labrador / Mestizo"
+            placeholderTextColor="#9CA3AF"
+            value={raza}
+            onChangeText={setRaza}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Ubicación *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Av. San Martín y Calle 4"
+            placeholderTextColor="#9CA3AF"
+            value={ubicacion}
+            onChangeText={setUbicacion}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Recompensa (opcional)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: $5000 / No especificada"
+            placeholderTextColor="#9CA3AF"
+            value={recompensa}
+            onChangeText={setRecompensa}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Descripción</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Señas particulares, color de collar, etc."
+            placeholderTextColor="#9CA3AF"
+            value={descripcion}
+            onChangeText={setDescripcion}
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+          />
+        </View>
+
+        {/* PREVISUALIZACIÓN DE FOTOS */}
+        {imagenes.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.previewContainer}>
+            {imagenes.map((uri, index) => (
+              <View key={`${uri}-${index}`} style={styles.imageCard}>
+                <Image source={{ uri }} style={styles.previewImage} />
+                <TouchableOpacity style={styles.deleteBadge} onPress={() => handleQuitarFoto(index)}>
+                  <Text style={styles.deleteText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+
+        {/* BOTÓN ADJUNTAR FOTOS */}
+        <TouchableOpacity style={styles.uploadButton} onPress={handleSeleccionarFotos}>
+          <Text style={styles.uploadButtonText}>
+            {imagenes.length > 0 ? 'AGREGAR MÁS FOTOS' : 'SUBIR FOTOS'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* BOTÓN PRINCIPAL */}
+        <TouchableOpacity
+          style={[styles.submitButton, guardando && styles.submitButtonDisabled]}
+          onPress={handlePublicar}
+          disabled={guardando}
+        >
+          {guardando ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.submitButtonText}>GUARDAR Y PUBLICAR</Text>
+          )}
+        </TouchableOpacity>
+
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 30,
+  },
+  backButton: {
+    paddingVertical: 8,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#374151',
+    fontWeight: '600',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#111827',
+    marginBottom: 20,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+  toggleButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderWidth: 1.5,
+    borderColor: '#374151',
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  toggleButtonActive: {
+    backgroundColor: '#FF8C00',
+    borderColor: '#FF8C00',
+  },
+  toggleText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#374151',
+  },
+  toggleTextActive: {
+    color: '#FFFFFF',
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 6,
+  },
+  input: {
+    borderWidth: 1.5,
+    borderColor: '#374151',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: '#111827',
+    backgroundColor: '#FFFFFF',
+  },
+  textArea: {
+    height: 100,
+  },
+  previewContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  imageCard: {
+    position: 'relative',
+    marginRight: 10,
+  },
+  previewImage: {
+    width: 75,
+    height: 75,
+    borderRadius: 10,
+  },
+  deleteBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    backgroundColor: '#EF4444',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  uploadButton: {
+    borderWidth: 1.5,
+    borderColor: '#374151',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 16,
+    backgroundColor: '#F9FAFB',
+  },
+  uploadButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#374151',
+  },
+  submitButton: {
+    backgroundColor: '#FF8C00',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+});

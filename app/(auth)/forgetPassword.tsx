@@ -14,7 +14,6 @@ import { useFonts, Baloo2_700Bold, Baloo2_500Medium, Baloo2_400Regular } from '@
 import { Nunito_400Regular, Nunito_700Bold, Nunito_300Light } from '@expo-google-fonts/nunito';
 import { Button } from '../../components/ui/Button';
 import { loginSchema } from '@/schemas/authScheama';
-import { router } from 'expo-router';
 
 interface ForgetPasswordProps {}
 
@@ -39,21 +38,22 @@ export default function ForgetPassword({ }: ForgetPasswordProps) {
   }
 
   const handleValidation = () => {
-    const resultado = loginSchema.safeParse({ email});
+    const resultado = loginSchema.safeParse({ email });
     if (!resultado.success) {
-      //no paso
+      // no paso
       return;
     }
-    //paso
+    // paso
   };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <View style={styles.contenedorTitulo}>
-         <Image
-          source={require('assets/logo_patitas_crop.png')}
+        <Image
+          source={require('@/assets/logo_patitas_crop.png')}
           style={styles.logo}
           resizeMode='contain'
         />
@@ -68,7 +68,8 @@ export default function ForgetPassword({ }: ForgetPasswordProps) {
       <View style={styles.contenedorInicio}>
         <Text style={styles.textoSemiTitulo}>Olvidaste tu Contrasenia?</Text>
         <Text style={styles.textoAbajo}> Ingresa tu correo electronico y se te enviara un codigo de recuperacion</Text>
-       </View>
+      </View>
+
       <Text style={styles.textoCorreo}> CORREO: </Text>
       <TextInput
         style={styles.input}
@@ -134,12 +135,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   linkTexto: {
-
     fontSize: Typography.sizes.sm,
     lineHeight: Typography.lineHeights.sm,
     marginTop: 5,
     marginLeft: 10,
-
     fontFamily: Typography.fonts.bodyRegular,
     marginBottom: 20,
   },
@@ -151,8 +150,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     fontFamily: Typography.fonts.titleRegular,
     marginBottom: 20,
-    color: Colors.text
-
+    color: Colors.text,
   },
   input: {
     height: 52,
@@ -174,6 +172,6 @@ const styles = StyleSheet.create({
   logo: {
     width: 180,
     height: 250,
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
 });

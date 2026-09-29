@@ -35,7 +35,7 @@ const MASCOTAS = [
 
 export default function HomeScreen() {
   function publicarMascota() {
-    console.log('Mascota publicada');
+    router.push('/publicar-alerta');
   }
 
   return (
