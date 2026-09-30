@@ -1,62 +1,78 @@
+import { router } from 'expo-router'; // importamos router para poder navegar entre pantallas
 import React, { useState } from 'react';
 import { View, Image, Alert, ScrollView, StyleSheet } from 'react-native';
-
-//importamos el modulo nativo de expo para poder seleccionar imagenes de la galeria del dispositivo
 import * as ImagePicker from 'expo-image-picker';
 
-//NUEVO - modificamos todo el bloque de codigo utilizando camelcase.
-//NUEVO - importamos los colores y el componente de boton personalizado.
-import { Colors } from '../../constants/theme';
+import { Colors, Spacing } from '../../constants/theme';
 import { Button } from '../../components/ui/Button';
-
-//1. Estado local para almacenar la URI (ruta local) de la foto seleccionada.
-//usamos una imagen generica por defecto hasta que el usuario seleccione alguna.
 
 export default function PerfilScreen() {
   const [fotoPerfil, setFotoPerfil] = useState<string>('https://via.placeholder.com/150');
 
-  //2. Funcion para pedirle permiso al celular para acceder a la galeria de fotos y seleccionar una imagen.
   const seleccionarFoto = async () => {
-    //pedimos permiso para acceder a la galeria de fotos del dispositivo
     const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    //si el usuario deniega el permiso, mostramos una alerta y detenemos la funcion.
     if (!permiso.granted) {
       Alert.alert('Permiso denegado', 'No se puede acceder a la galería de fotos.');
       return;
     }
 
-    //abrimos la galeria nativa del dispositivo para que el usuario seleccione una imagen.
     const resultado = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], //solo permitimos seleccionar imagenes
-      allowsEditing: true, // habilita el recorte de la imagen seleccionada
-      aspect: [1, 1], // mantiene la relacion de aspecto cuadrada.
-      quality: 0.8, // reducimos la calidad de la imagen para que pese menos.
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
     });
 
-    //si el usuario elige una foto y no cancelo la ventana:
-    //guardamos el estado temporal de la URI de la foto seleccionada en el estado local.
     if (!resultado.canceled) {
-      const uriSeleccionada = resultado.assets[0].uri;
+      const uriSeleccionada = resultado.assets[0].uri; // obtenemos la uri de la foto seleccionada
       setFotoPerfil(uriSeleccionada);
       Alert.alert('Foto seleccionada', 'Se ha seleccionado una nueva foto de perfil.');
+      //usamos alert.alert para mostrar la ventana emergente de confirmacion.
     }
+  };
 
+  // funcion para cerrar sesion con una alerta de confirmacion.
+  const cerrarSesion = () => {
+    Alert.alert(
+      'Cerrar sesión',
+      '¿Estás seguro de que querés cerrar sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Cerrar sesión',
+          style: 'destructive',
+          onPress: () => {
+            // mandamos al usuario al login y reemplazamos la ruta
+            // usamos replace para que no pueda volver a la pantalla de perfil con el boton de atras
+            router.replace('/(auth)/login');
+          },
+        },
+      ]
+    );
   };
 
   return (
-    <ScrollView style={styles.scrollView}>
-      {/* Sección principal del Avatar */}
+    <ScrollView 
+      style={styles.scrollView}
+      contentContainerStyle={styles.scrollContent}
+    >
       <View style={styles.avatarSection}>
-        {/* Renderizado de la imagen con bordes redondeados */}
         <Image
           source={{ uri: fotoPerfil }}
           style={styles.avatar}
         />
-        {/* Botón tactil para cambiar la foto */}
         <Button
           title="Cambiar Foto de perfil"
           onPress={seleccionarFoto}
+        />
+      </View>
+
+      <View style={styles.actionsSection}>
+        {/* agregamos un boton para cerrar sesion */}
+        <Button
+          title="Cerrar sesión"
+          onPress={cerrarSesion}
         />
       </View>
     </ScrollView>
@@ -67,20 +83,31 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     backgroundColor: Colors.backgroundLight,
-    padding: 16,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'space-between', 
+    padding: Spacing.base,
+    paddingBottom: Spacing.xxl,
   },
   avatarSection: {
     alignItems: 'center',
-    marginVertical: 32,
+    marginVertical: Spacing.xl,
   },
   avatar: {
     width: 128,
     height: 128,
     borderRadius: 64,
-    marginBottom: 16,
+    marginBottom: Spacing.base,
     backgroundColor: Colors.borderLight,
   },
+  actionsSection: {
+    alignItems: 'center',
+    width: '100%',
+  },
 });
-
-//se reemplazo classname por style y se agregaron estilos para que la imagen tenga bordes redondeados.
-//lo uso momentaneamente para probar la funcionalidad de seleccion de imagenes desde la galeria del dispositivo.
+// usamos spacing para los margenes y paddings, tambien colors de themes.ts
+// para que siga el mismo estilo que el resto de la app.
+// agregamos un scrollview para que la pantalla sea scrollable.
+// y el boton de cerrar sesion quede en la parte inferior de la pantalla.
+// usamos router.replace para que el usuario no pueda volver a la pantalla de perfil despues de cerrar sesion.
