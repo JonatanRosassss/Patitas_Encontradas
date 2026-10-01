@@ -64,6 +64,10 @@ export const Colors = {
   shadow: '#5A3A1F',
   overlay: 'rgba(90, 58, 31, 0.45)',
   tintPrimary: 'rgba(255, 138, 0, 0.12)',
+
+  // Marcas Sociales (OAuth)
+  google: '#DB4437',
+  facebook: '#4267B2',
 } as const;
 
 export const Typography = {
@@ -121,7 +125,25 @@ export const Spacing = {
   four: 24,
   five: 32,
   six: 64,
+  // Alias estandar
+  xs: 4,
+  sm: 8,
+  md: 12,
+  base: 16,
+  lg: 20,
+  xl: 24,
+  xxl: 32,
 } as const;
+
+export const Radius = {
+  xs: 4,
+  sm: 8,
+  md: 14,
+  lg: 20,
+  full: 9999,
+} as const;
+
+export const BorderRadius = Radius;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;

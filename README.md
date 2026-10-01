@@ -21,7 +21,7 @@ Esta aplicación nace para solucionar un problema super común que vemos todos l
 1. Publicar la búsqueda de tu mascota perdida en menos de un minuto con foto y ubicación exacta.
 2. Alertar a los vecinos cercanos para que estén atentos.
 3. Si alguien en la calle ve a un animal con cara de perdido, puede sacar una foto, clavar el pin en el mapa y avisarle de toque al dueño vía WhatsApp o mediante un reporte de avistamiento.
-4. Contar con una **Tienda Solidaria** e-commerce donde se pueden comprar chapitas QR inteligentes, collares y accesorios, ayudando a financiar la red y manteniendo la app autosustentable.
+
 
 ---
 
@@ -31,8 +31,6 @@ Esta aplicación nace para solucionar un problema super común que vemos todos l
 * 🚨 **CRUD Completo de Búsquedas:** Crear, consultar, editar datos/señas particulares y dar de baja o marcar como "Encontrado" los reportes.
 * 📸 **Integración de Cámara Nativa:** Captura inmediata de foto con la cámara del celular o selección desde la galería (`expo-image-picker`) subiendo directo a **Firebase Storage**.
 * 📍 **Geolocalización GPS:** Obtención de coordenadas en tiempo real (`expo-location`) para ubicar exactamente dónde se perdió la mascota o dónde fue vista.
-* 🛒 **Tienda Solidaria y Carrito de Compras:** Catálogo de productos con carrito global gestionado por **Zustand**, cálculo de totales en tiempo real y simulación de Checkout.
-* ⚡ **Feed Fluido de Alta Performance:** Renderizado de publicaciones con `@shopify/flash-list` para soportar cientos de avisos sin tirones visuales.
 * 💬 **Contacto Rápido e Inmediato:** Botón de contacto directo por WhatsApp al dueño sin vueltas ni configuraciones raras.
 
 ---
@@ -43,7 +41,7 @@ Esta aplicación nace para solucionar un problema super común que vemos todos l
 * **Navegación:** Expo Router (basado en archivos en la carpeta `app/`).
 * **Estilos & UI:** NativeWind (Tailwind CSS) + Design Tokens personalizados en `constants/theme.ts`.
 * **Backend as a Service (BaaS):** Firebase Authentication, Cloud Firestore (NoSQL DB) y Firebase Storage.
-* **Gestión de Estado Global:** Zustand (para el carrito de compras y estado de sesión).
+
 * **Formularios y Validaciones:** React Hook Form + Zod.
 * **Componentes de Lista:** `@shopify/flash-list`.
 
@@ -134,8 +132,7 @@ patitas-encontradas/
  │   ├── firebase.ts              # Configuración e inicialización de SDK
  │   ├── locationService.ts       # Wrapper de Expo Location
  │   └── mediaService.ts          # Wrapper de Expo ImagePicker y Storage
- ├── stores/
- │   └── useCarritoStore.ts       # Estado global con Zustand
+ ├
  └── types/
      └── index.ts                 # Interfaces TypeScript del sistema
 ```
