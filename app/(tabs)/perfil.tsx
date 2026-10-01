@@ -1,43 +1,106 @@
-import React, {useState} from 'react';
-import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
-import { Colors, Typography } from '../../constants/theme';
+import React, { useState } from 'react';
 import { router } from 'expo-router';
+import { View, Text, Image, Alert, ScrollView, StyleSheet, Modal, Pressable } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
-interface PerfilScreenProps {}
+import { Colors, Spacing, Typography } from '../../constants/theme';
+import { Button } from '../../components/ui/Button';
 
-export default function PerfilScreen({}: PerfilScreenProps) {
-  const [mostrarDatos, setMostrarDatos] = useState(false); //para que sepa detectar si se toco el boton
+export default function PerfilScreen() {
+  const [fotoPerfil, setFotoPerfil] = useState<string>('https://via.placeholder.com/150');
+  const [mostrarDatos, setMostrarDatos] = useState(false);
 
-      return (
+  const seleccionarFoto = async () => {
+    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permiso.granted) {
+      Alert.alert('Permiso denegado', 'No se puede acceder a la galería de fotos.');
+      return;
+    }
+
+    const resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!resultado.canceled) {
+      const uriSeleccionada = resultado.assets[0].uri;
+      setFotoPerfil(uriSeleccionada);
+      Alert.alert('Foto seleccionada', 'Se ha seleccionado una nueva foto de perfil.');
+    }
+  };
+
+  const cerrarSesion = () => {
+    Alert.alert(
+      'Cerrar sesión',
+      '¿Estás seguro de que querés cerrar sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Cerrar sesión',
+          style: 'destructive',
+          onPress: () => {
+            router.replace('/(auth)/login');
+          },
+        },
+      ]
+    );
+  };
+
+  return (
     <>
-      <View style={styles.container}>
-        <Text style={styles.titulo}>Mi Perfil</Text>
-
-        {/* boton para usar el modal, cuando click cambia el usestate a true*/ }
-        <Pressable style={styles.boton} onPress={() => setMostrarDatos(true)}>
-          <Text style={styles.botontext}>MIS DATOS</Text>
-        </Pressable>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.avatarSection}>
+          <Image
+            source={{ uri: fotoPerfil }}
+            style={styles.avatar}
+          />
+          <Button
+            title="Cambiar Foto de perfil"
+            onPress={seleccionarFoto}
+          />
+        </View>
 
         <Pressable style={styles.boton} onPress={() => router.push('/ajustes')}>
           <Text style={styles.botontext}>AJUSTES</Text>
         </Pressable>
-      </View>
 
-        {/*modal, la pantallita que aparece al click en mis datos*/}
-        <Modal visible={mostrarDatos} transparent={true} animationType="fade">
-          {/*aqui le decimos: lo que mostrara, que atras de la cajita sea transparente y que al aparecer la cajita lo haga con la animacion fade */}
-        <View style={styles.modalFondo}> 
+        <View style={styles.actionsSection}>
+          <Button
+            title="Mis Datos"
+            variant="outline"
+            onPress={() => setMostrarDatos(true)}
+          />
+          <Button
+            title="Cerrar sesión"
+            onPress={cerrarSesion}
+          />
+        </View>
+      </ScrollView>
+
+      {/* Modal con los datos del usuario */}
+      <Modal visible={mostrarDatos} transparent={true} animationType="fade" onRequestClose={() => setMostrarDatos(false)}>
+        <View style={styles.modalFondo}>
           <View style={styles.modalContenido}>
             <Text style={styles.modalTitulo}>MIS DATOS</Text>
 
-            <Text>Nombre: nombre usuario</Text>
-            <Text>Email: usuario@email.com</Text>
+            <View style={styles.datosContainer}>
+              <Text style={styles.datoLabel}>Nombre:</Text>
+              <Text style={styles.datoValor}>Usuario Patitas</Text>
+
+              <Text style={styles.datoLabel}>Email:</Text>
+              <Text style={styles.datoValor}>usuario@email.com</Text>
+            </View>
 
             <Pressable
               style={styles.botonCerrar}
               onPress={() => setMostrarDatos(false)}
             >
-            {/* este pressable nos sirve para cerrar el modal, sin esto estariamos atrapados al abrir el modal */}
               <Text style={styles.botonCerrarTexto}>CERRAR</Text>
             </Pressable>
           </View>
@@ -48,36 +111,44 @@ export default function PerfilScreen({}: PerfilScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: Colors.backgroundLight,
-    padding: 20,
   },
-  titulo: {
-    fontSize: Typography.sizes.xxl,
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.primary,
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'space-between', 
+    padding: Spacing.base,
+    paddingBottom: Spacing.xxl,
   },
-  //estilos del boton
+  avatarSection: {
+    alignItems: 'center',
+    marginVertical: Spacing.xl,
+  },
+  avatar: {
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    marginBottom: Spacing.base,
+    backgroundColor: Colors.borderLight,
+  },
+  actionsSection: {
+    alignItems: 'stretch',
+    width: '100%',
+    gap: Spacing.two,
+  },
   boton: {
-    height: 50,
-    borderWidth: 1,
+    backgroundColor: Colors.primary,
     borderRadius: 10,
-    paddingHorizontal: 130,
-    alignContent: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.borderFocus,
-    borderColor: Colors.black,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    marginBottom: Spacing.two,
   },
   botontext: {
-    fontSize: Typography.sizes.sm,
     color: Colors.white,
     fontFamily: Typography.fonts.bodyBold,
   },
-
-  //estilos del modal, la pantallita que aparece al apretar el boton mis datos
   modalFondo: {
     flex: 1,
     backgroundColor: Colors.overlay,
@@ -99,12 +170,27 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     marginBottom: 16,
   },
+  datosContainer: {
+    width: '100%',
+    marginBottom: 12,
+  },
+  datoLabel: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.bodyBold,
+    color: Colors.textSecondary,
+    marginTop: 8,
+  },
+  datoValor: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.text,
+  },
   botonCerrar: {
-    marginTop: 20,
+    marginTop: 16,
     backgroundColor: Colors.primary,
     borderRadius: 10,
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     alignItems: 'center',
   },
   botonCerrarTexto: {
@@ -112,3 +198,4 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fonts.bodyBold,
   },
 });
+

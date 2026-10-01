@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { StyleSheet, Pressable, View, Text, FlatList, Modal, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 import { PetCard } from '@/components/ui/pet-card';
-import {MaxContentWidth, Colors, Typography} from '@/constants/theme';
+import { BottomTabInset, MaxContentWidth, Colors, Typography } from '@/constants/theme';
+
 
 const MASCOTAS = [
   {
@@ -35,7 +37,6 @@ const MASCOTAS = [
       'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=500',
   },
 ];
-
 type Mascota = {
   id: string;
   tipo: string;
@@ -51,7 +52,7 @@ export default function HomeScreen() {
   const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null);
 
   function publicarMascota() {
-    console.log('Mascota publicada');
+    router.push('/publicar-alerta');
   }
 
   const mascotasFiltradas = MASCOTAS.filter((item) => {
@@ -149,7 +150,8 @@ export default function HomeScreen() {
               <View style={{height: 10}} />
             )}
             renderItem={({ item }) => (
-              <PetCard onPress={() => setMascotaSeleccionada(item)}
+              <PetCard
+                onPress={() => setMascotaSeleccionada(item)}
                 tipo={item.tipo}
                 estado={item.estado}
                 nombre={item.nombre}
@@ -209,12 +211,12 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     alignItems: 'stretch',
-    gap: 1,
-    paddingBottom: -50,
+    gap: 12,
+    paddingBottom: BottomTabInset + 16,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
-},
+  },
 
   heroSection: {
     alignItems: 'flex-start',
@@ -271,32 +273,27 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: 20,
     fontWeight: 'bold',
-},
-
+  },
   filterPanel: {
     padding: 16,
     backgroundColor: '#EEEEEE',
     borderRadius: 10,
-},
-
+  },
   filterTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     flexDirection: 'row',
-},
-
+  },
   filterSubtitle: {
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 10,
-},
-
+  },
   filterOptions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
-},
-
+  },
   filterOption: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -306,74 +303,21 @@ const styles = StyleSheet.create({
     borderColor: '#DDDDDD',
     alignItems: 'center',
     justifyContent: 'center',
-},
-
+  },
   petList: {
-  flex: 1,
-  marginTop: 16,
-},
-
+    flex: 1,
+    marginTop: 16,
+  },
   filterOptionText: {
     color: '#000000',
-},
-
+  },
   filterOptionActive: {
     backgroundColor: Colors?.primary ?? '#ff8c00',
     borderColor: Colors?.primary ?? '#ff8c00',
-},
-
+  },
   filterOptionTextActive: {
     color: '#FFFFFF',
     fontWeight: 'bold',
-},
-
-//modal styles
-
-/* ESTILOS DEL MODAL */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-},
-  modalContent: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-},
-  modalImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 12,
-    marginBottom: 16,
-},
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 4,
-},
-  modalSubtitle: {
-    fontSize: 14,
-    color: '#666666',
-    marginBottom: 12,
-},
-  modalDescription: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-},
-  closeButton: {
-    backgroundColor: Colors?.primary ?? '#FF8C00',
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 8,
-},
-  closeButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-},
+  },
 });
 
