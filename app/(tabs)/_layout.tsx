@@ -20,6 +20,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="publicar-alerta"
+        options={{
+          title: 'Publicar',
+          href: null, // Oculto de la barra inferior si navegas con el botón
+        }}
+      />
+      <Tabs.Screen
         name="mapa"
         options={{
           title: 'Mapa',

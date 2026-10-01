@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { PetCard } from '@/components/ui/pet-card';
 import { BottomTabInset, MaxContentWidth, Colors, Typography } from '@/constants/theme';
 
+
 const MASCOTAS = [
   {
     id: '1',
@@ -272,32 +273,27 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: 20,
     fontWeight: 'bold',
-},
-
+  },
   filterPanel: {
     padding: 16,
     backgroundColor: '#EEEEEE',
     borderRadius: 10,
-},
-
+  },
   filterTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     flexDirection: 'row',
-},
-
+  },
   filterSubtitle: {
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 10,
-},
-
+  },
   filterOptions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
-},
-
+  },
   filterOption: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -307,69 +303,19 @@ const styles = StyleSheet.create({
     borderColor: '#DDDDDD',
     alignItems: 'center',
     justifyContent: 'center',
-},
-
+  },
   petList: {
-  flex: 1,
-  marginTop: 16,
-},
-
+    flex: 1,
+    marginTop: 16,
+  },
   filterOptionText: {
     color: '#000000',
-},
-
+  },
   filterOptionActive: {
     backgroundColor: Colors?.primary ?? '#ff8c00',
     borderColor: Colors?.primary ?? '#ff8c00',
-},
-
+  },
   filterOptionTextActive: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-},
-  // modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    color: '#666666',
-    marginBottom: 12,
-  },
-  modalDescription: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  closeButton: {
-    backgroundColor: Colors?.primary ?? '#FF8C00',
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  closeButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
