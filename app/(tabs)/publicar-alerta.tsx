@@ -14,6 +14,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { EspecieMascota, type Pet } from '@/types/Pet';
+import { obtenerConexion } from '@/services/ConexionFirebase';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { Colors, Typography, Spacing, Radius } from '@/theme/tokens';
 
 export default function PublicarAlertaScreen() {
   const router = useRouter();
@@ -21,6 +25,7 @@ export default function PublicarAlertaScreen() {
   // Estados del formulario
   const [tipoAlerta, setTipoAlerta] = useState<'perdi' | 'encontre'>('perdi');
   const [nombre, setNombre] = useState('');
+  const [especie, setEspecie] = useState('');
   const [raza, setRaza] = useState('');
   const [ubicacion, setUbicacion] = useState('');
   const [recompensa, setRecompensa] = useState('');
@@ -29,6 +34,14 @@ export default function PublicarAlertaScreen() {
   // Estados para fotos y carga
   const [imagenes, setImagenes] = useState<string[]>([]);
   const [guardando, setGuardando] = useState(false);
+
+  const crearMascota = async (mascota: Pet) => {
+    const db = obtenerConexion();
+    const coleccionMasc = collection(db.firestore, 'Mascota');
+    const docMasc = await addDoc(coleccionMasc, mascota);
+    mascota.id = docMasc.id;
+    return docMasc.id;
+  };
 
   // Función para seleccionar fotos
   const handleSeleccionarFotos = async () => {
@@ -68,8 +81,24 @@ export default function PublicarAlertaScreen() {
 
     setGuardando(true);
 
+    const mascota: Pet = {
+      id: '',
+      nombre: nombre,
+      especie: especie as EspecieMascota,
+      estado: tipoAlerta === 'perdi' ? 'PERDIDO' : 'ENCONTRADO',
+      descripcion: descripcion,
+      fotos: imagenes,
+      ubicacion: ubicacion,
+      coordenadas: undefined,
+      contacto: undefined,
+      creadoPor: undefined,
+      fechaReporte: Timestamp.now().toString(),
+      recompensa: recompensa,
+    };
+
     // Simulación de envío
     setTimeout(() => {
+      crearMascota(mascota);
       setGuardando(false);
       Alert.alert('¡Alerta Publicada!', 'Tu publicación se ha registrado con éxito.', [
         { text: 'OK', onPress: () => router.back() },
@@ -138,6 +167,17 @@ export default function PublicarAlertaScreen() {
             placeholderTextColor="#9CA3AF"
             value={nombre}
             onChangeText={setNombre}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Especie</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Perro / Gato / Otro"
+            placeholderTextColor="#9CA3AF"
+            value={especie}
+            onChangeText={setEspecie}
           />
         </View>
 
@@ -216,7 +256,7 @@ export default function PublicarAlertaScreen() {
           disabled={guardando}
         >
           {guardando ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={Colors.surface} />
           ) : (
             <Text style={styles.submitButtonText}>GUARDAR Y PUBLICAR</Text>
           )}
@@ -238,14 +278,14 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   backButton: {
-    paddingVertical: 8,
-    marginBottom: 8,
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.sm,
     alignSelf: 'flex-start',
   },
   backButtonText: {
-    fontSize: 16,
-    color: '#374151',
-    fontWeight: '600',
+    fontSize: Typography.button.fontSize,
+    color: Colors.text,
+    fontWeight: Typography.button.fontWeight,
   },
   title: {
     fontSize: 24,
@@ -255,29 +295,29 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
+    gap: Spacing.md,
+    marginBottom: Spacing.xl,
   },
   toggleButton: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: Spacing.md,
     borderWidth: 1.5,
-    borderColor: '#374151',
-    borderRadius: 12,
+    borderColor: Colors.border,
+    borderRadius: Radius.md,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
   },
   toggleButtonActive: {
-    backgroundColor: '#FF8C00',
-    borderColor: '#FF8C00',
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   toggleText: {
-    fontSize: 16,
+    fontSize: Typography.button.fontSize,
     fontWeight: '700',
-    color: '#374151',
+    color: Colors.text,
   },
   toggleTextActive: {
-    color: '#FFFFFF',
+    color: Colors.surface,
   },
   inputGroup: {
     marginBottom: 16,
@@ -318,45 +358,50 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: '#EF4444',
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    backgroundColor: Colors.danger,
+    width: 22,
+    height: 22,
+    borderRadius: Radius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
   deleteText: {
-    color: '#FFFFFF',
-    fontSize: 11,
+    color: Colors.surface,
+    fontSize: Typography.caption.fontSize,
     fontWeight: 'bold',
   },
   uploadButton: {
     borderWidth: 1.5,
-    borderColor: '#374151',
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderColor: Colors.primary,
+    borderRadius: Radius.md,
+    paddingVertical: Spacing.md,
     alignItems: 'center',
-    marginBottom: 16,
-    backgroundColor: '#F9FAFB',
+    marginBottom: Spacing.base,
+    backgroundColor: Colors.background,
   },
   uploadButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#374151',
+    color: Colors.primary,
   },
   submitButton: {
-    backgroundColor: '#FF8C00',
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.md,
+    paddingVertical: Spacing.base,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: Spacing.sm,
+    shadowColor: Colors.text,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   submitButtonDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15,
+    color: Colors.surface,
+    fontSize: Typography.button.fontSize,
     fontWeight: 'bold',
     letterSpacing: 0.5,
   },
