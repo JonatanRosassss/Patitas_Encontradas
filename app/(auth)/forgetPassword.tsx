@@ -14,7 +14,6 @@ import { useFonts, Baloo2_700Bold, Baloo2_500Medium, Baloo2_400Regular } from '@
 import { Nunito_400Regular, Nunito_700Bold, Nunito_300Light } from '@expo-google-fonts/nunito';
 import { Button } from '../../components/ui/Button';
 import { loginSchema } from '@/schemas/authScheama';
-import { router } from 'expo-router';
 
 interface ForgetPasswordProps {}
 
@@ -39,21 +38,22 @@ export default function ForgetPassword({ }: ForgetPasswordProps) {
   }
 
   const handleValidation = () => {
-    const resultado = loginSchema.safeParse({ email});
+    const resultado = loginSchema.safeParse({ email });
     if (!resultado.success) {
-      //no paso
+      // no paso
       return;
     }
-    //paso
+    // paso
   };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <View style={styles.contenedorTitulo}>
-         <Image
-          source={require('assets/logo_patitas_crop.png')}
+        <Image
+          source={require('@/assets/logo_patitas_crop.png')}
           style={styles.logo}
           resizeMode='contain'
         />
@@ -68,7 +68,8 @@ export default function ForgetPassword({ }: ForgetPasswordProps) {
       <View style={styles.contenedorInicio}>
         <Text style={styles.textoSemiTitulo}>Olvidaste tu Contrasenia?</Text>
         <Text style={styles.textoAbajo}> Ingresa tu correo electronico y se te enviara un codigo de recuperacion</Text>
-       </View>
+      </View>
+
       <Text style={styles.textoCorreo}> CORREO: </Text>
       <TextInput
         style={styles.input}

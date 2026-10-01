@@ -3,7 +3,8 @@ import { StyleSheet, Pressable, View, Text, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PetCard } from '@/components/ui/pet-card';
-import {BottomTabInset, MaxContentWidth, Colors, Typography} from '@/constants/theme';
+import { BottomTabInset, MaxContentWidth, Colors, Typography } from '@/constants/theme';
+import { router } from 'expo-router';
 
 const MASCOTAS = [
   {
@@ -41,7 +42,7 @@ export default function HomeScreen() {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   function publicarMascota() {
-    console.log('Mascota publicada');
+    router.push('/publicar-alerta');
   }
 
   const mascotasFiltradas = MASCOTAS.filter((item) => {
@@ -164,12 +165,12 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     alignItems: 'stretch',
-    gap: 1,
-    paddingBottom: -50,
+    gap: 12,
+    paddingBottom: BottomTabInset + 16,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
-},
+  },
 
   heroSection: {
     alignItems: 'flex-start',
@@ -226,32 +227,27 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: 20,
     fontWeight: 'bold',
-},
-
+  },
   filterPanel: {
     padding: 16,
     backgroundColor: '#EEEEEE',
     borderRadius: 10,
-},
-
+  },
   filterTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     flexDirection: 'row',
-},
-
+  },
   filterSubtitle: {
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 10,
-},
-
+  },
   filterOptions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
-},
-
+  },
   filterOption: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -261,24 +257,20 @@ const styles = StyleSheet.create({
     borderColor: '#DDDDDD',
     alignItems: 'center',
     justifyContent: 'center',
-},
-
+  },
   petList: {
-  flex: 1,
-  marginTop: 16,
-},
-
+    flex: 1,
+    marginTop: 16,
+  },
   filterOptionText: {
     color: '#000000',
-},
-
+  },
   filterOptionActive: {
     backgroundColor: Colors?.primary ?? '#ff8c00',
     borderColor: Colors?.primary ?? '#ff8c00',
-},
-
+  },
   filterOptionTextActive: {
     color: '#FFFFFF',
     fontWeight: 'bold',
-},
+  },
 });
