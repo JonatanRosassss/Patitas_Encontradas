@@ -15,6 +15,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 
+import { Colors } from '@/constants/theme';
+
 export default function PublicarAlertaScreen() {
   const router = useRouter();
 
@@ -68,7 +70,6 @@ export default function PublicarAlertaScreen() {
 
     setGuardando(true);
 
-    // Simulación de envío
     setTimeout(() => {
       setGuardando(false);
       Alert.alert('¡Alerta Publicada!', 'Tu publicación se ha registrado con éxito.', [
@@ -135,7 +136,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Firulais"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
             value={nombre}
             onChangeText={setNombre}
           />
@@ -146,7 +147,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Labrador / Mestizo"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
             value={raza}
             onChangeText={setRaza}
           />
@@ -157,7 +158,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Av. San Martín y Calle 4"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
             value={ubicacion}
             onChangeText={setUbicacion}
           />
@@ -168,7 +169,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: $5000 / No especificada"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
             value={recompensa}
             onChangeText={setRecompensa}
           />
@@ -179,7 +180,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder="Señas particulares, color de collar, etc."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
             value={descripcion}
             onChangeText={setDescripcion}
             multiline
@@ -230,7 +231,7 @@ export default function PublicarAlertaScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors?.backgroundLight ?? '#FAF8F5',
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -244,13 +245,13 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 16,
-    color: '#374151',
+    color: Colors?.text ?? '#5A3A1F',
     fontWeight: '600',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#111827',
+    color: Colors?.text ?? '#5A3A1F',
     marginBottom: 20,
   },
   toggleContainer: {
@@ -262,19 +263,19 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderWidth: 1.5,
-    borderColor: '#374151',
+    borderColor: Colors?.border ?? '#E8DFD8',
     borderRadius: 12,
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },
   toggleButtonActive: {
-    backgroundColor: '#FF8C00',
-    borderColor: '#FF8C00',
+    backgroundColor: Colors?.primary ?? '#FF8A00',
+    borderColor: Colors?.primary ?? '#FF8A00',
   },
   toggleText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#374151',
+    color: Colors?.text ?? '#5A3A1F',
   },
   toggleTextActive: {
     color: '#FFFFFF',
@@ -285,17 +286,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: Colors?.text ?? '#5A3A1F',
     marginBottom: 6,
   },
   input: {
     borderWidth: 1.5,
-    borderColor: '#374151',
+    borderColor: Colors?.border ?? '#E8DFD8',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#111827',
+    color: Colors?.text ?? '#5A3A1F',
     backgroundColor: '#FFFFFF',
   },
   textArea: {
@@ -332,20 +333,20 @@ const styles = StyleSheet.create({
   },
   uploadButton: {
     borderWidth: 1.5,
-    borderColor: '#374151',
+    borderColor: Colors?.border ?? '#E8DFD8',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
     marginBottom: 16,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
   },
   uploadButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#374151',
+    color: Colors?.secondary ?? '#5A3A1F',
   },
   submitButton: {
-    backgroundColor: '#FF8C00',
+    backgroundColor: Colors?.primary ?? '#FF8A00',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
