@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
+import { router } from 'expo-router';
 
 interface PerfilScreenProps {}
 
@@ -15,6 +16,10 @@ export default function PerfilScreen({}: PerfilScreenProps) {
         {/* boton para usar el modal, cuando click cambia el usestate a true*/ }
         <Pressable style={styles.boton} onPress={() => setMostrarDatos(true)}>
           <Text style={styles.botontext}>MIS DATOS</Text>
+        </Pressable>
+
+        <Pressable style={styles.boton} onPress={() => router.push('/ajustes')}>
+          <Text style={styles.botontext}>AJUSTES</Text>
         </Pressable>
       </View>
 
