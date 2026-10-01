@@ -3,8 +3,19 @@ import { Image, StyleSheet, Text, View, Pressable } from 'react-native';
 import { Colors } from '@/constants/theme';
 import { useState } from 'react';
 
-export function PetCard({ tipo, estado, nombre, imagen }: { tipo: string; estado: string; nombre: string; imagen: string }) {
-
+export function PetCard({
+  tipo,
+  estado,
+  nombre,
+  imagen,
+  onPress,
+}: {
+  tipo: string;
+  estado: string;
+  nombre: string;
+  imagen: string;
+  onPress?: () => void;
+}) {
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
   const guardarPublicacion = () => {
     setMostrarMensaje(true);
@@ -13,10 +24,8 @@ export function PetCard({ tipo, estado, nombre, imagen }: { tipo: string; estado
     }, 2000);
   };
 
-
   return (
-    <View style={styles.petCard}>
-
+    <Pressable style={styles.petCard} onPress={onPress}>
       {mostrarMensaje && (
         <View style={styles.toast}>
           <Text style={styles.toastText}>Publicación guardada</Text>
@@ -25,27 +34,29 @@ export function PetCard({ tipo, estado, nombre, imagen }: { tipo: string; estado
       <Image source={{ uri: imagen }} style={styles.petImage} />
 
       <View style={styles.petInfo}>
-
         <View style={styles.petTopRow}>
+          <View style={[styles.petStatus, { backgroundColor: estado === 'ENCONTRADO' ? '#a2e6b3' : '#eda8a5' }]}>
+            <Text style={styles.petStatusText}>{estado}</Text>
+          </View>
 
-
-        <View style={[styles.petStatus, { backgroundColor: estado === 'ENCONTRADO' ? '#a2e6b3' : '#eda8a5' }]}>
-          <Text style={styles.petStatusText}>{estado}</Text>
-        </View>
-
-          <Pressable style={styles.saveButton} onPress={guardarPublicacion}>
+          <Pressable
+            style={styles.saveButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              guardarPublicacion();
+            }}
+          >
             <Text>G</Text>
           </Pressable>
         </View>
 
-
-        <Pressable style={styles.infoButton}>
+        <View style={styles.infoButton}>
           <Text style={styles.infoText}>{tipo} | informacion de la mascota</Text>
-        </Pressable>
+        </View>
 
         <Text style={styles.petName}>{nombre}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

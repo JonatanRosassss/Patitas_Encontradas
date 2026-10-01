@@ -1,13 +1,14 @@
-import { router } from 'expo-router'; // importamos router para poder navegar entre pantallas
+import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Image, Alert, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Image, Alert, ScrollView, StyleSheet, Modal, Pressable } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
-import { Colors, Spacing } from '../../constants/theme';
+import { Colors, Spacing, Typography } from '../../constants/theme';
 import { Button } from '../../components/ui/Button';
 
 export default function PerfilScreen() {
   const [fotoPerfil, setFotoPerfil] = useState<string>('https://via.placeholder.com/150');
+  const [mostrarDatos, setMostrarDatos] = useState(false);
 
   const seleccionarFoto = async () => {
     const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -25,14 +26,12 @@ export default function PerfilScreen() {
     });
 
     if (!resultado.canceled) {
-      const uriSeleccionada = resultado.assets[0].uri; // obtenemos la uri de la foto seleccionada
+      const uriSeleccionada = resultado.assets[0].uri;
       setFotoPerfil(uriSeleccionada);
       Alert.alert('Foto seleccionada', 'Se ha seleccionado una nueva foto de perfil.');
-      //usamos alert.alert para mostrar la ventana emergente de confirmacion.
     }
   };
 
-  // funcion para cerrar sesion con una alerta de confirmacion.
   const cerrarSesion = () => {
     Alert.alert(
       'Cerrar sesión',
@@ -43,8 +42,6 @@ export default function PerfilScreen() {
           text: 'Cerrar sesión',
           style: 'destructive',
           onPress: () => {
-            // mandamos al usuario al login y reemplazamos la ruta
-            // usamos replace para que no pueda volver a la pantalla de perfil con el boton de atras
             router.replace('/(auth)/login');
           },
         },
@@ -53,29 +50,59 @@ export default function PerfilScreen() {
   };
 
   return (
-    <ScrollView 
-      style={styles.scrollView}
-      contentContainerStyle={styles.scrollContent}
-    >
-      <View style={styles.avatarSection}>
-        <Image
-          source={{ uri: fotoPerfil }}
-          style={styles.avatar}
-        />
-        <Button
-          title="Cambiar Foto de perfil"
-          onPress={seleccionarFoto}
-        />
-      </View>
+    <>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.avatarSection}>
+          <Image
+            source={{ uri: fotoPerfil }}
+            style={styles.avatar}
+          />
+          <Button
+            title="Cambiar Foto de perfil"
+            onPress={seleccionarFoto}
+          />
+        </View>
 
-      <View style={styles.actionsSection}>
-        {/* agregamos un boton para cerrar sesion */}
-        <Button
-          title="Cerrar sesión"
-          onPress={cerrarSesion}
-        />
-      </View>
-    </ScrollView>
+        <View style={styles.actionsSection}>
+          <Button
+            title="Mis Datos"
+            variant="outline"
+            onPress={() => setMostrarDatos(true)}
+          />
+          <Button
+            title="Cerrar sesión"
+            onPress={cerrarSesion}
+          />
+        </View>
+      </ScrollView>
+
+      {/* Modal con los datos del usuario */}
+      <Modal visible={mostrarDatos} transparent={true} animationType="fade" onRequestClose={() => setMostrarDatos(false)}>
+        <View style={styles.modalFondo}>
+          <View style={styles.modalContenido}>
+            <Text style={styles.modalTitulo}>MIS DATOS</Text>
+
+            <View style={styles.datosContainer}>
+              <Text style={styles.datoLabel}>Nombre:</Text>
+              <Text style={styles.datoValor}>Usuario Patitas</Text>
+
+              <Text style={styles.datoLabel}>Email:</Text>
+              <Text style={styles.datoValor}>usuario@email.com</Text>
+            </View>
+
+            <Pressable
+              style={styles.botonCerrar}
+              onPress={() => setMostrarDatos(false)}
+            >
+              <Text style={styles.botonCerrarTexto}>CERRAR</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -102,12 +129,57 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.borderLight,
   },
   actionsSection: {
-    alignItems: 'center',
+    alignItems: 'stretch',
     width: '100%',
+    gap: Spacing.two,
+  },
+  modalFondo: {
+    flex: 1,
+    backgroundColor: Colors.overlay,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContenido: {
+    width: '100%',
+    maxWidth: 340,
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+  },
+  modalTitulo: {
+    fontSize: Typography.sizes.xl,
+    fontFamily: Typography.fonts.titleBold,
+    color: Colors.primary,
+    marginBottom: 16,
+  },
+  datosContainer: {
+    width: '100%',
+    marginBottom: 12,
+  },
+  datoLabel: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.bodyBold,
+    color: Colors.textSecondary,
+    marginTop: 8,
+  },
+  datoValor: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.text,
+  },
+  botonCerrar: {
+    marginTop: 16,
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  botonCerrarTexto: {
+    color: Colors.white,
+    fontFamily: Typography.fonts.bodyBold,
   },
 });
-// usamos spacing para los margenes y paddings, tambien colors de themes.ts
-// para que siga el mismo estilo que el resto de la app.
-// agregamos un scrollview para que la pantalla sea scrollable.
-// y el boton de cerrar sesion quede en la parte inferior de la pantalla.
-// usamos router.replace para que el usuario no pueda volver a la pantalla de perfil despues de cerrar sesion.
+

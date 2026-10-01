@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { StyleSheet, Pressable, View, Text, FlatList } from 'react-native';
+import { StyleSheet, Pressable, View, Text, FlatList, Modal, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 import { PetCard } from '@/components/ui/pet-card';
 import { BottomTabInset, MaxContentWidth, Colors, Typography } from '@/constants/theme';
-import { router } from 'expo-router';
+
 
 const MASCOTAS = [
   {
@@ -36,10 +37,19 @@ const MASCOTAS = [
       'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=500',
   },
 ];
+type Mascota = {
+  id: string;
+  tipo: string;
+  estado: string;
+  nombre: string;
+  descripcion: string;
+  imagen: string;
+};
 
 export default function HomeScreen() {
   const [estadoSeleccionado, setEstadoSeleccionado] = useState('Todos');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null);
 
   function publicarMascota() {
     router.push('/publicar-alerta');
@@ -141,6 +151,7 @@ export default function HomeScreen() {
             )}
             renderItem={({ item }) => (
               <PetCard
+                onPress={() => setMascotaSeleccionada(item)}
                 tipo={item.tipo}
                 estado={item.estado}
                 nombre={item.nombre}
@@ -150,8 +161,43 @@ export default function HomeScreen() {
           />
 
         </View>
+
+        <Modal
+          visible={mascotaSeleccionada !== null}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setMascotaSeleccionada(null)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {mascotaSeleccionada && (
+                <>
+                  <Image
+                    source={{ uri: mascotaSeleccionada.imagen }}
+                    style={styles.modalImage}
+                  />
+                  <Text style={styles.modalTitle}>{mascotaSeleccionada.nombre}</Text>
+                  <Text style={styles.modalSubtitle}>
+                    {mascotaSeleccionada.tipo} - {mascotaSeleccionada.estado}
+                  </Text>
+                  <Text style={styles.modalDescription}>
+                    {mascotaSeleccionada.descripcion}
+                  </Text>
+
+                  <Pressable
+                    style={styles.closeButton}
+                    onPress={() => setMascotaSeleccionada(null)}
+                  >
+                    <Text style={styles.closeButtonText}>Cerrar</Text>
+                  </Pressable>
+                </>
+              )}
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </View>
+
   );
 }
 
@@ -274,3 +320,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
