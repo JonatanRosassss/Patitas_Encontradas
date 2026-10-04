@@ -24,6 +24,14 @@ export default function AjustesScreen() {
         <Text style={styles.opcionTexto}>Cambiar contraseña</Text>
       </Pressable>
 
+      <Text style={styles.seccionTitulo}>Soporte</Text>
+      <Pressable 
+        style={styles.opcionBoton} 
+        onPress={() => router.push('/reporte_error')}
+      >
+        <Text style={styles.opcionTexto}>Help / Ayuda</Text>
+      </Pressable>
+
       {/* Redirección a login */}
       <Pressable style={styles.opcionBoton} onPress={() => router.push('/(auth)/login')}>
         <Text style={[styles.opcionTexto, { color: 'red' }]}>Cerrar sesión</Text>
