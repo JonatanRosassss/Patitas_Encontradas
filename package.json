@@ -14,16 +14,16 @@
     "@expo-google-fonts/nunito": "^0.4.2",
     "@expo/vector-icons": "^15.0.2",
     "@hookform/resolvers": "^3.9.0",
-    "@react-native-async-storage/async-storage": "^1.24.0",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@shopify/flash-list": "2.0.2",
-    "expo": "~57.0.22",
-    "expo-camera": "~57.0.5",
+    "expo": "~57.0.26",
+    "expo-camera": "~57.0.6",
     "expo-constants": "~57.0.17",
-    "expo-font": "~57.0.3",
+    "expo-font": "^57.0.3",
     "expo-image-picker": "~57.0.20",
-    "expo-linking": "~57.0.9",
-    "expo-location": "~57.0.16",
-    "expo-router": "~57.0.19",
+    "expo-linking": "~57.0.11",
+    "expo-location": "~57.0.20",
+    "expo-router": "~57.0.24",
     "expo-status-bar": "~57.0.1",
     "firebase": "^10.14.1",
     "lucide-react-native": "^1.45.0",
@@ -43,12 +43,11 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
-    "@types/react": "~18.2.79",
+    "@types/react": "~19.2.4",
     "tailwindcss": "^3.4.7",
-    "typescript": "^7.0.2"
+    "typescript": "~6.0.3"
   },
   "allowScripts": {
-    "node@26.8.1": true,
     "protobufjs@7.6.6": true
   }
 }

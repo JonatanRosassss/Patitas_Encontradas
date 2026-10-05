@@ -1,14 +1,30 @@
-import { router } from 'expo-router';
 import React, { useState } from 'react';
+import { router } from 'expo-router';
 import { View, Text, Image, Alert, ScrollView, StyleSheet, Modal, Pressable } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 import { Colors, Spacing, Typography } from '../../constants/theme';
 import { Button } from '../../components/ui/Button';
+import { Usuario } from '../../types/User';
+
 
 export default function PerfilScreen() {
   const [fotoPerfil, setFotoPerfil] = useState<string>('https://via.placeholder.com/150');
   const [mostrarDatos, setMostrarDatos] = useState(false);
+
+  const [usuario] = useState<Usuario>({
+    id: 'usr_123',
+    nombre: 'Usuario Patitas',
+    email: 'usuario@email.com',
+    telefono: '+54 11 1234-5678',
+    avatarUrl: 'https://via.placeholder.com/150',
+    fechaCreacion: '2024-01-15',
+  });
+
+  const formatearEtiqueta = (clave: string) => {
+    const texto = clave.replace(/([A-Z])/g, ' $1');
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
+  };
 
   const seleccionarFoto = async () => {
     const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -67,6 +83,11 @@ export default function PerfilScreen() {
         </View>
 
         <View style={styles.actionsSection}>
+          <Pressable style={styles.boton} onPress={() => router.push('/ajustes')}>
+            <Text style={styles.botontext}>AJUSTES</Text>
+          </Pressable>
+          
+
           <Button
             title="Mis Datos"
             variant="outline"
@@ -86,12 +107,20 @@ export default function PerfilScreen() {
             <Text style={styles.modalTitulo}>MIS DATOS</Text>
 
             <View style={styles.datosContainer}>
-              <Text style={styles.datoLabel}>Nombre:</Text>
-              <Text style={styles.datoValor}>Usuario Patitas</Text>
+              {Object.entries(usuario).map(([clave, valor]) => {
+                if (clave === 'id' || clave === 'avatarUrl') return null;
 
-              <Text style={styles.datoLabel}>Email:</Text>
-              <Text style={styles.datoValor}>usuario@email.com</Text>
+                return (
+                  <View key={clave} style={styles.datoItem}>
+                    <Text style={styles.datoLabel}>{formatearEtiqueta(clave)}:</Text>
+                    <Text style={styles.datoValor}>
+                      {valor !== undefined && valor !== null ? String(valor) : 'No especificado'}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
+
 
             <Pressable
               style={styles.botonCerrar}
@@ -132,6 +161,18 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     width: '100%',
     gap: Spacing.two,
+  },
+  boton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    marginBottom: Spacing.two,
+  },
+  botontext: {
+    color: Colors.white,
+    fontFamily: Typography.fonts.bodyBold,
   },
   modalFondo: {
     flex: 1,
@@ -180,6 +221,9 @@ const styles = StyleSheet.create({
   botonCerrarTexto: {
     color: Colors.white,
     fontFamily: Typography.fonts.bodyBold,
+  },
+  datoItem: {
+    marginBottom: 8,
   },
 });
 
