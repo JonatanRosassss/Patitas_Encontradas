@@ -95,8 +95,6 @@ export default function PublicarAlertaScreen() {
       fechaReporte: Timestamp.now().toString(),
       recompensa: recompensa,
     };
-
-    // Simulación de envío
     setTimeout(() => {
       crearMascota(mascota);
       setGuardando(false);
@@ -164,7 +162,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Firulais"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
             value={nombre}
             onChangeText={setNombre}
           />
@@ -186,7 +184,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Labrador / Mestizo"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
             value={raza}
             onChangeText={setRaza}
           />
@@ -197,7 +195,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Av. San Martín y Calle 4"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
             value={ubicacion}
             onChangeText={setUbicacion}
           />
@@ -208,7 +206,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: $5000 / No especificada"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
             value={recompensa}
             onChangeText={setRecompensa}
           />
@@ -219,7 +217,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder="Señas particulares, color de collar, etc."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
             value={descripcion}
             onChangeText={setDescripcion}
             multiline
@@ -270,7 +268,7 @@ export default function PublicarAlertaScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors?.backgroundLight ?? '#FAF8F5',
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -290,7 +288,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#111827',
+    color: Colors?.text ?? '#5A3A1F',
     marginBottom: 20,
   },
   toggleContainer: {
@@ -325,17 +323,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: Colors?.text ?? '#5A3A1F',
     marginBottom: 6,
   },
   input: {
     borderWidth: 1.5,
-    borderColor: '#374151',
+    borderColor: Colors?.border ?? '#E8DFD8',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#111827',
+    color: Colors?.text ?? '#5A3A1F',
     backgroundColor: '#FFFFFF',
   },
   textArea: {
