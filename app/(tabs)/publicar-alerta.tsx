@@ -162,7 +162,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Firulais"
-            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
+            placeholderTextColor={Colors.textMuted}
             value={nombre}
             onChangeText={setNombre}
           />
@@ -173,7 +173,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Perro / Gato / Otro"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={Colors.textMuted}
             value={especie}
             onChangeText={setEspecie}
           />
@@ -184,7 +184,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Labrador / Mestizo"
-            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
+            placeholderTextColor={Colors.textMuted}
             value={raza}
             onChangeText={setRaza}
           />
@@ -195,7 +195,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Av. San Martín y Calle 4"
-            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
+            placeholderTextColor={Colors.textMuted}
             value={ubicacion}
             onChangeText={setUbicacion}
           />
@@ -206,7 +206,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={styles.input}
             placeholder="Ej: $5000 / No especificada"
-            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
+            placeholderTextColor={Colors.textMuted}
             value={recompensa}
             onChangeText={setRecompensa}
           />
@@ -217,7 +217,7 @@ export default function PublicarAlertaScreen() {
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder="Señas particulares, color de collar, etc."
-            placeholderTextColor={Colors?.textSecondary ?? '#8D735C'}
+            placeholderTextColor={Colors.textMuted}
             value={descripcion}
             onChangeText={setDescripcion}
             multiline
@@ -268,7 +268,7 @@ export default function PublicarAlertaScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors?.backgroundLight ?? '#FAF8F5',
+    backgroundColor: Colors.background,
   },
   scrollContent: {
     paddingHorizontal: 20,
