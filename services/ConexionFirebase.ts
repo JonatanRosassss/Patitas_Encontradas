@@ -5,6 +5,8 @@ import {
   // @ts-ignore: React Native persistence is resolved at runtime by Metro
   getReactNativePersistence,
   Auth,
+  createUserWithEmailAndPassword,
+  UserCredential,
 } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
@@ -89,6 +91,14 @@ export class ConexionFirebase {
   }
 
   /**
+   * Registra un nuevo usuario con email y contraseña.
+   */
+  public static async registrarUsuario(email: string, contrasenia: string): Promise<UserCredential> {
+    const auth = ConexionFirebase.obtenerAuth();
+    return await createUserWithEmailAndPassword(auth, email.trim(), contrasenia);
+  }
+
+  /**
    * Acceso directo a Firebase Storage (para fotos/imágenes):
    * const storage = ConexionFirebase.obtenerStorage();
    */
@@ -142,4 +152,5 @@ export const obtenerConexion = (): ConexionFirebase => ConexionFirebase.obtenerC
 export const obtenerFirestore = (): Firestore => ConexionFirebase.obtenerFirestore();
 export const obtenerAuth = (): Auth => ConexionFirebase.obtenerAuth();
 export const obtenerStorage = (): FirebaseStorage => ConexionFirebase.obtenerStorage();
-
+export const registrarUsuario = (email: string, contrasenia: string): Promise<UserCredential> =>
+  ConexionFirebase.registrarUsuario(email, contrasenia);
