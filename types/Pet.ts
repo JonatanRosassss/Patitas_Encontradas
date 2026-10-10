@@ -1,5 +1,6 @@
 import { MapPoint } from './MapPoint';
 import { Coordinates } from './map';
+import { Usuario } from './User';
 
 export type EstadoMascota = 'ENCONTRADO' | 'PERDIDO' | 'VISTO';
 export type EspecieMascota = 'PERRO' | 'GATO' | 'OTRO';
@@ -21,4 +22,18 @@ export interface Pet {
 
 export type NuevaAlertaMascota = Omit<Pet, 'id'>;
 
+export type ActualizarAlertaMascota = Partial<Omit<Pet, 'id' | 'creadoPor' | 'fechaReporte'>>;
+
+export interface FiltrosListadoMascotas {
+  estado?: EstadoMascota;
+  especie?: EspecieMascota;
+  creadoPor?: string;
+  limite?: number;
+}
+
+export interface PetConUsuario extends Pet {
+  usuario?: Usuario | null;
+}
+
 export type { MapPoint };
+
