@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { useFonts, Baloo2_700Bold, Baloo2_600SemiBold, Baloo2_500Medium, Baloo2_400Regular } from '@expo-google-fonts/baloo-2';
 import { Nunito_700Bold, Nunito_600SemiBold, Nunito_400Regular, Nunito_300Light } from '@expo-google-fonts/nunito';
 import { Colors, Typography } from '../constants/theme';
-
+import { AuthProvider  } from '@/services/AuthContext';
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Baloo2_700Bold,
@@ -20,6 +20,7 @@ export default function RootLayout() {
   }
 
   return (
+    <AuthProvider>
     <Stack
       screenOptions={{
         headerShown: false,
@@ -40,6 +41,7 @@ export default function RootLayout() {
           headerTitleStyle: { fontFamily: Typography.fonts.titleBold, color: Colors.text },
         }}
       />
-    </Stack>
+      </Stack>
+      </AuthProvider>
   );
 }
