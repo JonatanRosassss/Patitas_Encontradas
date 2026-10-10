@@ -1,29 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { router } from 'expo-router';
-import { View, Text, Image, Alert, ScrollView, StyleSheet, Modal, Pressable } from 'react-native';
+import { View, Text, Image, Alert, ScrollView, StyleSheet, Modal, Pressable, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 import { Colors, Spacing, Typography } from '../../constants/theme';
 import { Button } from '../../components/ui/Button';
 import { Usuario } from '../../types/User';
-
+import { Pet } from '../../types/Pet';
+import { useAuth } from '@/services/AuthContext';
+import { listarAlertasPorUsuario, eliminarAlertaMascota } from '@/services/mascotasService';
 
 export default function PerfilScreen() {
+  const { usuario, cerrarSesion: cerrarSesionAuth } = useAuth();
   const [fotoPerfil, setFotoPerfil] = useState<string>('https://via.placeholder.com/150');
   const [mostrarDatos, setMostrarDatos] = useState(false);
+  const [misPublicaciones, setMisPublicaciones] = useState<Pet[]>([]);
+  const [cargandoPublicaciones, setCargandoPublicaciones] = useState<boolean>(true);
 
-  const [usuario] = useState<Usuario>({
-    id: 'usr_123',
-    nombre: 'Usuario Patitas',
-    email: 'usuario@email.com',
-    telefono: '+54 11 1234-5678',
-    avatarUrl: 'https://via.placeholder.com/150',
-    fechaCreacion: '2024-01-15',
-  });
+  // Cargar publicaciones reales del usuario desde Firestore
+  const cargarMisPublicaciones = async () => {
+    if (!usuario?.uid) {
+      setCargandoPublicaciones(false);
+      return;
+    }
+    try {
+      setCargandoPublicaciones(true);
+      const publicaciones = await listarAlertasPorUsuario(usuario.uid);
+      setMisPublicaciones(publicaciones);
+    } catch (error) {
+      console.error('Error al cargar mis publicaciones:', error);
+    } finally {
+      setCargandoPublicaciones(false);
+    }
+  };
 
-  const formatearEtiqueta = (clave: string) => {
-    const texto = clave.replace(/([A-Z])/g, ' $1');
-    return texto.charAt(0).toUpperCase() + texto.slice(1);
+  useEffect(() => {
+    cargarMisPublicaciones();
+  }, [usuario]);
+
+  // Manejo de eliminación de publicaciones
+  const confirmarEliminacion = (idAlerta: string, nombreMascota?: string) => {
+    Alert.alert(
+      'Eliminar publicación',
+      `¿Estás seguro de que querés eliminar la publicación de "${nombreMascota || 'Mascota'}"?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await eliminarAlertaMascota(idAlerta);
+              Alert.alert('Éxito', 'La publicación fue eliminada correctamente.');
+              cargarMisPublicaciones(); // Recargar la lista
+            } catch (error) {
+              Alert.alert('Error', 'No se pudo eliminar la publicación.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const seleccionarFoto = async () => {
@@ -48,7 +84,7 @@ export default function PerfilScreen() {
     }
   };
 
-  const cerrarSesion = () => {
+  const manejarCerrarSesion = () => {
     Alert.alert(
       'Cerrar sesión',
       '¿Estás seguro de que querés cerrar sesión?',
@@ -57,12 +93,24 @@ export default function PerfilScreen() {
         {
           text: 'Cerrar sesión',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
+            await cerrarSesionAuth();
             router.replace('/(auth)/login');
           },
         },
       ]
     );
+  };
+
+  const formatearEtiqueta = (clave: string) => {
+    const texto = clave.replace(/([A-Z])/g, ' $1');
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
+  };
+
+  const datosUsuario: Partial<Usuario> = {
+    nombre: usuario?.displayName || 'Usuario Patitas',
+    email: usuario?.email || 'Sin correo registrado',
+    fechaCreacion: usuario?.metadata.creationTime || 'No especificada',
   };
 
   return (
@@ -71,22 +119,61 @@ export default function PerfilScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
       >
+        {/* Cabecera / Perfil */}
         <View style={styles.avatarSection}>
           <Image
-            source={{ uri: fotoPerfil }}
+            source={{ uri: usuario?.photoURL || fotoPerfil }}
             style={styles.avatar}
           />
+          <Text style={styles.nombreUsuario}>{usuario?.displayName || 'Usuario Patitas'}</Text>
           <Button
             title="Cambiar Foto de perfil"
             onPress={seleccionarFoto}
           />
         </View>
 
+        {/* Sección: Mis Publicaciones */}
+        <View style={styles.seccionContenedor}>
+          <Text style={styles.tituloSeccion}>MIS PUBLICACIONES</Text>
+
+          {cargandoPublicaciones ? (
+            <ActivityIndicator size="small" color={Colors.primary} style={{ marginVertical: 12 }} />
+          ) : misPublicaciones.length === 0 ? (
+            <Text style={styles.textoVacio}>Aún no has creado publicaciones.</Text>
+          ) : (
+            misPublicaciones.map((pet) => (
+              <View key={pet.id} style={styles.tarjetaMascota}>
+                <Image
+                  source={{
+                    uri: pet.fotos && pet.fotos.length > 0 ? pet.fotos[0] : 'https://via.placeholder.com/80',
+                  }}
+                  style={styles.imagenMascota}
+                />
+                <View style={styles.infoMascota}>
+                  <Text style={styles.nombreMascota}>{pet.nombre || 'Sin Nombre'}</Text>
+                  <Text style={styles.estadoMascota}>Estado: {pet.estado}</Text>
+                  <Text style={styles.descripcionMascota} numberOfLines={1}>
+                    {pet.descripcion || 'Sin descripción'}
+                  </Text>
+                </View>
+
+                {/* Botón de Eliminar Publicación */}
+                <Pressable
+                  style={styles.botonEliminar}
+                  onPress={() => confirmarEliminacion(pet.id, pet.nombre)}
+                >
+                  <Text style={styles.textoBotonEliminar}>Eliminar</Text>
+                </Pressable>
+              </View>
+            ))
+          )}
+        </View>
+
+        {/* Acciones del Perfil */}
         <View style={styles.actionsSection}>
           <Pressable style={styles.boton} onPress={() => router.push('/ajustes')}>
             <Text style={styles.botontext}>AJUSTES</Text>
           </Pressable>
-          
 
           <Button
             title="Mis Datos"
@@ -95,7 +182,7 @@ export default function PerfilScreen() {
           />
           <Button
             title="Cerrar sesión"
-            onPress={cerrarSesion}
+            onPress={manejarCerrarSesion}
           />
         </View>
       </ScrollView>
@@ -107,20 +194,15 @@ export default function PerfilScreen() {
             <Text style={styles.modalTitulo}>MIS DATOS</Text>
 
             <View style={styles.datosContainer}>
-              {Object.entries(usuario).map(([clave, valor]) => {
-                if (clave === 'id' || clave === 'avatarUrl') return null;
-
-                return (
-                  <View key={clave} style={styles.datoItem}>
-                    <Text style={styles.datoLabel}>{formatearEtiqueta(clave)}:</Text>
-                    <Text style={styles.datoValor}>
-                      {valor !== undefined && valor !== null ? String(valor) : 'No especificado'}
-                    </Text>
-                  </View>
-                );
-              })}
+              {Object.entries(datosUsuario).map(([clave, valor]) => (
+                <View key={clave} style={styles.datoItem}>
+                  <Text style={styles.datoLabel}>{formatearEtiqueta(clave)}:</Text>
+                  <Text style={styles.datoValor}>
+                    {valor !== undefined && valor !== null ? String(valor) : 'No especificado'}
+                  </Text>
+                </View>
+              ))}
             </View>
-
 
             <Pressable
               style={styles.botonCerrar}
@@ -142,7 +224,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'space-between', 
     padding: Spacing.base,
     paddingBottom: Spacing.xxl,
   },
@@ -151,16 +232,87 @@ const styles = StyleSheet.create({
     marginVertical: Spacing.xl,
   },
   avatar: {
-    width: 128,
-    height: 128,
-    borderRadius: 64,
-    marginBottom: Spacing.base,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    marginBottom: Spacing.sm,
     backgroundColor: Colors.borderLight,
+  },
+  nombreUsuario: {
+    fontSize: Typography.sizes.lg,
+    fontFamily: Typography.fonts.titleBold,
+    color: Colors.text,
+    marginBottom: Spacing.sm,
+  },
+  seccionContenedor: {
+    width: '100%',
+    marginBottom: Spacing.xl,
+  },
+  tituloSeccion: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.titleBold,
+    color: Colors.primary,
+    marginBottom: Spacing.base,
+  },
+  textoVacio: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.textSecondary,
+    fontStyle: 'italic',
+  },
+  tarjetaMascota: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  imagenMascota: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  infoMascota: {
+    flex: 1,
+  },
+  nombreMascota: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.bodyBold,
+    color: Colors.text,
+  },
+  estadoMascota: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.primary,
+  },
+  descripcionMascota: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.textSecondary,
+  },
+  botonEliminar: {
+    backgroundColor: '#FF4D4D',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+  },
+  textoBotonEliminar: {
+    color: Colors.white,
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.bodyBold,
   },
   actionsSection: {
     alignItems: 'stretch',
     width: '100%',
     gap: Spacing.two,
+    marginTop: Spacing.base,
   },
   boton: {
     backgroundColor: Colors.primary,
@@ -226,4 +378,3 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 });
-
