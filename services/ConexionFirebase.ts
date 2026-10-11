@@ -34,6 +34,14 @@ export class ConexionFirebase {
       appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
     };
 
+    console.log('Diagnóstico Firebase:', {
+  apiKeyCargada: Boolean(configuracion.apiKey),
+  apiKeyLongitud: configuracion.apiKey?.length ?? 0,
+  formatoApiKey: configuracion.apiKey?.startsWith('AIza') ?? false,
+  projectIdCargado: Boolean(configuracion.projectId),
+  authDomainCargado: Boolean(configuracion.authDomain),
+});
+
     // Inicializar o reutilizar la instancia de FirebaseApp
     this.app =
       getApps().length === 0

@@ -1,10 +1,21 @@
-import { useState } from 'react';
-import { StyleSheet, Pressable, View, Text, FlatList, Modal, Image } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StyleSheet,
+  Pressable,
+  View,
+  Text,
+  FlatList,
+  Modal,
+  Image, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { PetCard } from '@/components/ui/pet-card';
 import { BottomTabInset, MaxContentWidth, Colors, Typography } from '@/constants/theme';
+//import GuiaDeUso from '@/components/GuiaDeUso';
+import GuiaDeUso, {
+  type RectanguloGuia,
+} from '@/components/GuiaDeUso';
 
 
 const MASCOTAS = [
@@ -50,6 +61,77 @@ export default function HomeScreen() {
   const [estadoSeleccionado, setEstadoSeleccionado] = useState('Todos');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null);
+  const [mostrarGuia, setMostrarGuia] = useState(false);
+
+  const [pasoGuia, setPasoGuia] = useState(0);
+
+const [targetRect, setTargetRect] =
+  useState<RectanguloGuia | null>(null);
+
+const publicarRef = useRef<View>(null);
+const filtrosRef = useRef<View>(null);
+const mascotaRef = useRef<View>(null);
+
+
+
+useEffect(() => {
+  async function verificarGuia() {
+    try {
+      const guiaVista = await AsyncStorage.getItem('guiaDeUsoVista');
+
+      if (guiaVista !== 'true') {
+        setMostrarGuia(true);
+      }
+    } catch (error) {
+      console.error('Error al verificar la guía:', error);
+    }
+  }
+
+  verificarGuia();
+}, []);
+
+useEffect(() => {
+  if (!mostrarGuia) {
+    setTargetRect(null);
+    return;
+  }
+
+  const referencias = [
+    publicarRef,
+    filtrosRef,
+    mascotaRef,
+  ];
+
+  const referencia = referencias[pasoGuia]?.current;
+
+  if (!referencia) {
+    setTargetRect(null);
+    return;
+  }
+
+  const frame = requestAnimationFrame(() => {
+    referencia.measureInWindow((x, y, width, height) => {
+      setTargetRect({
+        x,
+        y,
+        width,
+        height,
+      });
+    });
+  });
+
+  return () => cancelAnimationFrame(frame);
+}, [mostrarGuia, pasoGuia]);
+
+async function cerrarGuia() {
+  setMostrarGuia(false);
+
+  try {
+    await AsyncStorage.setItem('guiaDeUsoVista', 'true');
+  } catch (error) {
+    console.error('Error al guardar el estado de la guía:', error);
+  }
+}
 
   function publicarMascota() {
     router.push('/publicar-alerta');
@@ -66,36 +148,46 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
+<View style={styles.heroSection}>
+  <Text style={styles.title}>
+    HOLA, USUARIO
+  </Text>
 
-        <View style={styles.heroSection}>
-          <Text style={styles.title}>
-            HOLA, USUARIO
-          </Text>
+  <Text style={styles.subtitle}>
+    ¿Perdiste a tu mascota?
+  </Text>
 
-          <Text style={styles.subtitle}>
-            ¿Perdiste a tu mascota?
-          </Text>
-        </View>
+  <Pressable
+    style={styles.botonGuia}
+    onPress={() => setMostrarGuia(true)}
+  >
+    <Text style={styles.textoBotonGuia}>
+      📖 GUÍA DE USO
+    </Text>
+  </Pressable>
+</View>
 
         <View style={styles.stepContainer}>
 
-          <Pressable
-            style={styles.publishButton}
-            onPress={publicarMascota}
-          >
-            <Text style={styles.publishButtonText}>
-              PUBLICAR MASCOTA
-            </Text>
-          </Pressable>
+       <Pressable
+  ref={publicarRef}
+  style={styles.publishButton}
+  onPress={publicarMascota}
+>
+  <Text style={styles.publishButtonText}>
+    PUBLICAR MASCOTA
+  </Text>
+</Pressable>
 
-          <Pressable
-            style={styles.filterButton}
-            onPress={() => setMostrarFiltros(!mostrarFiltros)}
-          >
-            <Text style={styles.filterButtonText}>
-              ...
-            </Text>
-          </Pressable>
+     <Pressable
+  ref={filtrosRef}
+  style={styles.filterButton}
+  onPress={() => setMostrarFiltros(!mostrarFiltros)}
+>
+  <Text style={styles.filterButtonText}>
+    ...
+  </Text>
+</Pressable>
 
           {mostrarFiltros && (
             <View style={styles.filterPanel}>
@@ -149,15 +241,24 @@ export default function HomeScreen() {
             ItemSeparatorComponent={() => (
               <View style={{height: 10}} />
             )}
-            renderItem={({ item }) => (
-              <PetCard
-                onPress={() => setMascotaSeleccionada(item)}
-                tipo={item.tipo}
-                estado={item.estado}
-                nombre={item.nombre}
-                imagen={item.imagen}
-              />
-            )}
+          renderItem={({ item }) => (
+  <View
+    ref={
+      item.id === mascotasFiltradas[0]?.id
+        ? mascotaRef
+        : undefined
+    }
+    collapsable={false}
+  >
+    <PetCard
+      onPress={() => setMascotaSeleccionada(item)}
+      tipo={item.tipo}
+      estado={item.estado}
+      nombre={item.nombre}
+      imagen={item.imagen}
+    />
+  </View>
+)}
           />
 
         </View>
@@ -195,7 +296,21 @@ export default function HomeScreen() {
             </View>
           </View>
         </Modal>
+
       </SafeAreaView>
+      
+<GuiaDeUso
+  visible={mostrarGuia}
+  pasoActual={pasoGuia}
+  targetRect={targetRect}
+  onNext={() => {
+    setPasoGuia((actual) => Math.min(actual + 1, 2));
+  }}
+  onPrevious={() => {
+    setPasoGuia((actual) => Math.max(actual - 1, 0));
+  }}
+  onClose={cerrarGuia}
+/>
     </View>
 
   );
@@ -365,5 +480,22 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
+
+  botonGuia: {
+  alignSelf: 'flex-start',
+  marginTop: 8,
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+  borderRadius: 10,
+  borderWidth: 1,
+  borderColor: Colors?.primary ?? '#39805B',
+  backgroundColor: '#FFFFFF',
+},
+
+textoBotonGuia: {
+  color: Colors?.primary ?? '#39805B',
+  fontSize: 13,
+  fontWeight: '700',
+},
 });
 
