@@ -239,7 +239,7 @@ async function cerrarGuia() {
             data={mascotasFiltradas}
             keyExtractor={(item) => item.id}
             ItemSeparatorComponent={() => (
-              <View style={{height: 10}} />
+              <View style={{height: 12}} />
             )}
           renderItem={({ item }) => (
   <View
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: 'stretch',
     gap: 12,
-    paddingBottom: BottomTabInset + 16,
+    paddingBottom: -50,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
@@ -421,7 +421,9 @@ const styles = StyleSheet.create({
   },
   petList: {
     flex: 1,
-    marginTop: 16,
+    width: '100%',
+    marginTop: 10,
+
   },
   filterOptionText: {
     color: '#000000',
