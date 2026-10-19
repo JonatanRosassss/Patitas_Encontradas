@@ -27,14 +27,20 @@ export default function AjustesScreen() {
       <Text style={styles.seccionTitulo}>Soporte</Text>
       <Pressable 
         style={styles.opcionBoton} 
-        onPress={() => router.push('/reporte_error')}
+        onPress={() => router.push('/reporte_error?tab=FAQS')}
       >
-        <Text style={styles.opcionTexto}>Help / Ayuda</Text>
+        <Text style={styles.opcionTexto}>Centro de Ayuda y Preguntas Frecuentes</Text>
+      </Pressable>
+      <Pressable 
+        style={styles.opcionBoton} 
+        onPress={() => router.push('/reporte_error?tab=TICKET')}
+      >
+        <Text style={styles.opcionTexto}>Generar Ticket de Soporte / Error</Text>
       </Pressable>
 
       {/* Redirección a login */}
       <Pressable style={styles.opcionBoton} onPress={() => router.push('/(auth)/login')}>
-        <Text style={[styles.opcionTexto, { color: 'red' }]}>Cerrar sesión</Text>
+        <Text style={[styles.opcionTexto, { color: Colors.error }]}>Cerrar sesión</Text>
       </Pressable>
     </ScrollView>
   );

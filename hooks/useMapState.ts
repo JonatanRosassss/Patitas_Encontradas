@@ -1,10 +1,11 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { Coordinates, MapFilterIndex, MapPet } from '../types/map';
 import { MASCOTAS_MOCK } from '../data/mapMockData';
 import { isValidCoordinate } from '../utils/geoValidation';
 import { MapContainerRef } from '../components/map/MapContainer';
+import { listarAlertasParaMapa } from '../services/mascotasService';
 
 export interface UseMapStateReturn {
   filtro: MapFilterIndex;
@@ -20,9 +21,13 @@ export interface UseMapStateReturn {
   handleZoomIn: () => void;
   handleZoomOut: () => void;
   mapContainerRef: React.RefObject<MapContainerRef>;
+  cargandoPuntos: boolean;
+  recargarPuntos: () => Promise<void>;
 }
 
 export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateReturn {
+  const [pets, setPets] = useState<MapPet[]>(initialPets);
+  const [cargandoPuntos, setCargandoPuntos] = useState(false);
   const [filtro, setFiltro] = useState<MapFilterIndex>(0);
   const [selectedPet, setSelectedPet] = useState<MapPet | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,10 +36,32 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
 
   const mapContainerRef = useRef<MapContainerRef>(null);
 
+  const recargarPuntos = useCallback(async () => {
+    try {
+      setCargandoPuntos(true);
+      const alertasFirebase = await listarAlertasParaMapa();
+      if (alertasFirebase && alertasFirebase.length > 0) {
+        setPets(alertasFirebase);
+      } else {
+        // Fallback a los puntos iniciales si no hay alertas en Firestore
+        setPets(initialPets);
+      }
+    } catch {
+      // Manejo resiliente offline o restricciones temporales de Firestore
+      setPets(initialPets);
+    } finally {
+      setCargandoPuntos(false);
+    }
+  }, [initialPets]);
+
+  useEffect(() => {
+    recargarPuntos();
+  }, [recargarPuntos]);
+
   const filteredPets = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return initialPets.filter((pet) => {
+    return pets.filter((pet) => {
       // Must have valid coordinates
       if (!pet.coordenadas || !isValidCoordinate(pet.coordenadas.latitude, pet.coordenadas.longitude)) {
         return false;
@@ -47,9 +74,9 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
 
       // Filter by search query
       if (query.length > 0) {
-        const matchesName = pet.nombre.toLowerCase().includes(query);
-        const matchesLocation = pet.ubicacion.toLowerCase().includes(query);
-        const matchesDescription = pet.descripcion.toLowerCase().includes(query);
+        const matchesName = (pet.nombre || '').toLowerCase().includes(query);
+        const matchesLocation = (pet.ubicacion || '').toLowerCase().includes(query);
+        const matchesDescription = (pet.descripcion || '').toLowerCase().includes(query);
         if (!matchesName && !matchesLocation && !matchesDescription) {
           return false;
         }
@@ -57,7 +84,7 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
 
       return true;
     });
-  }, [initialPets, filtro, searchQuery]);
+  }, [pets, filtro, searchQuery]);
 
   const handleLocate = useCallback(async () => {
     if (isLocating) return;
@@ -164,5 +191,7 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
     handleZoomIn,
     handleZoomOut,
     mapContainerRef,
+    cargandoPuntos,
+    recargarPuntos,
   };
 }

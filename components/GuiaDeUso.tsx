@@ -105,7 +105,7 @@ const alto = targetRect
       <Svg
         width={width}
         height={height}
-        style={StyleSheet.absoluteFillObject}
+        style={StyleSheet.absoluteFill}
         pointerEvents="none"
       >
         <Path
@@ -215,7 +215,7 @@ const alto = targetRect
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 9999,
     elevation: 9999,
   },
