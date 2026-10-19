@@ -30,6 +30,19 @@ export default function PantallaRegistro() {
   const [verContrasenia, setVerContrasenia] = useState(false);
   const [verConfirmarContrasenia, setVerConfirmarContrasenia] = useState(false);
 
+  const alertar = (titulo: string, mensaje?: string, accion?: () => void) => {
+    if (Platform.OS === 'web') {
+      window.alert([titulo, mensaje].filter(Boolean).join('\n'));
+      accion?.();
+    } else {
+      Alert.alert(
+        titulo,
+        mensaje,
+        accion ? [{ text: 'OK', onPress: accion }] : undefined
+      );
+    }
+  };
+
   const manejarRegistro = async () => {
     if (
       !nombre.trim() ||
@@ -38,26 +51,17 @@ export default function PantallaRegistro() {
       !contrasenia.trim() ||
       !confirmarContrasenia.trim()
     ) {
-      Alert.alert(
-        'Atención',
-        'Por favor completá todos los campos requeridos.'
-      );
+      alertar('Atención', 'Por favor completá todos los campos requeridos.');
       return;
     }
 
     if (contrasenia !== confirmarContrasenia) {
-      Alert.alert(
-        'Atención',
-        'Las contraseñas no coinciden.'
-      );
+      alertar('Atención', 'Las contraseñas no coinciden.');
       return;
     }
 
     if (contrasenia.length < 6) {
-      Alert.alert(
-        'Atención',
-        'La contraseña debe tener al menos 6 caracteres.'
-      );
+      alertar('Atención', 'La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
@@ -95,37 +99,32 @@ export default function PantallaRegistro() {
       });
 
       // 4. Confirmación y navegación
-      Alert.alert(
+      alertar(
         '¡Cuenta creada!',
         `Bienvenida/o ${nombre.trim()}. Ya podés iniciar sesión.`,
-        [
-          {
-            text: 'Ir a Iniciar Sesión',
-            onPress: () => enrutador.replace('/(auth)/login'),
-          },
-        ]
+        () => enrutador.replace('/(auth)/login')
       );
 
     } catch (error: any) {
-      console.error('Error al registrar usuario:', error);
+      console.warn('Error al registrar usuario:', error?.message || error);
 
       if (error.code === 'auth/email-already-in-use') {
-        Alert.alert(
+        alertar(
           'Correo registrado',
-          'Ya existe una cuenta registrada con este correo electrónico.'
+          'Ya existe una cuenta registrada con este correo electrónico. Por favor iniciá sesión o usá otro correo.'
         );
       } else if (error.code === 'auth/invalid-email') {
-        Alert.alert(
+        alertar(
           'Correo inválido',
           'Ingresá una dirección de correo electrónico válida.'
         );
       } else if (error.code === 'auth/weak-password') {
-        Alert.alert(
+        alertar(
           'Contraseña débil',
           'La contraseña debe tener al menos 6 caracteres.'
         );
       } else {
-        Alert.alert(
+        alertar(
           'Error',
           'No se pudo crear la cuenta. Intentá nuevamente.'
         );

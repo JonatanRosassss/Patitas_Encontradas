@@ -27,8 +27,9 @@ export default function PerfilScreen() {
       setCargandoPublicaciones(true);
       const publicaciones = await listarAlertasPorUsuario(usuario.uid);
       setMisPublicaciones(publicaciones);
-    } catch (error) {
-      console.error('Error al cargar mis publicaciones:', error);
+    } catch {
+      // Manejo resiliente: si las reglas de seguridad de Firestore o la red restringen la consulta, se mantiene lista vacía
+      setMisPublicaciones([]);
     } finally {
       setCargandoPublicaciones(false);
     }
