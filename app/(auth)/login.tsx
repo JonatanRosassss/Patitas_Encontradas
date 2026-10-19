@@ -19,7 +19,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../../components/ui/Button';
 import { loginSchema } from '@/schemas/authScheama';
 import { router } from 'expo-router';
-import { simularInicioSesion } from '../../services/authMock';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { obtenerAuth } from '../../services/ConexionFirebase';
 
 interface LoginScreenProps {}
 
@@ -34,6 +36,7 @@ export default function LoginScreen({ }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [contrasenia, setContrasenia] = useState('');
   const [verContrasenia, setVerContrasenia] = useState(false);
+  const [cargando, setCargando] = useState(false);
 
   if (!fontsLoaded) {
     return (
@@ -43,7 +46,7 @@ export default function LoginScreen({ }: LoginScreenProps) {
     );
   }
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const resultado = loginSchema.safeParse({
       email,
       contrasenia,
@@ -56,19 +59,50 @@ export default function LoginScreen({ }: LoginScreenProps) {
       return;
     }
 
-    const usuario = simularInicioSesion(email, contrasenia);
-    if (usuario) {
-      Alert.alert('¡Bienvenido!', `Inicio de sesión exitoso como ${usuario.nombre}.`, [
-        {
-          text: 'Continuar',
-          onPress: () => router.replace('/(tabs)'),
-        },
-      ]);
-    } else {
-      Alert.alert(
-        'Acceso denegado',
-        'Correo o contraseña incorrectos.\n\nDatos de prueba:\nprofesor@patitas.com / 123456'
+    try {
+      setCargando(true);
+      const auth = obtenerAuth();
+
+      // 1. Iniciar sesión con Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        contrasenia
       );
+
+      const usuario = userCredential.user;
+
+      // 2. Obtener y guardar token de sesión/id localmente
+      const token = await usuario.getIdToken();
+      await AsyncStorage.setItem(
+        'user_session',
+        JSON.stringify({
+          uid: usuario.uid,
+          token,
+          email: usuario.email,
+        })
+      );
+
+      // 3. Navegar a las pestañas principales
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      console.error('Error al iniciar sesión:', error);
+
+      let mensajeError = 'Correo o contraseña incorrectos.';
+
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        mensajeError = 'Correo o contraseña incorrectos.';
+      } else if (error.code === 'auth/invalid-email') {
+        mensajeError = 'El formato del correo electrónico no es válido.';
+      } else if (error.code === 'auth/too-many-requests') {
+        mensajeError = 'Demasiados intentos fallidos. Intenta más tarde.';
+      } else if (error.code === 'auth/network-request-failed') {
+        mensajeError = 'Error de conexión. Revisa tu conexión a internet.';
+      }
+
+      Alert.alert('Acceso denegado', mensajeError);
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -163,19 +197,25 @@ export default function LoginScreen({ }: LoginScreenProps) {
             Olvidaste tu contrasenia?
           </Text>
 
-          <Button
-            label="Ingresar"
-            onClick={handleLogin}
-            color="orange"
-            colorText="white"
-          />
+          {cargando ? (
+            <ActivityIndicator size="small" color={Colors.primary} style={{ marginVertical: Spacing.three }} />
+          ) : (
+            <>
+              <Button
+                label="Ingresar"
+                onClick={handleLogin}
+                color="orange"
+                colorText="white"
+              />
 
-          <Button
-            label="Crear cuenta"
-            onClick={handleCreateAccount}
-            color="bWhite"
-            colorText="black"
-          />
+              <Button
+                label="Crear cuenta"
+                onClick={handleCreateAccount}
+                color="bWhite"
+                colorText="black"
+              />
+            </>
+          )}
 
           {/* Divisor social */}
           <View style={styles.contenedorDivisor}>
