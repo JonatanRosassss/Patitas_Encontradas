@@ -6,7 +6,7 @@ import { StyleSheet,
   Text,
   FlatList,
   Modal,
-  Image, } from 'react-native';
+  Image,Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
@@ -18,6 +18,7 @@ import GuiaDeUso, {
 } from '@/components/GuiaDeUso';
 
 
+import { crearColeccionAlertas } from "../scripts/crearColeccionAlertas";
 const MASCOTAS = [
   {
     id: '1',
@@ -311,6 +312,30 @@ async function cerrarGuia() {
   }}
   onClose={cerrarGuia}
 />
+
+<Pressable
+  style={styles.botonNotificaciones}
+  onPress={() => router.push("/notificaciones")}
+>
+  <Text style={styles.textoBotonNotificaciones}>
+    🔔 NOTIFICACIONES
+  </Text>
+</Pressable>
+
+
+<Pressable
+  onPress={async () => {
+    try {
+      await crearColeccionAlertas();
+      Alert.alert("Correcto", "Colección alertas inicializada.");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "No se pudo inicializar alertas.");
+    }
+  }}
+>
+  <Text>Inicializar colección alertas</Text>
+</Pressable>
     </View>
 
   );
@@ -496,6 +521,22 @@ textoBotonGuia: {
   color: Colors?.primary ?? '#39805B',
   fontSize: 13,
   fontWeight: '700',
+},
+
+botonNotificaciones: {
+  backgroundColor: "#FFE7D2",
+  borderWidth: 1,
+  borderColor: "#FFC28A",
+  borderRadius: 12,
+  paddingVertical: 10,
+  paddingHorizontal: 16,
+  alignSelf: "flex-start",
+  marginTop: 8,
+},
+textoBotonNotificaciones: {
+  color: "#5A3A1F",
+  fontWeight: "700",
+  fontSize: 14,
 },
 });
 

@@ -14,9 +14,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { EspecieMascota, type Pet } from '@/types/Pet';
-import { obtenerConexion } from '@/services/ConexionFirebase';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { EspecieMascota } from '@/types/Pet';
+import { crearAlertaMascota } from '@/services/mascotasService';
 import { Colors, Typography, Spacing, Radius } from '@/theme/tokens';
 
 export default function PublicarAlertaScreen() {
@@ -35,13 +34,6 @@ export default function PublicarAlertaScreen() {
   const [imagenes, setImagenes] = useState<string[]>([]);
   const [guardando, setGuardando] = useState(false);
 
-  const crearMascota = async (mascota: Pet) => {
-    const db = obtenerConexion();
-    const coleccionMasc = collection(db.firestore, 'Mascota');
-    const docMasc = await addDoc(coleccionMasc, mascota);
-    mascota.id = docMasc.id;
-    return docMasc.id;
-  };
 
   // Función para seleccionar fotos
   const handleSeleccionarFotos = async () => {
@@ -73,36 +65,70 @@ export default function PublicarAlertaScreen() {
   };
 
   // Función para guardar / publicar
-  const handlePublicar = async () => {
-    if (!nombre.trim() || !ubicacion.trim()) {
-      Alert.alert('Campos requeridos', 'Por favor completa al menos el nombre y la ubicación.');
-      return;
-    }
 
-    setGuardando(true);
+const handlePublicar = async () => {
+  if (!nombre.trim() || !ubicacion.trim()) {
+    Alert.alert(
+      'Campos requeridos',
+      'Por favor completa al menos el nombre y la ubicación.'
+    );
+    return;
+  }
 
-    const mascota: Pet = {
-      id: '',
-      nombre: nombre,
-      especie: especie as EspecieMascota,
-      estado: tipoAlerta === 'perdi' ? 'PERDIDO' : 'ENCONTRADO',
-      descripcion: descripcion,
-      fotos: imagenes,
-      ubicacion: ubicacion,
-      coordenadas: undefined,
-      contacto: undefined,
-      creadoPor: undefined,
-      fechaReporte: Timestamp.now().toString(),
-      recompensa: recompensa,
-    };
-    setTimeout(() => {
-      crearMascota(mascota);
-      setGuardando(false);
-      Alert.alert('¡Alerta Publicada!', 'Tu publicación se ha registrado con éxito.', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
-    }, 1000);
-  };
+  setGuardando(true);
+
+  try {
+    const especieNormalizada = especie.trim().toUpperCase();
+
+    const especieFinal = (
+      ['PERRO', 'GATO', 'OTRO'].includes(especieNormalizada)
+        ? especieNormalizada
+        : 'OTRO'
+    ) as EspecieMascota;
+
+    const descripcionCompleta = [
+      raza.trim() ? `Raza: ${raza.trim()}` : '',
+      descripcion.trim(),
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+
+    const idAlerta = await crearAlertaMascota(
+      {
+        nombre: nombre.trim(),
+        especie: especieFinal,
+        estado: tipoAlerta === 'perdi' ? 'PERDIDO' : 'ENCONTRADO',
+        descripcion: descripcionCompleta,
+        ubicacion: ubicacion.trim(),
+        recompensa: recompensa.trim() || null,
+      },
+      imagenes
+    );
+
+    console.log('Alerta creada correctamente:', idAlerta);
+
+    Alert.alert(
+      '¡Alerta publicada!',
+      'Tu publicación se guardó correctamente.',
+      [
+        {
+          text: 'OK',
+          onPress: () => router.back(),
+        },
+      ]
+    );
+  } catch (error) {
+    console.error('Error al publicar la alerta:', error);
+
+    Alert.alert(
+      'Error al publicar',
+      'No se pudo guardar la publicación. Revisá tu conexión e intentá nuevamente.'
+    );
+  } finally {
+    setGuardando(false);
+  }
+};
+
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
