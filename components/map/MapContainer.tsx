@@ -14,6 +14,7 @@ import {
   StyleSheet,
   StyleProp,
   ViewStyle,
+  Platform,
 } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { Colors, Typography, Spacing } from '../../constants/theme';
@@ -138,13 +139,21 @@ const buildLeafletHtml = (): string => `
     var markersMap = new Map();
 
     function postToRN(type, payload) {
-      if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({ type: type, payload: payload || {} }));
+      var msg = JSON.stringify({ type: type, payload: payload || {} });
+      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+        window.ReactNativeWebView.postMessage(msg);
+      } else if (window.parent && window.parent !== window) {
+        window.parent.postMessage(msg, '*');
       }
     }
 
     function initMap() {
       try {
+        if (typeof L === 'undefined') {
+          setTimeout(initMap, 100);
+          return;
+        }
+
         map = L.map('map', {
           center: [${PILAR_DEFAULT_CENTER.latitude}, ${PILAR_DEFAULT_CENTER.longitude}],
           zoom: ${PILAR_DEFAULT_CENTER.zoom},
@@ -152,10 +161,10 @@ const buildLeafletHtml = (): string => `
           attributionControl: true
         });
 
-        var tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; OpenStreetMap &copy; CARTO',
+        var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           maxZoom: 19,
-          subdomains: 'abcd'
+          subdomains: 'abc'
         }).addTo(map);
 
         tileLayer.on('tileerror', function() {
@@ -174,6 +183,10 @@ const buildLeafletHtml = (): string => `
         map.whenReady(function() {
           postToRN('MAP_READY');
         });
+
+        setTimeout(function() {
+          postToRN('MAP_READY');
+        }, 1000);
       } catch (err) {
         postToRN('MAP_ERROR', { error: err.message });
       }
@@ -275,13 +288,19 @@ const buildLeafletHtml = (): string => `
 
     function handleRNMessage(event) {
       try {
-        var msg = JSON.parse(event.data);
+        var rawData = event.data;
+        var msg = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
         if (msg.type === 'SET_MARKERS') window.mapBridge.setMarkers(msg.payload);
         if (msg.type === 'CENTER') window.mapBridge.centerTo(msg.payload.lat, msg.payload.lng, msg.payload.zoom);
         if (msg.type === 'ZOOM_IN') window.mapBridge.zoomIn();
         if (msg.type === 'ZOOM_OUT') window.mapBridge.zoomOut();
         if (msg.type === 'SET_USER_LOCATION') window.mapBridge.setUserLocation(msg.payload.lat, msg.payload.lng);
         if (msg.type === 'SELECT_PET') window.mapBridge.selectPet(msg.payload.id);
+        if (msg.type === 'EVAL' && msg.code) {
+          try {
+            (new Function(msg.code))();
+          } catch(e) {}
+        }
       } catch (e) {
         // Ignored in production
       }
@@ -313,11 +332,31 @@ export const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
     ref
   ) {
     const webViewRef = useRef<WebView>(null);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
     const [isMapReady, setIsMapReady] = useState(false);
     const [hasError, setHasError] = useState(false);
 
+    // Watchdog de resiliencia: si el mapa tarda más de 3 segundos en emitir evento,
+    // desbloqueamos la vista para que el usuario no quede atrapado en el spinner
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setIsMapReady((actual) => (!actual ? true : actual));
+      }, 3000);
+      return () => clearTimeout(timer);
+    }, []);
+
     const runInWebView = useCallback((code: string) => {
-      webViewRef.current?.injectJavaScript(`${code}; true;`);
+      if (Platform.OS === 'web') {
+        const iframe = iframeRef.current;
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage(
+            JSON.stringify({ type: 'EVAL', code }),
+            '*'
+          );
+        }
+      } else {
+        webViewRef.current?.injectJavaScript(`${code}; true;`);
+      }
     }, []);
 
     useImperativeHandle(
@@ -366,61 +405,114 @@ export const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
       }
     }, [selectedPet, isMapReady, runInWebView]);
 
+    const procesarEventoBridge = useCallback((data: MapBridgeEvent) => {
+      switch (data.type) {
+        case 'MAP_READY':
+          setIsMapReady(true);
+          setHasError(false);
+          if (onMapReady) {
+            onMapReady();
+          }
+          break;
+        case 'MARKER_CLICK':
+          if (data.payload?.id) {
+            const pet = pets.find((p) => p.id === data.payload?.id) || null;
+            onSelectPet(pet);
+          }
+          break;
+        case 'MAP_CLICK':
+          onSelectPet(null);
+          break;
+        case 'MAP_ERROR':
+          // Non-fatal error report from Leaflet tile/script
+          break;
+        default:
+          break;
+      }
+    }, [pets, onSelectPet, onMapReady]);
+
     const handleMessage = (event: WebViewMessageEvent) => {
       try {
         const data: MapBridgeEvent = JSON.parse(event.nativeEvent.data);
-        switch (data.type) {
-          case 'MAP_READY':
-            setIsMapReady(true);
-            setHasError(false);
-            if (onMapReady) {
-              onMapReady();
-            }
-            break;
-          case 'MARKER_CLICK':
-            if (data.payload?.id) {
-              const pet = pets.find((p) => p.id === data.payload?.id) || null;
-              onSelectPet(pet);
-            }
-            break;
-          case 'MAP_CLICK':
-            onSelectPet(null);
-            break;
-          case 'MAP_ERROR':
-            // Non-fatal error report from Leaflet tile/script
-            break;
-          default:
-            break;
-        }
+        procesarEventoBridge(data);
       } catch {
         // Ignored
       }
     };
 
+    // Soporte para recepción de mensajes en navegador Web
+    useEffect(() => {
+      if (Platform.OS !== 'web') return;
+
+      const handleWebMessage = (event: MessageEvent) => {
+        try {
+          if (!event.data) return;
+          const raw = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
+          const data: MapBridgeEvent = JSON.parse(raw);
+          if (data && data.type) {
+            procesarEventoBridge(data);
+          }
+        } catch {
+          // Ignorado para mensajes no JSON
+        }
+      };
+
+      window.addEventListener('message', handleWebMessage);
+      return () => {
+        window.removeEventListener('message', handleWebMessage);
+      };
+    }, [procesarEventoBridge]);
+
     const handleReload = () => {
       setHasError(false);
       setIsMapReady(false);
-      webViewRef.current?.reload();
+      if (Platform.OS === 'web') {
+        const iframe = iframeRef.current;
+        if (iframe) {
+          iframe.srcdoc = buildLeafletHtml();
+        }
+      } else {
+        webViewRef.current?.reload();
+      }
     };
 
     return (
       <View style={[styles.container, style]}>
-        <WebView
-          ref={webViewRef}
-          source={{ html: buildLeafletHtml() }}
-          style={styles.webView}
-          originWhitelist={['*']}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          allowFileAccess={false}
-          scalesPageToFit={true}
-          scrollEnabled={false}
-          overScrollMode="never"
-          bounces={false}
-          onMessage={handleMessage}
-          onError={() => setHasError(true)}
-          onHttpError={() => setHasError(true)}
-        />
+        {Platform.OS === 'web' ? (
+          React.createElement('iframe', {
+            ref: iframeRef,
+            srcDoc: buildLeafletHtml(),
+            style: {
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              backgroundColor: Colors.backgroundLight,
+            },
+            title: 'Mapa Leaflet Web',
+            onLoad: () => {
+              setTimeout(() => {
+                setIsMapReady(true);
+              }, 400);
+            },
+          })
+        ) : (
+          <WebView
+            ref={webViewRef}
+            source={{ html: buildLeafletHtml() }}
+            style={styles.webView}
+            originWhitelist={['*']}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            allowFileAccess={false}
+            scalesPageToFit={true}
+            scrollEnabled={false}
+            overScrollMode="never"
+            bounces={false}
+            onMessage={handleMessage}
+            onError={() => setHasError(true)}
+            onHttpError={() => setHasError(true)}
+          />
+        )}
 
         {!isMapReady && !hasError && (
           <View style={styles.loadingOverlay} pointerEvents="auto">

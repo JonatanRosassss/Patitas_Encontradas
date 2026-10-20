@@ -46,6 +46,14 @@ export default function LoginScreen({ }: LoginScreenProps) {
     );
   }
 
+  const alertar = (titulo: string, mensaje?: string) => {
+    if (Platform.OS === 'web') {
+      window.alert([titulo, mensaje].filter(Boolean).join('\n'));
+    } else {
+      Alert.alert(titulo, mensaje);
+    }
+  };
+
   const handleLogin = async () => {
     const resultado = loginSchema.safeParse({
       email,
@@ -55,7 +63,7 @@ export default function LoginScreen({ }: LoginScreenProps) {
 
     if (!resultado.success) {
       const errorMsg = resultado.error.errors[0]?.message || 'Por favor revisa los campos ingresados.';
-      Alert.alert('Atención', errorMsg);
+      alertar('Atención', errorMsg);
       return;
     }
 
@@ -86,7 +94,7 @@ export default function LoginScreen({ }: LoginScreenProps) {
       // 3. Navegar a las pestañas principales
       router.replace('/(tabs)');
     } catch (error: any) {
-      console.error('Error al iniciar sesión:', error);
+      console.warn('Error al iniciar sesión:', error?.message || error);
 
       let mensajeError = 'Correo o contraseña incorrectos.';
 
@@ -100,7 +108,7 @@ export default function LoginScreen({ }: LoginScreenProps) {
         mensajeError = 'Error de conexión. Revisa tu conexión a internet.';
       }
 
-      Alert.alert('Acceso denegado', mensajeError);
+      alertar('Acceso denegado', mensajeError);
     } finally {
       setCargando(false);
     }

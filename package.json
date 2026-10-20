@@ -7,7 +7,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "node --test tests/geoValidation.test.mjs tests/challenger2_integration.test.mjs tests/challenger_stress.test.mjs tests/faqSection.test.mjs tests/ticketCollectionAndForm.test.mjs tests/mapFirebasePoints.test.mjs",
+    "test:firebase": "node tests/firebaseLivePoints.test.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/baloo-2": "^0.4.2",

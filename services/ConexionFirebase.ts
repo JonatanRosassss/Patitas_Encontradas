@@ -26,21 +26,13 @@ export class ConexionFirebase {
 
   private constructor() {
     const configuracion = {
-      apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-      authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-      storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-      appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+      apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'AIzaSyB_G3XR7fIyypuE9eGZCZAQ9q5doqQ2qNU',
+      authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || 'patitas-encontradas-2026.firebaseapp.com',
+      projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || 'patitas-encontradas-2026',
+      storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || 'patitas-encontradas-2026.firebasestorage.app',
+      messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '633513717477',
+      appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '1:633513717477:web:d883f628d134d25b3fae0c',
     };
-
-    console.log('Diagnóstico Firebase:', {
-  apiKeyCargada: Boolean(configuracion.apiKey),
-  apiKeyLongitud: configuracion.apiKey?.length ?? 0,
-  formatoApiKey: configuracion.apiKey?.startsWith('AIza') ?? false,
-  projectIdCargado: Boolean(configuracion.projectId),
-  authDomainCargado: Boolean(configuracion.authDomain),
-});
 
     // Inicializar o reutilizar la instancia de FirebaseApp
     this.app =
