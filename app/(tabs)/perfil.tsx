@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router } from 'expo-router';
-import { View, Text, Image, Alert, ScrollView, StyleSheet, Modal, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, Image, Alert, ScrollView, StyleSheet, Modal, Pressable, ActivityIndicator, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 import { Colors, Spacing, Typography } from '../../constants/theme';
@@ -39,25 +39,48 @@ export default function PerfilScreen() {
     cargarMisPublicaciones();
   }, [usuario]);
 
-  // Manejo de eliminación de publicaciones
+  // Manejo de eliminación de publicaciones con soporte completo para Web y Native
   const confirmarEliminacion = (idAlerta: string, nombreMascota?: string) => {
+    const nombre = nombreMascota || 'Mascota';
+    const mensaje = `¿Estás seguro de que querés eliminar la publicación de "${nombre}"?`;
+
+    const ejecutarEliminacion = async () => {
+      try {
+        await eliminarAlertaMascota(idAlerta);
+        // Actualización optimista de estado
+        setMisPublicaciones((prev) => prev.filter((p) => p.id !== idAlerta));
+        if (Platform.OS === 'web') {
+          window.alert('La publicación fue eliminada correctamente.');
+        } else {
+          Alert.alert('Éxito', 'La publicación fue eliminada correctamente.');
+        }
+        cargarMisPublicaciones();
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'No se pudo eliminar la publicación.';
+        if (Platform.OS === 'web') {
+          window.alert(msg);
+        } else {
+          Alert.alert('Error', msg);
+        }
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm(mensaje)) {
+        ejecutarEliminacion();
+      }
+      return;
+    }
+
     Alert.alert(
       'Eliminar publicación',
-      `¿Estás seguro de que querés eliminar la publicación de "${nombreMascota || 'Mascota'}"?`,
+      mensaje,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await eliminarAlertaMascota(idAlerta);
-              Alert.alert('Éxito', 'La publicación fue eliminada correctamente.');
-              cargarMisPublicaciones(); // Recargar la lista
-            } catch (error) {
-              Alert.alert('Error', 'No se pudo eliminar la publicación.');
-            }
-          },
+          onPress: ejecutarEliminacion,
         },
       ]
     );

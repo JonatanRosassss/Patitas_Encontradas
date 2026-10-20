@@ -77,6 +77,8 @@ interface TicketSoporte {
 - [x] **Tarea 1: VISTA DE SOPORTE** -> Implementada en `app/(tabs)/reporte_error.tsx` como Centro de Ayuda integral con selector dinámico de pestañas (FAQs / Generar Ticket).
 - [x] **Tarea 2: HACER PREGUNTAS FRECUENTES (FAQ)** -> Implementado en `components/soporte/FaqAccordion.tsx` con dataset `data/faqsData.ts` categorizado y mapeado a los RF#1 a RF#4.
 - [x] **Tarea 3: CREAR COLECCIÓN PARA TICKETS Y ENVIARLOS** -> Implementada la colección `tickets_soporte` en Firestore a través de `services/soporteService.ts`, tipos en `types/Ticket.ts` y formulario en `components/soporte/TicketForm.tsx`.
+- [x] **Tarea 4: REALIZAR EL HOME MEDIANTE LA CONEXIÓN A BD** -> Conexión reactiva a Firestore en `app/(tabs)/index.tsx` vía `listarTodasLasAlertas()`, pull-to-refresh, empty states, saludo dinámico al vecino autenticado y tarjetas `PetCard` integradas con el Design System.
+- [x] **Tarea 5: MOSTRAR DETALLE DE LA MASCOTA MEDIANTE BD Y REDIRIGIR A WPP** -> Pantalla completa `app/detalle/[id].tsx` con enriquecimiento de datos de autor vía `obtenerAlertaConUsuarioPorId()`, carrusel de fotos, recompensas, señas particulares y redirección universal a WhatsApp contextualizado vía `utils/whatsapp.ts`.
 
 ---
 
