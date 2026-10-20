@@ -16,6 +16,7 @@ import {
   QueryConstraint,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { Platform } from 'react-native';
 import { ConexionFirebase } from '@/services/ConexionFirebase';
 import type {
   Pet,
@@ -39,12 +40,30 @@ const COLECCION_USUARIOS = 'usuarios';
 // ==========================================
 
 /**
- * Elimina las claves con valor undefined para evitar que Firestore lance excepciones.
+ * Elimina las claves con valor undefined (incluso en objetos anidados como coordenadas)
+ * para evitar que Firestore lance excepciones como:
+ * "Function addDoc() called with invalid data. Unsupported field value: undefined"
  */
 function limpiarUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
   const limpio: Record<string, any> = {};
   for (const [key, value] of Object.entries(obj)) {
-    if (value !== undefined) {
+    if (value === undefined) {
+      continue;
+    }
+    // Si es un objeto plano anidado (no Date, Timestamp, FieldValue, ni Array)
+    if (
+      value !== null &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      !(value instanceof Date) &&
+      !(value instanceof Timestamp) &&
+      typeof (value as any)?.toMillis !== 'function'
+    ) {
+      const subLimpio = limpiarUndefined(value);
+      if (Object.keys(subLimpio).length > 0) {
+        limpio[key] = subLimpio;
+      }
+    } else {
       limpio[key] = value;
     }
   }
@@ -71,7 +90,7 @@ function normalizarFecha(fecha: any): string {
 /**
  * Formatea una fecha en texto relativo amigable (ej: "Hace 15 min", "Hace 2 h", "Hace 3 d").
  */
-function formatearTiempoRelativo(fechaRaw: any): string {
+export function formatearTiempoRelativo(fechaRaw: any): string {
   try {
     const fecha = fechaRaw instanceof Timestamp ? fechaRaw.toDate() : new Date(normalizarFecha(fechaRaw));
     const ahora = new Date();
@@ -120,11 +139,49 @@ function docAPet(id: string, data: any): Pet {
 // ==========================================
 
 /**
+ * Convierte un Blob a Data URL base64 para entornos web donde las políticas
+ * de CORS de Firebase Storage restrinjan las llamadas XMLHttpRequest.
+ */
+async function blobADataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result);
+      } else {
+        reject(new Error('No se pudo convertir el archivo a Data URL'));
+      }
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
  * Sube una imagen local a Firebase Storage y retorna su URL pública de descarga.
+ * En la plataforma Web, si el origen está restringido por CORS, serializa a Data URL
+ * para garantizar persistencia y visualización inmediata sin bloqueos.
  */
 export async function subirImagenMascota(uriLocal: string): Promise<string> {
+  if (uriLocal.startsWith('data:image/')) {
+    return uriLocal;
+  }
+  if ((uriLocal.startsWith('http://') || uriLocal.startsWith('https://')) && !uriLocal.startsWith('blob:')) {
+    return uriLocal;
+  }
+
   const respuesta = await fetch(uriLocal);
   const blob = await respuesta.blob();
+
+  // En la plataforma Web, si el bucket no tiene CORS para localhost, convertimos a Data URL base64
+  if (Platform.OS === 'web' && blob.size < 800 * 1024) {
+    try {
+      return await blobADataUrl(blob);
+    } catch {
+      // Fallback a subida directa si falla
+    }
+  }
+
   const nombreArchivo = `mascotas/${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
   const referencia = ref(storage, nombreArchivo);
 
@@ -145,18 +202,53 @@ export async function crearAlertaMascota(
 ): Promise<string> {
   const usuario = auth.currentUser;
 
-  // 1. Subir fotos a Firebase Storage en paralelo
+  // 1. Subir fotos a Firebase Storage en paralelo con manejo resiliente
   const urlsFotos = await Promise.all(
-    fotosLocales.map((uri) => (uri.startsWith('http') ? uri : subirImagenMascota(uri)))
+    fotosLocales.map(async (uri) => {
+      if (
+        (uri.startsWith('http://') || uri.startsWith('https://') || uri.startsWith('data:image/')) &&
+        !uri.startsWith('blob:')
+      ) {
+        return uri;
+      }
+      try {
+        return await subirImagenMascota(uri);
+      } catch {
+        try {
+          const resp = await fetch(uri);
+          const b = await resp.blob();
+          return await blobADataUrl(b);
+        } catch {
+          return uri;
+        }
+      }
+    })
   );
 
-  // 2. Construir el payload sin campos undefined
+  // 2. Si vienen coordenadas, validar que sean numéricas y finitas
+  let coordenadasValidas = datos.coordenadas;
+  if (
+    coordenadasValidas &&
+    (typeof coordenadasValidas.latitude !== 'number' ||
+      typeof coordenadasValidas.longitude !== 'number' ||
+      !Number.isFinite(coordenadasValidas.latitude) ||
+      !Number.isFinite(coordenadasValidas.longitude))
+  ) {
+    coordenadasValidas = undefined;
+  }
+
+  // 3. Construir el payload sin campos undefined
   const payload = limpiarUndefined({
     ...datos,
+    ...(coordenadasValidas ? { coordenadas: coordenadasValidas } : {}),
     fotos: urlsFotos,
     creadoPor: usuario?.uid ?? 'anonimo',
     fechaReporte: serverTimestamp(),
   });
+
+  if (payload.coordenadas === undefined) {
+    delete payload.coordenadas;
+  }
 
   const docRef = await addDoc(collection(db, COLECCION_ALERTAS), payload);
   return docRef.id;
@@ -212,6 +304,43 @@ export async function obtenerAlertaPorId(idAlerta: string): Promise<Pet | null> 
   }
 
   return docAPet(docSnap.id, docSnap.data());
+}
+
+/**
+ * Obtiene los datos de una alerta cruzando y enriqueciendo con la información
+ * de contacto del usuario creador (para la pantalla de detalle de mascota y enlace a WhatsApp).
+ */
+export async function obtenerAlertaConUsuarioPorId(
+  idAlerta: string
+): Promise<PetConUsuario | null> {
+  const pet = await obtenerAlertaPorId(idAlerta);
+  if (!pet) {
+    return null;
+  }
+
+  if (!pet.creadoPor || pet.creadoPor === 'anonimo') {
+    return { ...pet, usuario: null };
+  }
+
+  try {
+    const userDoc = await getDoc(doc(db, COLECCION_USUARIOS, pet.creadoPor));
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      const usuario: Usuario = {
+        id: userDoc.id,
+        nombre: data.nombre ?? 'Vecino de la comunidad',
+        email: data.correo ?? data.email ?? '',
+        telefono: data.telefono ?? undefined,
+        avatarUrl: data.avatarUrl ?? undefined,
+        fechaCreacion: data.fechaRegistro ? normalizarFecha(data.fechaRegistro) : undefined,
+      };
+      return { ...pet, usuario };
+    }
+  } catch {
+    // Retorno resiliente: si la consulta de usuario falla, se mantiene la alerta sin romper la UI
+  }
+
+  return { ...pet, usuario: null };
 }
 
 // ==========================================
@@ -309,8 +438,8 @@ export async function listarAlertasConUsuario(
             fechaCreacion: data.fechaRegistro ? normalizarFecha(data.fechaRegistro) : undefined,
           });
         }
-      } catch (err) {
-        console.warn(`No se pudo cargar el perfil del usuario ${uid}:`, err);
+      } catch {
+        // Silencioso en producción: si no se puede cargar el perfil, continúa sin datos adicionales
       }
     })
   );
