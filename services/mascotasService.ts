@@ -201,6 +201,9 @@ export async function crearAlertaMascota(
   fotosLocales: string[] = []
 ): Promise<string> {
   const usuario = auth.currentUser;
+  if (!usuario) {
+    throw new Error('Debes iniciar sesión para publicar una alerta.');
+  }
 
   // 1. Subir fotos a Firebase Storage en paralelo con manejo resiliente
   const urlsFotos = await Promise.all(
@@ -242,7 +245,7 @@ export async function crearAlertaMascota(
     ...datos,
     ...(coordenadasValidas ? { coordenadas: coordenadasValidas } : {}),
     fotos: urlsFotos,
-    creadoPor: usuario?.uid ?? 'anonimo',
+    creadoPor: usuario.uid,
     fechaReporte: serverTimestamp(),
   });
 
