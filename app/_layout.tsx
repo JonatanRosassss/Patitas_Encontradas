@@ -27,6 +27,12 @@ export default function RootLayout() {
       }}
       initialRouteName="index"
     >
+<Stack.Screen
+  name="notificaciones"
+  options={{
+    headerShown: false,
+  }}
+/>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
       <Stack.Screen name="(auth)/register" options={{ headerShown: false }} />

@@ -8,7 +8,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "node --test tests/geoValidation.test.mjs tests/challenger2_integration.test.mjs tests/challenger_stress.test.mjs tests/faqSection.test.mjs tests/ticketCollectionAndForm.test.mjs tests/mapFirebasePoints.test.mjs",
+    "test": "node --test tests/geoValidation.test.mjs tests/challenger2_integration.test.mjs tests/challenger_stress.test.mjs tests/faqSection.test.mjs tests/ticketCollectionAndForm.test.mjs tests/mapFirebasePoints.test.mjs tests/publicarAlertaService.test.mjs tests/homeAndPetDetailWhatsApp.test.mjs",
     "test:firebase": "node tests/firebaseLivePoints.test.mjs"
   },
   "dependencies": {
@@ -20,11 +20,12 @@
     "@shopify/flash-list": "2.0.2",
     "expo": "~57.0.26",
     "expo-camera": "~57.0.6",
-    "expo-constants": "~57.0.17",
+    "expo-constants": "~57.0.22",
     "expo-font": "^57.0.3",
     "expo-image-picker": "~57.0.20",
     "expo-linking": "~57.0.11",
     "expo-location": "~57.0.20",
+    "expo-notifications": "~57.0.23",
     "expo-router": "~57.0.24",
     "expo-status-bar": "~57.0.1",
     "firebase": "^10.14.1",
