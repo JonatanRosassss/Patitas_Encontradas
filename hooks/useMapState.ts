@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { Coordinates, MapFilterIndex, MapPet } from '../types/map';
-import { MASCOTAS_MOCK } from '../data/mapMockData';
+
 import { isValidCoordinate } from '../utils/geoValidation';
 import { MapContainerRef } from '../components/map/MapContainer';
 import { listarAlertasParaMapa } from '../services/mascotasService';
@@ -25,7 +25,7 @@ export interface UseMapStateReturn {
   recargarPuntos: () => Promise<void>;
 }
 
-export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateReturn {
+export function useMapState(initialPets: MapPet[] = []): UseMapStateReturn {
   const [pets, setPets] = useState<MapPet[]>(initialPets);
   const [cargandoPuntos, setCargandoPuntos] = useState(false);
   const [filtro, setFiltro] = useState<MapFilterIndex>(0);
@@ -37,21 +37,20 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
   const mapContainerRef = useRef<MapContainerRef>(null);
 
   const recargarPuntos = useCallback(async () => {
-    try {
-      setCargandoPuntos(true);
-      const alertasFirebase = await listarAlertasParaMapa();
-      if (alertasFirebase && alertasFirebase.length > 0) {
-        setPets(alertasFirebase);
-      } else {
-        // Fallback a los puntos iniciales si no hay alertas en Firestore
-        setPets(initialPets);
-      }
-    } catch {
-      // Manejo resiliente offline o restricciones temporales de Firestore
-      setPets(initialPets);
-    } finally {
-      setCargandoPuntos(false);
-    }
+  try {
+  setCargandoPuntos(true);
+
+  const alertasFirebase = await listarAlertasParaMapa();
+
+  // El mapa utiliza publicaciones reales de Firebase.
+  // Si no hay publicaciones con coordenadas válidas, queda vacío.
+  setPets(alertasFirebase);
+} catch (error) {
+  console.error('Error al cargar las alertas del mapa:', error);
+  setPets([]);
+} finally {
+  setCargandoPuntos(false);
+}
   }, [initialPets]);
 
   useEffect(() => {
