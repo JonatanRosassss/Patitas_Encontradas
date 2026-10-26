@@ -261,4 +261,23 @@ Antes de dar cualquier entrega por finalizada:
   - **Nueva estrategia aplicada:** Validación defensiva multicapa (Picker nativo -> Servicio de Storage con `uploadString` -> Normalizador tipado de fotos `obtenerFotosValidas` -> Fallbacks visuales con estados de error en componentes de UI).
 - **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | Suite de pruebas `npm test` (57/57 PASS).
 
+#### [2026-10-26] - Resolución de Conflictos y Sincronización de Ramas (home/pantalla y maxi/filtros)
+- **Solicitud del Usuario:** Corregir los errores de merge al intentar integrar las ramas del repositorio (primero `home/pantalla` tras el merge de `sol/trabajo-main`, y luego `maxi/filtros` al crear el Pull Request hacia `main`).
+- **Tipo de Cambio:** `CORRECCIÓN_BUG` | `CONFIGURACIÓN`
+- **Archivos Involucrados:**
+  - `hooks/useMapState.ts`: Modificado en `home/pantalla` (resolución de conflicto en importación de mocks y tipado de referencias `MapContainerRef`).
+  - `services/mascotasService.ts`: Modificado en `home/pantalla` (conciliación de funciones `marcarComoEncontrada` de Sol y `listarTodasLasAlertas` / `obtenerAlertaConUsuarioPorId`).
+  - `app/ajustes.tsx`: Modificado en `maxi/filtros` (conciliación del botón de regreso superior con `SafeAreaView` de Maxi y las opciones de soporte `/reporte_error?tab=FAQS` y `TICKET` de `main`).
+- **Progreso Realizado:**
+  - Se completó y verificó la integración de `origin/main` en `home/pantalla` (commit `bd71d09`), permitiendo su merge exitoso en `main` vía PR #19 (`1f10bfc`).
+  - En la rama `maxi/filtros`, se sincronizó con `origin/main` y se resolvió el conflicto de `app/ajustes.tsx`, preservando el layout limpio de Maxi con botón superior `← Volver` y los enlaces al centro de ayuda y soporte técnico.
+  - Se validó la integración completa con `npx tsc --noEmit` (0 errores) y suite automatizada de pruebas `npm test` (58/58 PASS).
+  - Se commiteó el merge (`3adf85b`) y se realizó `git push origin maxi/filtros`, dejando la rama lista para merge directo sin conflictos en GitHub.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** `maxi/filtros` había quedado desactualizada respecto a los últimos cambios de `main` (PR #21, #22 y #19), generando conflictos en `app/ajustes.tsx` al intentar abrir un Pull Request en GitHub.
+  - **Motivo del cambio:** Incompatibilidad de merge automático en GitHub por divergencia en los cambios de cabecera y navegación de la pantalla de ajustes.
+  - **Nueva estrategia aplicada:** Integrar `origin/main` en `maxi/filtros`, unificar armónicamente las dos propuestas de UI (botón superior con padding seguro de Maxi + enlaces de tickets/FAQs) y verificar antes de pushear a remoto.
+- **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` (58/58 PASS) | Push exitoso a `origin/maxi/filtros`.
+
+
 
