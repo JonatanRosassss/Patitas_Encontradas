@@ -253,25 +253,12 @@ export default function PublicarAlertaScreen() {
       return;
     }
 
-    // 3. Validar teléfono de contacto (si tenés la variable 'telefono' o similar)
-    // Sanea quitando espacios, guiones o letras
-    const telLimpio = (typeof telefono !== 'undefined' && telefono) ? telefono.replace(/\D/g, '') : '';
-    if (typeof telefono !== 'undefined') {
-      if (!telefono.trim()) {
-        alertar('Teléfono requerido', 'Ingresá un número de contacto para que puedan comunicarse.');
-        return;
-      }
-      if (telLimpio.length < 8) {
-        alertar('Teléfono inválido', 'El número de teléfono debe tener al menos 8 dígitos.');
-        return;
-      }
-    }
-
-    // 4. Validar descripción (si escribió algo, que tenga sentido)
-    if (typeof descripcion !== 'undefined' && descripcion && descripcion.trim().length > 0 && descripcion.trim().length < 5) {
+    // 3. Validar descripción (si escribió algo, que tenga sentido)
+    if (descripcion && descripcion.trim().length > 0 && descripcion.trim().length < 5) {
       alertar('Descripción muy corta', 'Si agregás una descripción, por favor detallá un poco más (mínimo 5 caracteres).');
       return;
     }
+
 
     setGuardando(true);
 
