@@ -279,5 +279,26 @@ Antes de dar cualquier entrega por finalizada:
   - **Nueva estrategia aplicada:** Integrar `origin/main` en `maxi/filtros`, unificar armónicamente las dos propuestas de UI (botón superior con padding seguro de Maxi + enlaces de tickets/FAQs) y verificar antes de pushear a remoto.
 - **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` (58/58 PASS) | Push exitoso a `origin/maxi/filtros`.
 
+#### [2026-10-26] - Resolución de Conflictos y Conciliación de rama-rodrigo
+- **Solicitud del Usuario:** Solucionar el error de merge al intentar fusionar la rama de Rodrigo (`rama-rodrigo`).
+- **Tipo de Cambio:** `CORRECCIÓN_BUG` | `REFACTORIZACIÓN` | `CONFIGURACIÓN`
+- **Archivos Involucrados:**
+  - `app/(tabs)/index.tsx`: Restaurado desde `origin/main` (la versión de Rodrigo sobreescribía el feed con un componente previo sin `PetCard`, sin `listarTodasLasAlertas()` ni Design System).
+  - `app/(tabs)/publicar-alerta.tsx`: Corregido error TS2304 al validar una variable inexistente `telefono`, conservando las validaciones mejoradas de ubicación y descripción.
+  - `app/(tabs)/_layout.tsx`: Integrado el botón central circular flotante de Rodrigo usando tokens de `Colors.primary` y nombre de ruta correcto `publicar-alerta`, conservando la pantalla oculta de soporte (`reporte_error`) y padding seguro de navegación (`useSafeAreaInsets`).
+  - `app/mascota/[id].tsx`: Reemplazado por un componente limpio de redirección tipada a `app/detalle/[id].tsx`, eliminando llamadas directas a Firebase en la UI y `console.error`.
+- **Progreso Realizado:**
+  - Se hizo merge de `origin/main` en `rama-rodrigo`.
+  - Se corrigieron los errores de compilación de TypeScript en `publicar-alerta.tsx` y `_layout.tsx`.
+  - Se verificó la suite completa de pruebas con `npm test` (58/58 PASS) y `npx tsc --noEmit` (0 errores).
+  - Se commiteó (`0191ca3`) y se subió con `git push origin rama-rodrigo`.
+  - Se simuló el merge contra `origin/main` mediante `git merge-tree`, verificando 0 conflictos.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** `rama-rodrigo` intentaba sobreescribir la pantalla de inicio con código anterior a la integración de Firestore y PetCard, rompía la compilación por variables no declaradas y renombraba la pestaña a `publicar` (inexistente), además de duplicar la pantalla de detalle de mascota como `mascota/[id].tsx` con violación de directivas de Firestore.
+  - **Motivo del cambio:** Incompatibilidad total con el estándar de arquitectura y bloqueo de merge automático en GitHub.
+  - **Nueva estrategia aplicada:** Integrar los aportes visuales de Rodrigo (botón central prominente en tabs y validaciones estrictas de publicación), redirigir de forma segura cualquier enlace a `mascota/[id]` hacia `detalle/[id]`, y mantener el feed oficial del Home con `PetCard`.
+- **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` (58/58 PASS) | Push exitoso a `origin/rama-rodrigo`.
+
+
 
 
