@@ -3,20 +3,13 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography } from '../../constants/theme';
+import { Colors, Typography, TabBarMetrics } from '../../constants/theme';
 
 export default function TabLayout() {
+  // Expo 57 dibuja edge-to-edge en Android: la barra de 3 botones / gestos se superpone
+  // a la app. Sumamos el inset inferior real para que la tab bar quede SIEMPRE por encima.
   const insets = useSafeAreaInsets();
-  const bottomPadding = Platform.select({
-    ios: 28,
-    web: 8,
-    default: Math.max(8, insets.bottom),
-  });
-  const tabHeight = Platform.select({
-    ios: 88,
-    web: 64,
-    default: 60 + (insets.bottom > 0 ? insets.bottom : 8),
-  });
+  const bottomPadding = Math.max(insets.bottom, TabBarMetrics.minBottomPadding);
 
   return (
     <Tabs
@@ -28,9 +21,9 @@ export default function TabLayout() {
           backgroundColor: Colors.tabBackground,
           borderTopColor: Colors.borderLight,
           borderTopWidth: 1,
-          height: tabHeight,
+          height: TabBarMetrics.contentHeight + bottomPadding,
           paddingBottom: bottomPadding,
-          paddingTop: 6,
+          paddingTop: TabBarMetrics.paddingTop,
           ...Platform.select({
             web: { boxShadow: '0px -2px 10px rgba(90, 58, 31, 0.06)' },
             default: {
@@ -147,4 +140,3 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.05 }],
   },
 });
-

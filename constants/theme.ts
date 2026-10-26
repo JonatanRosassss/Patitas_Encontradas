@@ -68,6 +68,44 @@ export const Colors = {
   // Marcas Sociales (OAuth)
   google: '#DB4437',
   facebook: '#4267B2',
+
+  // Tokens de Pantalla de Bienvenida (Unificados con Paleta Oficial y Login)
+  welcomeCanvas: '#FAF8F5',
+  welcomeHeadlineDark: '#5A3A1F',
+  welcomeAccentCoral: '#FF8A00',
+  welcomeAccentWarm: '#FF8A00',
+  welcomeGlowOuter: 'rgba(255, 194, 138, 0.30)',
+  welcomeGlowInner: 'rgba(255, 138, 0, 0.14)',
+  welcomeCalloutBg: '#FFFFFF',
+  welcomeCalloutBorder: '#E8DFD8',
+  welcomePillBg: '#FFFFFF',
+  welcomePillActiveBg: '#FFE7D2',
+  welcomePillBorder: '#E8DFD8',
+  welcomePinLost: '#E65100',
+  welcomePinFound: '#2E7D32',
+  welcomeDotInactive: '#FFC28A',
+  welcomeSkipText: '#8D735C',
+
+  // Tokens de Ficha de Mascota
+  detailWhatsapp: '#25D366', // Verde oficial de WhatsApp (reconocimiento inmediato del CTA)
+  detailWhatsappPressed: '#1DA851',
+  detailContactDisabled: '#B5A496',
+  detailOverlayButton: 'rgba(255, 255, 255, 0.90)',
+  detailOverlayButtonPressed: 'rgba(255, 255, 255, 0.72)',
+  detailOverlayChip: 'rgba(255, 255, 255, 0.92)',
+  detailDotActive: '#FFFFFF',
+  detailDotInactive: 'rgba(255, 255, 255, 0.55)',
+  detailDotsTrack: 'rgba(43, 26, 12, 0.32)',
+  detailHeroPlaceholder: '#FFE7D2',
+  detailHeroPlaceholderIconBg: '#FFC28A',
+  detailStatusLost: '#E65100',
+  detailStatusFound: '#2E7D32',
+  detailStatusSeen: '#1565C0',
+  detailReward: '#E65100',
+  detailRewardBg: '#FFF1E4',
+  detailRewardBorder: '#FFD3AD',
+  detailMapPinShadow: 'rgba(90, 58, 31, 0.35)',
+  detailContactBarShadow: 'rgba(90, 58, 31, 0.10)',
 } as const;
 
 export const Typography = {
@@ -145,5 +183,50 @@ export const Radius = {
 
 export const BorderRadius = Radius;
 
+/**
+ * Métricas de layout de la Ficha de Mascota (app/detalle/[id].tsx).
+ * El alto del hero se calcula como ratio del alto de pantalla, acotado por min/max
+ * para que se vea proporcionado tanto en 360dp como en tablets.
+ */
+export const DetailMetrics = {
+  heroHeightRatio: 0.45,
+  heroMinHeight: 300,
+  heroMaxHeight: 480,
+  heroBottomRadius: 28,
+  floatingButtonSize: 44,
+  floatingIconSize: 22,
+  arrowButtonSize: 40,
+  arrowIconSize: 20,
+  dotSize: 7,
+  dotActiveWidth: 20,
+  statusDotSize: 8,
+  placeholderIconCircle: 112,
+  placeholderIconSize: 56,
+  mapHeight: 196,
+  mapApproxRadiusMeters: 450,
+  mapZoomExact: 16,
+  mapZoomApprox: 14,
+  avatarSize: 52,
+  iconSm: 16,
+  iconMd: 20,
+  iconLg: 24,
+  errorIconSize: 64,
+  errorTextMaxWidth: 320,
+  contactButtonHeight: 56,
+  rewardMaxWidthRatio: 0.42,
+} as const;
+
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+
+/**
+ * Métricas de la barra inferior de pestañas.
+ * La altura final = contentHeight + inset inferior real del dispositivo
+ * (barra de 3 botones / gestos de Android edge-to-edge, home indicator de iOS).
+ */
+export const TabBarMetrics = {
+  contentHeight: 58,
+  paddingTop: Spacing.sm,
+  minBottomPadding: Spacing.sm,
+  iconSize: 24,
+} as const;

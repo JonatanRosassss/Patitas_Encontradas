@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Image,
   StyleSheet,
@@ -40,6 +39,10 @@ export function PetCard({
 }: PetCardProps) {
   const [mostrarToast, setMostrarToast] = useState(false);
   const [imagenValida, setImagenValida] = useState(true);
+
+  useEffect(() => {
+    setImagenValida(true);
+  }, [imagen]);
 
   const isPerdido = estado.toUpperCase() === 'PERDIDO';
 
@@ -90,37 +93,41 @@ export function PetCard({
         {/* Información principal */}
         <View style={styles.petInfo}>
           <View style={styles.petTopRow}>
-            <View
-              style={[
-                styles.petStatus,
-                {
-                  backgroundColor: isPerdido
-                    ? Colors.statusPerdidoBg
-                    : Colors.statusEncontradoBg,
-                },
-              ]}
-            >
-              <Text
+            <View style={styles.badgesGroup}>
+              <View
                 style={[
-                  styles.petStatusText,
+                  styles.petStatus,
                   {
-                    color: isPerdido
-                      ? Colors.statusPerdido
-                      : Colors.statusEncontradoText,
+                    backgroundColor: isPerdido
+                      ? Colors.statusPerdidoBg
+                      : Colors.statusEncontradoBg,
                   },
                 ]}
               >
-                {isPerdido ? 'Perdido' : 'Encontrado'}
-              </Text>
-            </View>
-
-            {recompensa ? (
-              <View style={styles.recompensaBadge}>
-                <Text style={styles.recompensaText}>
-                  Recompensa
+                <Text
+                  style={[
+                    styles.petStatusText,
+                    {
+                      color: isPerdido
+                        ? Colors.statusPerdido
+                        : Colors.statusEncontradoText,
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {isPerdido ? 'Perdido' : 'Encontrado'}
                 </Text>
               </View>
-            ) : null}
+
+              {recompensa ? (
+                <View style={styles.recompensaBadge}>
+                  <Ionicons name="gift-outline" size={11} color={Colors.text} />
+                  <Text style={styles.recompensaText} numberOfLines={1}>
+                    Recompensa
+                  </Text>
+                </View>
+              ) : null}
+            </View>
           </View>
 
           <Text
@@ -261,13 +268,19 @@ const styles = StyleSheet.create({
 
   petTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
-    gap: Spacing.xs,
     width: '100%',
+    gap: Spacing.sm,
     marginBottom: Spacing.half,
   },
-
+  badgesGroup: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
   petStatus: {
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.half,
@@ -280,6 +293,9 @@ const styles = StyleSheet.create({
   },
 
   recompensaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
     backgroundColor: Colors.secondary,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.half,

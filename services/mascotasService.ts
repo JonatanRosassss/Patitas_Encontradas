@@ -15,7 +15,7 @@ import {
   Timestamp,
   QueryConstraint,
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, uploadString } from 'firebase/storage';
 import { Platform } from 'react-native';
 import { ConexionFirebase } from '@/services/ConexionFirebase';
 import type {
@@ -159,21 +159,48 @@ async function blobADataUrl(blob: Blob): Promise<string> {
 
 /**
  * Sube una imagen local a Firebase Storage y retorna su URL pública de descarga.
- * En la plataforma Web, si el origen está restringido por CORS, serializa a Data URL
- * para garantizar persistencia y visualización inmediata sin bloqueos.
+ * Soporta Data URLs base64 nativos con uploadString para máxima resiliencia en React Native.
  */
 export async function subirImagenMascota(uriLocal: string): Promise<string> {
-  if (uriLocal.startsWith('data:image/')) {
-    return uriLocal;
+  if (!uriLocal || uriLocal.includes('RmlsZSBub3QgZm91bmQ=')) {
+    throw new Error('Imagen inválida');
   }
+
+  // Si ya es una URL remota de Storage o HTTP, retornarla
   if ((uriLocal.startsWith('http://') || uriLocal.startsWith('https://')) && !uriLocal.startsWith('blob:')) {
     return uriLocal;
   }
 
+  // Si es un Data URL base64 válido (data:image/...;base64,...)
+  if (uriLocal.startsWith('data:')) {
+    const match = uriLocal.match(/^data:([^;]+);base64,(.+)$/);
+    if (match) {
+      const mimeType = match[1] || 'image/jpeg';
+      const base64Content = match[2];
+
+      try {
+        const nombreArchivo = `mascotas/${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
+        const referencia = ref(storage, nombreArchivo);
+        await uploadString(referencia, base64Content, 'base64', { contentType: mimeType });
+        const downloadUrl = await getDownloadURL(referencia);
+        if (downloadUrl) return downloadUrl;
+      } catch {
+        // Fallback resiliente: Si Storage falla, el data URL base64 es 100% renderizable
+        return uriLocal;
+      }
+    }
+    return uriLocal;
+  }
+
+  // Para URIs locales de archivo (file://, content://, blob:)
   const respuesta = await fetch(uriLocal);
   const blob = await respuesta.blob();
 
-  // En la plataforma Web, si el bucket no tiene CORS para localhost, convertimos a Data URL base64
+  // Validar que no sea un error "File not found" serializado como octet-stream
+  if (blob.size < 100 && blob.type === 'application/octet-stream') {
+    throw new Error('Archivo local no disponible');
+  }
+
   if (Platform.OS === 'web' && blob.size < 800 * 1024) {
     try {
       return await blobADataUrl(blob);
@@ -206,26 +233,25 @@ export async function crearAlertaMascota(
   }
 
   // 1. Subir fotos a Firebase Storage en paralelo con manejo resiliente
-  const urlsFotos = await Promise.all(
+  const resultadosFotos = await Promise.all(
     fotosLocales.map(async (uri) => {
-      if (
-        (uri.startsWith('http://') || uri.startsWith('https://') || uri.startsWith('data:image/')) &&
-        !uri.startsWith('blob:')
-      ) {
-        return uri;
+      if (!uri || uri.includes('RmlsZSBub3QgZm91bmQ=')) {
+        return null;
       }
       try {
         return await subirImagenMascota(uri);
       } catch {
-        try {
-          const resp = await fetch(uri);
-          const b = await resp.blob();
-          return await blobADataUrl(b);
-        } catch {
+        // Si el archivo local falló pero es un data URL genuino, conservarlo
+        if (uri.startsWith('data:image/')) {
           return uri;
         }
+        return null;
       }
     })
+  );
+
+  const urlsFotos = resultadosFotos.filter(
+    (url): url is string => Boolean(url && !url.includes('RmlsZSBub3QgZm91bmQ='))
   );
 
   // 2. Si vienen coordenadas, validar que sean numéricas y finitas

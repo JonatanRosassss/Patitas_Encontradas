@@ -101,11 +101,18 @@ export default function PublicarAlertaScreen() {
     const resultado = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsMultipleSelection: true,
-      quality: 0.7,
+      quality: 0.6,
+      base64: true,
     });
 
     if (!resultado.canceled) {
-      const uris = resultado.assets.map((asset) => asset.uri);
+      const uris = resultado.assets.map((asset) => {
+        if (asset.base64 && asset.base64.length > 0) {
+          const mime = asset.mimeType || 'image/jpeg';
+          return `data:${mime};base64,${asset.base64}`;
+        }
+        return asset.uri;
+      });
       setImagenes((prev) => [...prev, ...uris]);
     }
   };
