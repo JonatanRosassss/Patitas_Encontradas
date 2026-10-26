@@ -149,20 +149,14 @@ export default function LoginScreen({ }: LoginScreenProps) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.contenedorTitulo}>
-          <Text style={styles.tituloNegro}>
-            PATITAS
-            <Text style={styles.titulo}> ENCONTRADAS</Text>
-          </Text>
-          <Text style={styles.textoAbajo}>Ayudanos a que vuelvan a casa</Text>
+        <View style={styles.contenedorInicio}>
+          {/* Logo centrado sin el texto grande superior */}
           <Image
             source={require('../../assets/logo_patitas_crop.png')}
             style={styles.logo}
             resizeMode="contain"
           />
-        </View>
 
-        <View style={styles.contenedorInicio}>
           <Text style={styles.textoIniciarSesion}>Iniciar Sesion</Text>
           <Text style={styles.textoAbajo}>Bienvenido de vuelta</Text>
 
@@ -284,26 +278,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.backgroundLight,
   },
+  logo: {
+    width: 250,
+    height: 270,
+    alignSelf: 'center',
+    marginBottom: Spacing.two,
+  },
   textoIniciarSesion: {
     fontSize: Typography.sizes.xxxl,
     lineHeight: Typography.lineHeights.xxxl,
     textAlign: 'center',
     fontFamily: Typography.fonts.titleMedium,
-  },
-  titulo: {
-    fontSize: Typography.sizes.display,
-    lineHeight: Typography.lineHeights.display,
-    marginBottom: Spacing.five,
-    textAlign: 'center',
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.primary,
-  },
-  tituloNegro: {
-    fontSize: Typography.sizes.display,
-    lineHeight: Typography.lineHeights.display,
-    textAlign: 'center',
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.black,
   },
   textoAbajo: {
     fontSize: Typography.sizes.sm,
@@ -358,16 +343,6 @@ const styles = StyleSheet.create({
     height: 52,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  contenedorTitulo: {
-    alignSelf: 'stretch',
-    marginTop: Spacing.four,
-    paddingHorizontal: Spacing.four,
-  },
-  logo: {
-    width: 180,
-    height: 200,
-    alignSelf: 'center',
   },
   contenedorDivisor: {
     flexDirection: 'row',

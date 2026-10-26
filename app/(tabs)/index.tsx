@@ -137,7 +137,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {/* HERO SECTION CON SALUDO, NOTIFICACIONES Y GUÍA */}
         <View style={styles.heroSection}>
           <View style={styles.saludoContainer}>
@@ -309,7 +309,7 @@ export default function HomeScreen() {
           />
         )}
 
-        {/* MODAL DE PREVISUALIZACIÓN RÁPIDA (CON ACCESO DIRECTO A DETALLE Y WHATSAPP) */}
+        {/* MODAL DE PREVISUALIZACIÓN RÁPIDA */}
         <Modal
           visible={mascotaSeleccionada !== null}
           transparent={true}
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     alignItems: 'stretch',
     gap: Spacing.md,
-    paddingBottom: BottomTabInset + Spacing.three,
+    paddingBottom: Spacing.half,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
@@ -594,6 +594,7 @@ const styles = StyleSheet.create({
   },
   petListContent: {
     paddingVertical: Spacing.sm,
+    paddingBottom: Spacing.md,
   },
   emptyListContent: {
     flexGrow: 1,
@@ -613,7 +614,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   emptySubtitle: {
-    fontSize: Typography.sizes.sm,
+    fontSize: Typography.sizes.xs,
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.textSecondary,
     textAlign: 'center',

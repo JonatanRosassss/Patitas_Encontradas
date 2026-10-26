@@ -1,6 +1,8 @@
 {
   "scheme": "patitasencontradas",
   "plugins": [
-    "expo-router"
+    "expo-router",
+    "expo-font",
+    "expo-status-bar"
   ]
 }
