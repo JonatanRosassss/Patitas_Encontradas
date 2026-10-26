@@ -11,16 +11,17 @@
 >   1. *Desarrollo de Aplicaciones Móviles* (Profesor Titular / Equipo Docente)
 >   2. *Taller de Formulación y Desarrollo de Proyectos Sociocomunitarios* (Comisión 4 - Prof. Yamila Ojeda)
 > - **Período Académico:** Cuatrimestre 2026-2
-> - **Equipo de Desarrollo (7 Integrantes):** 
->   - Yerik Ramos Ventura (UX/UI & Documentación)
->   - Jonatan Rosas / "Jona" (Auth & Architecture Lead)
->   - Rodrigo Paz (Core Data & Backend Dev)
->   - Francisco Gonzalez / "Fran" (Auth & State Lead)
->   - Maximiliano Duarte / "Maxi" (Core Data & Feed Dev)
->   - Sol Careaga / "SB" (UX/UI, Wireframes & Doc Lead)
->   - Santino / Martina Guenin (UX/UI & Onboarding Dev)
-> - **Repositorio:** `Patitas_Encontradas` (Branch actual: `main`)
-> - **Estado General de Pruebas:** 53 pruebas automatizadas unitarias, de integración y de estrés ejecutadas y aprobadas (100% PASS, 0 FAIL).
+> - **Equipo de Desarrollo (7 Integrantes + Colaboración en S2):** 
+>   - Jonatan Rosas / "Jona" (Product Owner, Arquitectura & Auth Lead — Célula 1)
+>   - Sol Careaga / "SB" (Scrum Master, UX/UI, Wireframes & Doc Lead — Célula 3)
+>   - Rodrigo Paz (QA Lead, Core Data & Detalle Dev — Célula 2)
+>   - Maximiliano Duarte / "Maxi" (Core Data, Publicar & Filtros Dev — Célula 2)
+>   - Francisco Gonzalez / "Fran" (Auth, Registro & Perfil Dev — Célula 1)
+>   - Yerik Ramos Ventura (UX/UI, Home, Ajustes & Share Dev — Célula 3)
+>   - Martina Guenin / "Santino" (Mapa v1, Wireframes & UX Dev — Célula 3)
+>   - *Colaboración en Sprint 2:* `Bresser` (Integración Firebase Auth en commit `c7795b7` del `08/10/2026`)
+> - **Repositorio:** `JonatanRosassss/Patitas_Encontradas` (Branch: `main` — **114 commits verificados** en **29 fechas activas** entre el `24/08/2026` y el `26/10/2026`)
+> - **Estado General de Pruebas:** **59 pruebas automatizadas** en 9 archivos `.test.mjs` (**58 tests** en `npm test` + **1 test vivo** en `firebaseLivePoints.test.mjs`, 100% PASS) + **1 prueba de usabilidad temprana** con vecina real y **auditoría WCAG 2.1 / Nielsen** (`Etapa 2`, págs. 9–12).
 
 ---
 
@@ -34,9 +35,9 @@
 7. [Radiografía del Avance Actual: Módulos 100% Implementados](#7-radiografía-del-avance-actual-módulos-100-implementados)
 8. [Planificación Ágil, Células de Trabajo y Tareas del Sprint 3](#8-planificación-ágil-células-de-trabajo-y-tareas-del-sprint-3)
 9. [Estructura de Desglose del Trabajo (EDT / WBS) Integral](#9-estructura-de-desglose-del-trabajo-edt--wbs-integral)
-10. [Matriz de Pruebas Automatizadas y Criterios de Aceptación (DoD)](#10-matriz-de-pruebas-automatizadas-y-criterios-de-aceptación-dod)
+10. [Matriz de Pruebas Automatizadas (59 Tests) y Criterios de Aceptación (DoD)](#10-matriz-de-pruebas-automatizadas-y-criterios-de-aceptación-dod)
 11. [Guía de Preguntas Frecuentes y Defensa Técnica Oral](#11-guía-de-preguntas-frecuentes-y-defensa-técnica-oral)
-12. [Backlog Pendiente y Hoja de Ruta Inmediata (Próxima Semana)](#12-backlog-pendiente-y-hoja-de-ruta-inmediata-próxima-semana)
+12. [Cierre del Sprint 3 (26/10/2026) y Láminas Visuales de Gestión del Proyecto](#12-cierre-del-sprint-3-26102026-y-láminas-visuales-de-gestión-del-proyecto)
 
 ---
 
@@ -477,52 +478,61 @@ A continuación se detalla la descomposición jerárquica del proyecto completo 
     - 1.9.2 Acordeón interactivo de 9 preguntas frecuentes clasificadas (`FaqAccordion.tsx`)
     - 1.9.3 Formulario de generación de tickets con tipos de incidencia (`TicketForm.tsx`)
     - 1.9.4 Persistencia y trazabilidad de tickets en Firestore (`soporteService.ts`)
-  - **1.10 Módulo de Detalle y Contacto Inmediato (En Progreso)**
-    - 1.10.1 Pantalla dinámica de ficha completa de mascota (`app/detalle/[id].tsx`)
-    - 1.10.2 Consumo de alerta por ID desde Firestore (`obtenerAlertaPorId`)
-    - 1.10.3 Redirección directa a WhatsApp con mensaje contextualizado vía `Linking API`
-  - **1.11 Aseguramiento de Calidad y Pruebas**
-    - 1.11.1 Suite de pruebas de validación geoespacial (`geoValidation.test.mjs`)
-    - 1.11.2 Suite de pruebas de estrés sobre filtros y búsqueda (`challenger_stress.test.mjs`)
-    - 1.11.3 Suite de pruebas de integración del mapa y accesibilidad (`challenger2_integration.test.mjs`)
-    - 1.11.4 Suite de pruebas del módulo de soporte y tickets (`faqSection.test.mjs`, `ticketCollectionAndForm.test.mjs`)
-    - 1.11.5 Pruebas de integración del servicio de publicaciones (`publicarAlertaService.test.mjs`)
+  - **1.10 Módulo de Detalle, Resoluciones y Contacto Inmediato (Completado en Sprint 3)**
+    - 1.10.1 Pantalla dinámica de ficha completa de mascota (`app/detalle/[id].tsx`, `features/detalle/PantallaDetalleMascota.tsx`)
+    - 1.10.2 Consumo de alerta por ID desde Firestore (`obtenerAlertaPorId`) + resolución de caso (`marcarAlertaResuelta` / "Mascota encontrada")
+    - 1.10.3 Redirección directa a WhatsApp con mensaje contextualizado vía `Linking API` (`utils/whatsappContacto.ts`) + botón "¡Lo vi!" (envío de coordenadas por WhatsApp) + `Share` nativo
+  - **1.11 Aseguramiento de Calidad y Pruebas (59 Pruebas Automatizadas + Auditorías UX/WCAG)**
+    - 1.11.1 Suite de pruebas de validación geoespacial (`geoValidation.test.mjs` - 10 tests)
+    - 1.11.2 Suite de pruebas de estrés sobre filtros y búsqueda (`challenger_stress.test.mjs` - 19 tests)
+    - 1.11.3 Suite de pruebas de integración del mapa y accesibilidad (`challenger2_integration.test.mjs` - 10 tests)
+    - 1.11.4 Suite de pruebas del módulo de soporte y tickets (`faqSection.test.mjs` - 4 tests, `ticketCollectionAndForm.test.mjs` - 3 tests)
+    - 1.11.5 Pruebas de servicios de publicaciones y marcadores (`publicarAlertaService.test.mjs` - 5 tests, `mapFirebasePoints.test.mjs` - 2 tests, `firebaseLivePoints.test.mjs` - 1 test live)
+    - 1.11.6 Suite de pruebas de Feed Home, Detalle y WhatsApp (`homeAndPetDetailWhatsApp.test.mjs` - 5 tests)
+    - 1.11.7 Prueba de Usabilidad Temprana con vecino real + Auditoría WCAG 2.1 / Heurísticas de Nielsen (Etapa 2, págs. 9–12)
   - **1.12 Documentación y Entrega Académica**
     - 1.12.1 Consolidación de Guía de Defensa Oral y Examen Parcial (`generar_pdf_parcial.py`)
     - 1.12.2 Consolidación de Planificación Ágil del Sprint 3 (`generar_pdf_sprint3.py`)
-    - 1.12.3 Redacción formal de las Secciones 5 a 9 del Incremento 2
+    - 1.12.3 Plan Maestro de Proyecto, Gestión del Tiempo, Costos, Riesgos y 6 Láminas Visuales (`PLAN_DE_PROYECTO_Y_GESTION_COMPLETA_PATITAS_ENCONTRADAS.md`)
 
 ---
 
 ## 10. MATRIZ DE PRUEBAS AUTOMATIZADAS Y CRITERIOS DE ACEPTACIÓN (DoD)
 
-La suite de pruebas automatizadas utiliza el **Node.js Native Test Runner** (`node --test`), ejecutando **53 pruebas** que validan la solidez del sistema ante fallos, entradas maliciosas y casos de borde:
+La suite de pruebas automatizadas utiliza el **Node.js Native Test Runner** (`node --test`), ejecutando **58 pruebas en suite estándar** (`npm test`) más **1 prueba live de humo contra Firestore** (`firebaseLivePoints.test.mjs`), totalizando **59 pruebas automatizadas distribuidas en 9 archivos de test**:
 
-### 10.1 Cobertura de la Suite de Pruebas
-1. **Validación Geoespacial (`geoValidation.test.mjs` - 10 Tests):**
+### 10.1 Cobertura Exacta de la Suite de Pruebas (9 Archivos — 59 Tests)
+1. **Validación Geoespacial (`geoValidation.test.mjs` — 10 Tests):**
    - Coordenadas válidas en casco urbano y periferia de Pilar: APROBADO.
    - Puntos en los límites extremos del planeta (-90, 90, -180, 180): APROBADO.
    - Rechazo estricto de latitudes > 90 o < -90 y longitudes > 180 o < -180: APROBADO.
    - Rechazo de valores no numéricos IEEE 754 (`NaN`, `Infinity`, `-Infinity`): APROBADO.
    - Rechazo de nulos, indefinidos, strings y objetos malformados: APROBADO.
-2. **Arquitectura y Puente del Mapa (`challenger2_integration.test.mjs` - 10 Tests):**
+2. **Arquitectura y Puente del Mapa (`challenger2_integration.test.mjs` — 10 Tests):**
    - Verificación de pantalla orquestadora liviana (`mapa.tsx` con 142 líneas < 150): APROBADO.
    - Botones táctiles de control flotante con área mínima de 46x46 dp (supera los 44 dp estándar): APROBADO.
    - Integridad del puente bidireccional (escucha de mensajes en `window` y `document`): APROBADO.
    - Cero colores hexadecimales 'hardcodeados' y cero `console.log` en componentes de mapa: APROBADO.
-3. **Estrés en Filtros y Búsqueda (`challenger_stress.test.mjs` - 17 Tests):**
+3. **Estrés en Filtros y Búsqueda (`challenger_stress.test.mjs` — 19 Tests):**
    - Filtrado por categorías ('Todos', 'Perdidos', 'Encontrados'): APROBADO.
    - Búsqueda combinada insensible a mayúsculas/minúsculas por nombre, raza y barrio: APROBADO.
    - Manejo de consultas con espacios en blanco y caracteres especiales: APROBADO.
    - Resiliencia ante registros con coordenadas corruptas (exclusión segura sin caída de app): APROBADO.
-4. **Módulo de Soporte y FAQs (`faqSection.test.mjs` & `ticketCollectionAndForm.test.mjs` - 7 Tests):**
+4. **Módulo de Soporte y FAQs (`faqSection.test.mjs` [4] & `ticketCollectionAndForm.test.mjs` [3] — 7 Tests):**
    - Presencia de las 9 preguntas oficiales en sus 4 categorías: APROBADO.
    - Validación del contrato de la colección `tickets_soporte` y sanitización de inputs: APROBADO.
    - Verificación de accesibilidad y estados de carga en el formulario: APROBADO.
-5. **Servicios de Alertas y Firestore (`mapFirebasePoints.test.mjs` & `publicarAlertaService.test.mjs` - 9 Tests):**
+5. **Servicios de Alertas y Firestore (`publicarAlertaService.test.mjs` [5], `mapFirebasePoints.test.mjs` [2] & `firebaseLivePoints.test.mjs` [1] — 8 Tests):**
    - Sanitización de campos con `limpiarUndefined` (eliminación de claves prohibidas por Firestore): APROBADO.
    - Transformación de alertas Firestore a marcadores interactivos para Leaflet: APROBADO.
-   - Comportamiento ante fallas de red con retorno ordenado a datos de respaldo: APROBADO.
+   - Prueba en vivo contra Firestore y comportamiento ante fallas de red con retorno ordenado a datos de respaldo: APROBADO.
+6. **Home Feed, Detalle de Mascota y Redirección WhatsApp (`homeAndPetDetailWhatsApp.test.mjs` — 5 Tests):**
+   - Formateo y sanitización de teléfonos argentinos (`+549...`) para `https://wa.me/`: APROBADO.
+   - Construcción de mensaje contextualizado según tipo de alerta (`perdida` vs. `encontrada`) y avistamiento (`¡Lo vi!`): APROBADO.
+   - Resolución de alerta (`marcarAlertaResuelta`) e integración entre tarjeta del Feed y ruta dinámica `/detalle/[id]`: APROBADO.
+7. **Pruebas Cualitativas y Auditoría Normativa (`Etapa 2 documentacion PATITAS ENCONTRADAS.pdf`, págs. 9–12):**
+   - **1 Prueba de Usabilidad Temprana** con usuario real (vecino de Pilar con mascota propia) sobre 3 escenarios críticos (publicar alerta en < 2 min, buscar en radio de 2 km, reportar avistamiento con 1 toque).
+   - **Auditoría WCAG 2.1 Nivel AA y 10 Heurísticas de Nielsen:** Contraste texto principal `12.6:1` (AAA), botones táctiles `>= 48x48 dp`, feedback háptico y semántica `accessibilityRole`.
 
 ---
 
@@ -544,18 +554,26 @@ Resumen de las preguntas clave que evaluará la cátedra y sus respuestas basada
 
 ---
 
-## 12. BACKLOG PENDIENTE Y HOJA DE RUTA INMEDIATA (PRÓXIMA SEMANA)
+## 12. CIERRE DEL SPRINT 3 Y GALERÍA DE DIAGRAMAS DE GESTIÓN DEL PROYECTO
 
-Para la entrega académica del Incremento 2 y la defensa del Sprint 3 la semana entrante, los esfuerzos se concentran en:
+El **26 de octubre de 2026** se completó la integración en `main` de las 3 células paralelas del Sprint 3 (114 commits totales):
+1. **Célula 1 — Home Feed e Integración (`feat/home-feed-screen`):** Conectado a `suscribirAlertasActivas`, filtros por categoría, pull-to-refresh y navegación a `/detalle/[id]`.
+2. **Célula 2 — Detalle, Resoluciones y WhatsApp (`feat/pet-detail-whatsapp`):** Pantalla `/detalle/[id].tsx`, `obtenerAlertaPorId`, `marcarAlertaResuelta` ("Mascota encontrada"), botón "¡Lo vi!" (coordenadas vía WhatsApp), contacto directo vía `Linking.openURL('https://wa.me/...')` y `Share` nativo.
+3. **Célula 3 — Onboarding, Perfil y Cierre Documental (`feat/welcome-info-screen`):** Pantalla de bienvenida `app/onboarding.tsx`, mis publicaciones en `app/perfil.tsx` y plan integral de gestión.
 
-1. **Finalización de la Pantalla de Detalle de Mascota (`app/detalle/[id].tsx`):**
-   - Conectar la pantalla al servicio `obtenerAlertaPorId(id)`.
-   - Mostrar galería de fotos completa, descripción, recompensas y fecha relativa.
-   - Integrar el botón de acción principal "Contactar por WhatsApp" utilizando `Linking.openURL()` con mensaje contextualizado ("Hola, vi tu publicación en Patitas Encontradas sobre...").
-2. **Pantalla de Bienvenida / Onboarding (`feat/welcome-info-screen`):**
-   - Maquetar la vista introductoria según los wireframes de Padlet de la Célula 3.
-   - Incorporar navegación directa hacia `login` o hacia el `feed` para usuarios invitados.
-3. **Cierre de la Documentación del Incremento 2:**
-   - Consolidar las secciones 5 a 9 (Diagramas de secuencia, casos de uso expandidos, matriz de trazabilidad y manual de usuario).
-4. **Preparación del Plan de Proyecto y Modelo de Negocio:**
-   - Usar este documento en NotebookLM para sintetizar el Business Model Canvas (Propuesta de valor, canales, estructura de costos de servidores y fuentes de ingresos solidarias) y el cronograma Gantt de entregas.
+### 12.1 Láminas Visuales de Gestión de Proyecto (`documentacion/diagramas/`)
+Las 6 láminas de alta resolución generadas y auditadas se encuentran disponibles en `documentacion/diagramas/` y vinculadas en [`PLAN_DE_PROYECTO_Y_GESTION_COMPLETA_PATITAS_ENCONTRADAS.md`](./PLAN_DE_PROYECTO_Y_GESTION_COMPLETA_PATITAS_ENCONTRADAS.md):
+
+1. **EDT / WBS de 12 Paquetes de Trabajo:**
+   ![EDT / WBS](./diagramas/01_edt_wbs_patitas.png)
+2. **Red de Precedencias PERT/CPM y Camino Crítico Real (64 días):**
+   ![Red PERT/CPM](./diagramas/02_red_pert_cpm_camino_critico.png)
+3. **Cronograma Gantt Comparativo (Planificado vs. Ejecución Real y Desvíos):**
+   ![Gantt Plan vs Real](./diagramas/03_cronograma_gantt_plan_vs_real.png)
+4. **Diagrama de Puntos e Intervalos PERT ($a, m, b, E, \text{Real}$):**
+   ![Diagrama de Puntos PERT](./diagramas/04_diagrama_puntos_pert_desvios.png)
+5. **Curva S de Valor Ganado y Diagrama de Puntos de Commits en Git (114 commits en 29 fechas):**
+   ![Curva S y Commits Git](./diagramas/05_curva_s_y_velocidad_commits_git.png)
+6. **Mapa de Calor de Riesgos (5x5), Tablero Semáforo y Matriz RACI:**
+   ![Riesgos, Semáforo y RACI](./diagramas/06_matriz_riesgos_semaforo_y_raci.png)
+

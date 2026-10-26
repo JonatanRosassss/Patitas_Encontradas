@@ -8,3 +8,6 @@ web-build/
 .env
 .env.local
 
+# Python
+__pycache__/
+*.pyc
