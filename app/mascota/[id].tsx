@@ -16,13 +16,16 @@ import { db } from '../../services/firebase';
 
 interface Mascota {
   id?: string;
-  nombre: string;
-  tipo: string;
-  estado: 'Perdido' | 'Encontrado' | 'Visto';
+  nombre?: string;
+  titulo?: string;
+  tipo?: string;
+  estado?: 'Perdido' | 'Encontrado' | 'Visto';
   imagenUrl?: string;
+  fotoUrl?: string;
   ubicacion?: string;
   descripcion?: string;
-  telefonoContacto: string;
+  telefonoContacto?: string;
+  telefono?: string;
 }
 
 export default function DetalleMascotaScreen() {
@@ -36,7 +39,7 @@ export default function DetalleMascotaScreen() {
     const obtenerMascota = async () => {
       if (!id) return;
       try {
-        const docRef = doc(db, 'mascotas', id);
+        const docRef = doc(db, 'Publicaciones', id);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -56,14 +59,16 @@ export default function DetalleMascotaScreen() {
   }, [id]);
 
   const abrirWhatsApp = async () => {
-    if (!mascota?.telefonoContacto) {
+    const telefono = mascota?.telefonoContacto || mascota?.telefono;
+    if (!telefono) {
       Alert.alert('Sin contacto', 'Esta publicación no cuenta con un número de teléfono registrado.');
       return;
     }
 
-    const numeroLimpio = mascota.telefonoContacto.replace(/[^0-9]/g, '');
+    const numeroLimpio = telefono.replace(/[^0-9]/g, '');
+    const nombreMostrar = mascota?.nombre || mascota?.titulo || 'la mascota';
     const mensaje = encodeURIComponent(
-      `¡Hola! Vi tu publicación de ${mascota.nombre || 'la mascota'} en Patitas Encontradas.`
+      `¡Hola! Vi tu publicación de ${nombreMostrar} en Patitas Encontradas.`
     );
     const url = `[suspicious link removed]{numeroLimpio}?text=${mensaje}`;
 
@@ -100,10 +105,13 @@ export default function DetalleMascotaScreen() {
     );
   }
 
+  const imagen = mascota.imagenUrl || mascota.fotoUrl;
+  const nombreMostrar = mascota.nombre || mascota.titulo || 'Mascota sin nombre';
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      {mascota.imagenUrl ? (
-        <Image source={{ uri: mascota.imagenUrl }} style={styles.imagen} />
+      {imagen ? (
+        <Image source={{ uri: imagen }} style={styles.imagen} />
       ) : (
         <View style={styles.imagenPlaceholder}>
           <Text style={styles.imagenPlaceholderTexto}>Sin Imagen</Text>
@@ -112,15 +120,17 @@ export default function DetalleMascotaScreen() {
 
       <View style={styles.contenido}>
         <View style={styles.headerRow}>
-          <Text style={styles.nombre}>{mascota.nombre || 'Mascota sin nombre'}</Text>
-          <View
-            style={[
-              styles.badge,
-              mascota.estado === 'Perdido' ? styles.badgePerdido : styles.badgeEncontrado,
-            ]}
-          >
-            <Text style={styles.badgeTexto}>{mascota.estado}</Text>
-          </View>
+          <Text style={styles.nombre}>{nombreMostrar}</Text>
+          {mascota.estado && (
+            <View
+              style={[
+                styles.badge,
+                mascota.estado === 'Perdido' ? styles.badgePerdido : styles.badgeEncontrado,
+              ]}
+            >
+              <Text style={styles.badgeTexto}>{mascota.estado}</Text>
+            </View>
+          )}
         </View>
 
         <Text style={styles.tipo}>{mascota.tipo || 'Mascota'}</Text>
