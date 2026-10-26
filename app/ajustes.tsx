@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Typography } from '../constants/theme';
+import { Colors, Spacing, Typography } from '../constants/theme';
 import { router } from 'expo-router';
 
 export default function AjustesScreen() {
@@ -12,7 +12,7 @@ export default function AjustesScreen() {
       <ScrollView style={styles.container}>
         {/* Botón de Atrás / Volver */}
         <Pressable style={styles.botonVolver} onPress={() => router.back()}>
-          <Text style={styles.textoBotonVolver}>←</Text>
+          <Text style={styles.textoBotonVolver}>← Volver</Text>
         </Pressable>
 
         <Text style={styles.seccionTitulo}>Notificaciones</Text>
@@ -108,5 +108,15 @@ const styles = StyleSheet.create({
   opcionTexto: {
     fontSize: Typography.sizes.sm,
     fontFamily: Typography.fonts.bodyBold,
+  },
+  backButton: {
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.sm,
+    alignSelf: 'flex-start',
+  },
+  backButtonText: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.bodyBold,
+    color: Colors.text,
   },
 });

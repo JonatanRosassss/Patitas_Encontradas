@@ -1,8 +1,10 @@
 
 import {
   addDoc,
+  arrayUnion,
   collection,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   query,
@@ -14,6 +16,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "./firebase";
+import { auth } from "./firebase";
 
 export type TipoNotificacion =
   | "cerca"
@@ -33,6 +36,7 @@ export interface Notificacion {
 }
 
 const notificacionesRef = collection(db, "notificaciones");
+const alertasRef = collection(db, "alertas");
 
 /**
  * Crea una notificación interna para un usuario.
@@ -58,8 +62,102 @@ export async function crearNotificacion(datos: {
 }
 
 /**
+ * Registra al usuario como interesado en una publicación.
+ * Se debe llamar cuando confirma que vio la mascota.
+ */
+export async function registrarInteraccionPublicacion(
+  publicacionId: string
+): Promise<void> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("Tenés que iniciar sesión para registrar la interacción.");
+  }
+
+  if (!publicacionId) {
+    throw new Error("La publicación no es válida.");
+  }
+
+  const alertaRef = doc(db, "alertas", publicacionId);
+  const alertaSnap = await getDoc(alertaRef);
+
+  if (!alertaSnap.exists()) {
+    throw new Error("La publicación ya no existe.");
+  }
+
+  const datos = alertaSnap.data();
+
+  if (datos.creadoPor === usuario.uid) {
+    throw new Error("No podés registrar una interacción en tu propia publicación.");
+  }
+
+  await updateDoc(alertaRef, {
+    usuariosInteresados: arrayUnion(usuario.uid),
+  });
+}
+
+/**
+ * Notifica a las personas que interactuaron con una publicación
+ * cuando su dueño la marca como encontrada.
+ *
+ * Esta función también actualiza el estado de la publicación.
+ */
+export async function notificarMascotaEncontrada(
+  publicacionId: string
+): Promise<void> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("Tenés que iniciar sesión.");
+  }
+
+  const alertaRef = doc(db, "alertas", publicacionId);
+  const alertaSnap = await getDoc(alertaRef);
+
+  if (!alertaSnap.exists()) {
+    throw new Error("No se encontró la publicación.");
+  }
+
+  const alerta = alertaSnap.data();
+
+  if (alerta.creadoPor !== usuario.uid) {
+    throw new Error("Solo el dueño de la publicación puede cambiar su estado.");
+  }
+
+  if (alerta.estado === "ENCONTRADO") {
+    return;
+  }
+
+  const interesados: string[] = Array.isArray(alerta.usuariosInteresados)
+    ? alerta.usuariosInteresados
+    : [];
+
+  const destinatarios = [
+    ...new Set(interesados.filter(
+      (uid) => typeof uid === "string" && uid !== usuario.uid
+    )),
+  ];
+
+  // Primero actualizamos el estado de la publicación.
+  await updateDoc(alertaRef, {
+    estado: "ENCONTRADO",
+    fechaModificacion: serverTimestamp(),
+  });
+
+  // Después generamos las notificaciones para los interesados.
+  for (const destinatarioId of destinatarios) {
+    await crearNotificacion({
+      destinatarioId,
+      tipo: "estado",
+      titulo: "¡Mascota encontrada!",
+      mensaje: `¡Buenas noticias! ${alerta.nombre || "La mascota"} fue marcada como encontrada.`,
+      publicacionId,
+    });
+  }
+}
+
+/**
  * Escucha las notificaciones de un usuario en tiempo real.
- * El orden se calcula localmente para evitar el índice compuesto.
  */
 export function escucharNotificaciones(
   usuarioId: string,
@@ -80,10 +178,8 @@ export function escucharNotificaciones(
       })) as Notificacion[];
 
       items.sort((a, b) => {
-        const fechaA = obtenerMilisegundos(a.createdAt);
-        const fechaB = obtenerMilisegundos(b.createdAt);
-
-        return fechaB - fechaA;
+        return obtenerMilisegundos(b.createdAt) -
+          obtenerMilisegundos(a.createdAt);
       });
 
       callback(items);
@@ -95,9 +191,6 @@ export function escucharNotificaciones(
   );
 }
 
-/**
- * Convierte el timestamp de Firestore a milisegundos.
- */
 function obtenerMilisegundos(fecha: unknown): number {
   if (
     fecha &&
@@ -111,9 +204,6 @@ function obtenerMilisegundos(fecha: unknown): number {
   return 0;
 }
 
-/**
- * Marca una notificación como leída.
- */
 export async function marcarComoLeida(
   notificacionId: string
 ): Promise<void> {
@@ -122,9 +212,6 @@ export async function marcarComoLeida(
   });
 }
 
-/**
- * Marca todas las notificaciones de un usuario como leídas.
- */
 export async function marcarTodasComoLeidas(
   usuarioId: string
 ): Promise<void> {

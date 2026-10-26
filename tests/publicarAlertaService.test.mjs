@@ -27,6 +27,22 @@ test('mascotasService: limpiarUndefined logic strips undefined and corrupt coord
     "Must target 'alertas' collection"
   );
 
+  const inicioCrearAlerta = content.indexOf('export async function crearAlertaMascota');
+  const finCrearAlerta = content.indexOf('export async function modificarAlertaMascota', inicioCrearAlerta);
+  const crearAlerta = content.slice(inicioCrearAlerta, finCrearAlerta);
+  assert.match(
+    crearAlerta,
+    /const usuario = auth\.currentUser;\s*if \(!usuario\)\s*\{\s*throw new Error/
+  );
+  assert.ok(
+    crearAlerta.includes('creadoPor: usuario.uid'),
+    'Published alerts must always belong to the authenticated user'
+  );
+  assert.ok(
+    !crearAlerta.includes("'anonimo'"),
+    'Unauthenticated users must not be able to create alerts'
+  );
+
   // Must NOT target obsolete 'Mascota' collection
   assert.ok(
     !content.includes("'Mascota'"),
@@ -86,6 +102,10 @@ test('publicar-alerta screen: adheres to clean architecture, delegates to servic
   assert.ok(
     content.includes('await crearAlertaMascota('),
     'Must invoke crearAlertaMascota with await'
+  );
+  assert.ok(
+    content.includes('if (!usuario)') && content.includes("router.replace('/(auth)/login')"),
+    'Unauthenticated visitors must be redirected to login instead of seeing the publication form'
   );
 
   // Must NOT have unawaited setTimeout wrapping Firestore write
