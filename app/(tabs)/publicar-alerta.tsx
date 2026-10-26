@@ -26,9 +26,11 @@ import {
   type GeocodingResult,
 } from '@/services/geocodingService';
 import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
+import { useAuth } from '@/services/AuthContext';
 
 export default function PublicarAlertaScreen() {
   const router = useRouter();
+  const { usuario, cargando: cargandoSesion } = useAuth();
 
   // Estados del formulario
   const [tipoAlerta, setTipoAlerta] = useState<'perdi' | 'encontre'>('perdi');
@@ -55,6 +57,34 @@ export default function PublicarAlertaScreen() {
       router.replace('/(tabs)');
     }
   };
+
+  if (cargandoSesion) {
+    return (
+      <SafeAreaView style={[styles.container, styles.authGate]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </SafeAreaView>
+    );
+  }
+
+  if (!usuario) {
+    return (
+      <SafeAreaView style={[styles.container, styles.authGate]}>
+        <Text style={styles.title}>Iniciá sesión para publicar</Text>
+        <Text style={styles.authMessage}>
+          Necesitás una cuenta para compartir una alerta de una mascota.
+        </Text>
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={() => router.replace('/(auth)/login')}
+        >
+          <Text style={styles.submitButtonText}>INICIAR SESIÓN</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.backButton} onPress={handleVolver}>
+          <Text style={styles.backButtonText}>Volver</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   // Función para seleccionar fotos desde la galería
   const handleSeleccionarFotos = async () => {
@@ -541,6 +571,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundLight,
+  },
+  authGate: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.four,
+  },
+  authMessage: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
   },
   scrollContent: {
     paddingHorizontal: Spacing.four,

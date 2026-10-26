@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Switch, Pressable, ScrollView } from 'react-native';
-import { Colors, Typography } from '../constants/theme';
+import { View, Text, StyleSheet, Switch, Pressable, ScrollView, TouchableOpacity } from 'react-native';
+import { Colors, Spacing, Typography } from '../constants/theme';
 import { router } from 'expo-router';
 
 export default function AjustesScreen() {
@@ -42,6 +42,9 @@ export default function AjustesScreen() {
       <Pressable style={styles.opcionBoton} onPress={() => router.push('/(auth)/login')}>
         <Text style={[styles.opcionTexto, { color: Colors.error }]}>Cerrar sesión</Text>
       </Pressable>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Text style={styles.backButtonText}>← Volver</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -77,5 +80,15 @@ const styles = StyleSheet.create({
   opcionTexto: {
     fontSize: Typography.sizes.sm,
     fontFamily: Typography.fonts.bodyBold,
+  },
+  backButton: {
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.sm,
+    alignSelf: 'flex-start',
+  },
+  backButtonText: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.bodyBold,
+    color: Colors.text,
   },
 });
