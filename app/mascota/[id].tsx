@@ -1,28 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  Image, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ActivityIndicator, 
-  ScrollView, 
-  Linking, 
-  Alert 
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Linking,
+  Alert,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 
-interface Mascota {
-  id?: string;
+interface AlertaDetalle {
+  id: string;
   nombre?: string;
-  titulo?: string;
-  tipo?: string;
-  estado?: 'Perdido' | 'Encontrado' | 'Visto';
-  imagenUrl?: string;
+  especie?: string;
+  estado?: string;
+  tipoAlerta?: string;
   fotoUrl?: string;
+  imagenUrl?: string;
+  fotoUri?: string;
+  foto?: string;
+  imagen?: string;
   ubicacion?: string;
+  direccionAproximada?: string;
   descripcion?: string;
   telefonoContacto?: string;
   telefono?: string;
@@ -32,126 +37,225 @@ export default function DetalleMascotaScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
-  const [mascota, setMascota] = useState<Mascota | null>(null);
-  const [cargando, setCargando] = useState<boolean>(true);
+  const [mascota, setMascota] = useState<AlertaDetalle | null>(null);
+  const [cargando, setCargando] = useState(true);
+  const [procesando, setProcesando] = useState(false);
 
+  // READ (Detalle)
   useEffect(() => {
-    const obtenerMascota = async () => {
-      if (!id) return;
+    if (!id) return;
+
+    const cargarAlerta = async () => {
       try {
-        const docRef = doc(db, 'Publicaciones', id);
+        const docRef = doc(db, 'alertas', id as string);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setMascota({ id: docSnap.id, ...docSnap.data() } as Mascota);
+          setMascota({ id: docSnap.id, ...docSnap.data() } as AlertaDetalle);
         } else {
-          Alert.alert('Aviso', 'No se encontró la publicación especificada.');
+          if (Platform.OS === 'web') {
+            window.alert('La publicación no existe o fue eliminada.');
+          } else {
+            Alert.alert('No encontrada', 'La publicación no existe o fue eliminada.');
+          }
+          router.replace('/(tabs)');
         }
       } catch (error) {
-        console.error('Error al consultar Firestore:', error);
-        Alert.alert('Error', 'Ocurrió un error al cargar la información.');
+        console.error('Error al cargar detalle:', error);
       } finally {
         setCargando(false);
       }
     };
 
-    obtenerMascota();
+    cargarAlerta();
   }, [id]);
 
-  const abrirWhatsApp = async () => {
-    const telefono = mascota?.telefonoContacto || mascota?.telefono;
-    if (!telefono) {
-      Alert.alert('Sin contacto', 'Esta publicación no cuenta con un número de teléfono registrado.');
-      return;
-    }
-
-    const numeroLimpio = telefono.replace(/[^0-9]/g, '');
-    const nombreMostrar = mascota?.nombre || mascota?.titulo || 'la mascota';
-    const mensaje = encodeURIComponent(
-      `¡Hola! Vi tu publicación de ${nombreMostrar} en Patitas Encontradas.`
-    );
-    const url = `[suspicious link removed]{numeroLimpio}?text=${mensaje}`;
-
+  // UPDATE (Cambiar estado: Perdido <-> Encontrado)
+  const handleCambiarEstado = async () => {
+    if (!id || !mascota) return;
+    setProcesando(true);
     try {
-      const sePuedeAbrir = await Linking.canOpenURL(url);
-      if (sePuedeAbrir) {
-        await Linking.openURL(url);
+      const nuevoEstado = mascota.estado === 'ENCONTRADO' ? 'PERDIDO' : 'ENCONTRADO';
+      const docRef = doc(db, 'alertas', id as string);
+      await updateDoc(docRef, { estado: nuevoEstado });
+      setMascota({ ...mascota, estado: nuevoEstado });
+
+      if (Platform.OS === 'web') {
+        window.alert(`Estado actualizado a "${nuevoEstado}".`);
       } else {
-        Alert.alert('Error', 'No se pudo abrir la aplicación de WhatsApp.');
+        Alert.alert('Éxito', `Estado actualizado a "${nuevoEstado}".`);
       }
     } catch (error) {
-      console.error('Error abriendo WhatsApp:', error);
-      Alert.alert('Error', 'Ocurrió un problema al intentar redireccionar.');
+      console.error('Error al actualizar estado:', error);
+      if (Platform.OS === 'web') {
+        window.alert('No se pudo actualizar el estado.');
+      } else {
+        Alert.alert('Error', 'No se pudo actualizar el estado de la publicación.');
+      }
+    } finally {
+      setProcesando(false);
     }
+  };
+
+  // DELETE (Eliminar publicación)
+  const ejecutarBorrado = async () => {
+    if (!id) return;
+    setProcesando(true);
+    try {
+      const docRef = doc(db, 'alertas', id as string);
+      await deleteDoc(docRef);
+
+      if (Platform.OS === 'web') {
+        window.alert('Publicación eliminada correctamente.');
+      } else {
+        Alert.alert('Eliminado', 'La alerta fue eliminada correctamente.');
+      }
+
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Error al eliminar:', error);
+      if (Platform.OS === 'web') {
+        window.alert('No se pudo eliminar la alerta.');
+      } else {
+        Alert.alert('Error', 'No se pudo eliminar la alerta.');
+      }
+    } finally {
+      setProcesando(false);
+    }
+  };
+
+  const handleEliminar = () => {
+    if (Platform.OS === 'web') {
+      const confirmar = window.confirm('¿Estás seguro de que deseas eliminar esta publicación?');
+      if (confirmar) {
+        ejecutarBorrado();
+      }
+    } else {
+      Alert.alert(
+        'Eliminar publicación',
+        '¿Estás seguro de que deseas eliminar esta alerta?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Eliminar',
+            style: 'destructive',
+            onPress: ejecutarBorrado,
+          },
+        ]
+      );
+    }
+  };
+
+  // CONTACTO WHATSAPP
+  const handleContactar = () => {
+    const telefono = mascota?.telefonoContacto || mascota?.telefono;
+    if (!telefono) {
+      if (Platform.OS === 'web') {
+        window.alert('Esta alerta no tiene un teléfono asociado.');
+      } else {
+        Alert.alert('Sin contacto', 'Esta alerta no tiene un teléfono asociado.');
+      }
+      return;
+    }
+    const mensaje = `Hola! Te contacto desde Patitas Encontradas por la publicación de ${mascota?.nombre || 'la mascota'}.`;
+    const url = `whatsapp://send?phone=${telefono}&text=${encodeURIComponent(mensaje)}`;
+
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(url);
+        } else {
+          Linking.openURL(`[suspicious link removed]{telefono}?text=${encodeURIComponent(mensaje)}`);
+        }
+      })
+      .catch(() => {
+        if (Platform.OS === 'web') {
+          window.alert('No se pudo abrir WhatsApp.');
+        } else {
+          Alert.alert('Error', 'No se pudo abrir WhatsApp.');
+        }
+      });
   };
 
   if (cargando) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#FF8A00" />
-        <Text style={styles.cargandoTexto}>Cargando datos de la mascota...</Text>
       </View>
     );
   }
 
-  if (!mascota) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorTexto}>La mascota no está disponible.</Text>
-        <TouchableOpacity style={styles.btnVolver} onPress={() => router.back()}>
-          <Text style={styles.btnVolverTexto}>Volver atrás</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  if (!mascota) return null;
 
-  const imagen = mascota.imagenUrl || mascota.fotoUrl;
-  const nombreMostrar = mascota.nombre || mascota.titulo || 'Mascota sin nombre';
+  const imagen =
+    mascota.fotoUrl ||
+    mascota.imagenUrl ||
+    mascota.fotoUri ||
+    mascota.foto ||
+    mascota.imagen;
+
+  const esPerdido = (mascota.estado || '').toLowerCase().includes('perd');
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container}>
       {imagen ? (
         <Image source={{ uri: imagen }} style={styles.imagen} />
       ) : (
         <View style={styles.imagenPlaceholder}>
-          <Text style={styles.imagenPlaceholderTexto}>Sin Imagen</Text>
+          <Text style={styles.placeholderTexto}>Sin Foto</Text>
         </View>
       )}
 
       <View style={styles.contenido}>
-        <View style={styles.headerRow}>
-          <Text style={styles.nombre}>{nombreMostrar}</Text>
-          {mascota.estado && (
-            <View
-              style={[
-                styles.badge,
-                mascota.estado === 'Perdido' ? styles.badgePerdido : styles.badgeEncontrado,
-              ]}
-            >
-              <Text style={styles.badgeTexto}>{mascota.estado}</Text>
-            </View>
-          )}
+        <View style={styles.headerFila}>
+          <Text style={styles.nombre}>{mascota.nombre || 'Mascota'}</Text>
+          <View style={[styles.badge, esPerdido ? styles.badgePerdido : styles.badgeEncontrado]}>
+            <Text style={styles.badgeTexto}>{mascota.estado || 'Alerta'}</Text>
+          </View>
         </View>
 
-        <Text style={styles.tipo}>{mascota.tipo || 'Mascota'}</Text>
+        <Text style={styles.especie}>{mascota.especie || 'Mascota'}</Text>
 
-        {mascota.ubicacion && (
-          <View style={styles.bloqueInfo}>
-            <Text style={styles.label}>📍 Ubicación:</Text>
-            <Text style={styles.valor}>{mascota.ubicacion}</Text>
-          </View>
+        {(mascota.ubicacion || mascota.direccionAproximada) && (
+          <Text style={styles.ubicacion}>
+            📍 {mascota.ubicacion || mascota.direccionAproximada}
+          </Text>
         )}
 
-        {mascota.descripcion && (
-          <View style={styles.bloqueInfo}>
-            <Text style={styles.label}>📝 Descripción / Señas particulares:</Text>
-            <Text style={styles.valor}>{mascota.descripcion}</Text>
+        {mascota.descripcion ? (
+          <View style={styles.seccionDesc}>
+            <Text style={styles.tituloDesc}>Descripción:</Text>
+            <Text style={styles.textoDesc}>{mascota.descripcion}</Text>
           </View>
-        )}
+        ) : null}
 
-        <TouchableOpacity style={styles.btnWhatsapp} onPress={abrirWhatsApp} activeOpacity={0.85}>
-          <Text style={styles.btnWhatsappTexto}>💬 Contactar por WhatsApp</Text>
+        {/* CONTACTAR WHATSAPP */}
+        <TouchableOpacity style={styles.btnWhatsapp} onPress={handleContactar} activeOpacity={0.8}>
+          <Text style={styles.btnTextoBlanco}>💬 Contactar por WhatsApp</Text>
         </TouchableOpacity>
+
+        {/* ACCIONES CRUD: UPDATE Y DELETE */}
+        <View style={styles.crudAcciones}>
+          <TouchableOpacity
+            style={styles.btnSecundario}
+            onPress={handleCambiarEstado}
+            disabled={procesando}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.btnTextoSecundario}>
+              {mascota.estado === 'ENCONTRADO' ? 'Marcar como Perdido' : 'Marcar como Encontrado'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.btnEliminar}
+            onPress={handleEliminar}
+            disabled={procesando}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.btnTextoEliminar}>🗑️ Eliminar publicación</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
@@ -160,49 +264,33 @@ export default function DetalleMascotaScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F2',
+    backgroundColor: '#FFFFFF',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-  },
-  cargandoTexto: {
-    marginTop: 10,
-    color: '#666',
-    fontSize: 16,
-  },
-  errorTexto: {
-    fontSize: 18,
-    color: '#333',
-    marginBottom: 20,
   },
   imagen: {
     width: '100%',
-    height: 300,
+    height: 280,
     resizeMode: 'cover',
   },
   imagenPlaceholder: {
     width: '100%',
-    height: 250,
+    height: 220,
     backgroundColor: '#E0E0E0',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  imagenPlaceholderTexto: {
+  placeholderTexto: {
     color: '#888',
-    fontSize: 18,
+    fontSize: 16,
   },
   contenido: {
     padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginTop: -20,
   },
-  headerRow: {
+  headerFila: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -213,15 +301,11 @@ const styles = StyleSheet.create({
     color: '#5A3A1F',
     flex: 1,
   },
-  tipo: {
-    fontSize: 16,
-    color: '#888',
-    marginBottom: 15,
-  },
   badge: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 5,
     borderRadius: 12,
+    marginLeft: 8,
   },
   badgePerdido: {
     backgroundColor: '#FF3B30',
@@ -234,45 +318,71 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12,
   },
-  bloqueInfo: {
-    marginBottom: 15,
+  especie: {
+    fontSize: 16,
+    color: '#777',
+    marginTop: 4,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#5A3A1F',
-    marginBottom: 4,
-  },
-  valor: {
+  ubicacion: {
     fontSize: 15,
     color: '#444',
-    lineHeight: 22,
+    marginTop: 10,
+  },
+  seccionDesc: {
+    marginTop: 18,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+  },
+  tituloDesc: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 6,
+  },
+  textoDesc: {
+    fontSize: 14,
+    color: '#555',
+    lineHeight: 20,
   },
   btnWhatsapp: {
     backgroundColor: '#25D366',
-    paddingVertical: 15,
-    borderRadius: 12,
+    borderRadius: 10,
+    paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
+    marginTop: 25,
   },
-  btnWhatsappTexto: {
+  btnTextoBlanco: {
     color: '#FFFFFF',
+    fontWeight: 'bold',
     fontSize: 16,
-    fontWeight: 'bold',
   },
-  btnVolver: {
-    backgroundColor: '#FF8A00',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+  crudAcciones: {
+    marginTop: 15,
+    gap: 10,
   },
-  btnVolverTexto: {
-    color: '#FFF',
-    fontWeight: 'bold',
+  btnSecundario: {
+    backgroundColor: '#FFF3E0',
+    borderWidth: 1,
+    borderColor: '#FF8A00',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  btnTextoSecundario: {
+    color: '#FF8A00',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  btnEliminar: {
+    backgroundColor: '#FDECEA',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  btnTextoEliminar: {
+    color: '#D32F2F',
+    fontWeight: '600',
+    fontSize: 14,
   },
 });
