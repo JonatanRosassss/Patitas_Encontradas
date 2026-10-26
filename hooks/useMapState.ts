@@ -4,6 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { Coordinates, MapFilterIndex, MapPet } from '../types/map';
 import { MASCOTAS_MOCK } from '../data/mapMockData';
+
 import { isValidCoordinate } from '../utils/geoValidation';
 import { MapContainerRef } from '../components/map/MapContainer';
 import { listarAlertasParaMapa } from '../services/mascotasService';
@@ -21,7 +22,7 @@ export interface UseMapStateReturn {
   handleLocate: () => Promise<void>;
   handleZoomIn: () => void;
   handleZoomOut: () => void;
-  mapContainerRef: React.RefObject<MapContainerRef | null>;
+  mapContainerRef: React.RefObject<MapContainerRef>;
   cargandoPuntos: boolean;
   puntosCargados: boolean;
   recargarPuntos: () => Promise<void>;
