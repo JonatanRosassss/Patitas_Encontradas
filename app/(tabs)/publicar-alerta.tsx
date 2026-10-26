@@ -222,16 +222,48 @@ export default function PublicarAlertaScreen() {
     }
   };
 
-  // Función para guardar y publicar la alerta a través del servicio centralizado
+  // Función para guardar y publicar la alerta con validaciones estrictas (Sprint 5)
   const handlePublicar = async () => {
-    if (!nombre.trim() || !ubicacion.trim()) {
-      Alert.alert('Campos requeridos', 'Por favor completa al menos el nombre y la ubicación de la mascota.');
+    // Helper para mostrar alertas compatibles tanto en Web como en Móvil
+    const alertar = (titulo: string, mensaje: string) => {
+      if (Platform.OS === 'web') {
+        window.alert(`${titulo}: ${mensaje}`);
+      } else {
+        Alert.alert(titulo, mensaje);
+      }
+    };
+
+    // 1. Validar nombre / referencia
+    if (!nombre || !nombre.trim()) {
+      alertar('Campo requerido', 'Por favor ingresá el nombre o referencia de la mascota.');
       return;
     }
+    if (nombre.trim().length < 2) {
+      alertar('Nombre inválido', 'El nombre o referencia debe tener al menos 2 caracteres.');
+      return;
+    }
+
+    // 2. Validar ubicación
+    if (!ubicacion || !ubicacion.trim()) {
+      alertar('Campo requerido', 'Por favor indicá la zona, barrio o calle aproximada.');
+      return;
+    }
+    if (ubicacion.trim().length < 4) {
+      alertar('Ubicación poco clara', 'Por favor ingresá una ubicación más descriptiva (mínimo 4 caracteres).');
+      return;
+    }
+
+    // 3. Validar descripción (si escribió algo, que tenga sentido)
+    if (descripcion && descripcion.trim().length > 0 && descripcion.trim().length < 5) {
+      alertar('Descripción muy corta', 'Si agregás una descripción, por favor detallá un poco más (mínimo 5 caracteres).');
+      return;
+    }
+
 
     setGuardando(true);
 
     try {
+
       // 1. Construir payload tipado omitiendo propiedades con valor undefined
       const payload: Omit<NuevaAlertaMascota, 'fotos' | 'fechaReporte' | 'creadoPor'> = {
         nombre: nombre.trim(),
