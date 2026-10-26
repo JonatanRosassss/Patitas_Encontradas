@@ -299,6 +299,28 @@ Antes de dar cualquier entrega por finalizada:
   - **Nueva estrategia aplicada:** Integrar los aportes visuales de Rodrigo (botón central prominente en tabs y validaciones estrictas de publicación), redirigir de forma segura cualquier enlace a `mascota/[id]` hacia `detalle/[id]`, y mantener el feed oficial del Home con `PetCard`.
 - **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` (58/58 PASS) | Push exitoso a `origin/rama-rodrigo`.
 
+#### [2026-10-26] - Sincronización y Resolución de Conflictos de dev/equipo1 con main
+- **Solicitud del Usuario:** Responder si es necesario mergear `dev/equipo1` hacia `main` tras el push de Rodrigo, y solucionar el error de merge que impedía hacerlo automáticamente en GitHub.
+- **Tipo de Cambio:** `CORRECCIÓN_BUG` | `REFACTORIZACIÓN` | `CONFIGURACIÓN`
+- **Archivos Involucrados:**
+  - `app/(tabs)/_layout.tsx`: Conciliación del botón central flotante '+' con `TabBarMetrics` y elevación de barra de tabs para navegación de 3 botones en Android.
+  - `app/(tabs)/index.tsx`: Conciliación de espaciados de scroll y padding seguro.
+  - `app/(tabs)/perfil.tsx`: Unificación de la función `marcarMascotaComoEncontrada` de Sol con la persistencia multicapa de foto de perfil y edición de datos de `dev/equipo1`.
+  - `app/detalle/[id].tsx`: Integración del enlace enriquecido de compartir de `main` (`ExpoLinking.createURL` y `isValidCoordinate`) con los componentes modulares y responsivos de la ficha de mascota.
+  - `components/ui/pet-card.tsx`: Desacoplamiento del botón de guardar fuera del contenedor interactivo de la tarjeta para compatibilidad web, manteniendo `badgesGroup` y etiquetas con icono.
+- **Progreso Realizado:**
+  - Se hizo merge de `origin/main` (que ya contiene los PRs de `sol/trabajo-main`, `home/pantalla`, `maxi/filtros` y `rama-rodrigo`) hacia `dev/equipo1`.
+  - Se resolvieron manualmente los 5 archivos en conflicto garantizando interoperabilidad completa entre todas las funcionalidades del sprint.
+  - Se validó con `npx tsc --noEmit` (0 errores) y suite de pruebas `npm test` (58/58 PASS).
+  - Se commiteó (`85b8dde`) y se subió con `git push origin dev/equipo1`.
+  - Se simuló el merge de `dev/equipo1` hacia `main` (`git merge-tree`), confirmando 0 conflictos ("Able to merge").
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** Al fusionarse en `main` los cambios de Sol, Maxi y Rodrigo, `dev/equipo1` divergió en 5 archivos clave (layouts, tabs, perfiles y tarjetas), lo que impedía a GitHub realizar el merge automático.
+  - **Motivo del cambio:** Integrar todas las ramas del equipo en una versión unificada y estable sin perder ninguna funcionalidad de los colaboradores ni las mejoras de UX y responsive de `dev/equipo1`.
+  - **Nueva estrategia aplicada:** Integración bidireccional y respetuosa: conservar las mejoras de enlace y marcado de mascota de Sol, el botón central de Rodrigo, los ajustes de Maxi y toda la infraestructura visual, responsiva y de persistencia de `dev/equipo1`.
+- **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` (58/58 PASS) | Push exitoso a `origin/dev/equipo1`.
+
+
 
 
 
