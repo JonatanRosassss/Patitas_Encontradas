@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { Coordinates, MapFilterIndex, MapPet } from '../types/map';
 import { MASCOTAS_MOCK } from '../data/mapMockData';
@@ -22,12 +23,17 @@ export interface UseMapStateReturn {
   handleZoomOut: () => void;
   mapContainerRef: React.RefObject<MapContainerRef | null>;
   cargandoPuntos: boolean;
+  puntosCargados: boolean;
   recargarPuntos: () => Promise<void>;
 }
 
 export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateReturn {
+  const { alertaId: alertaIdParam } = useLocalSearchParams<{ alertaId?: string | string[] }>();
+  const alertaId = Array.isArray(alertaIdParam) ? alertaIdParam[0] : alertaIdParam;
+  const alertaProcesada = useRef<string | null>(null);
   const [pets, setPets] = useState<MapPet[]>(initialPets);
   const [cargandoPuntos, setCargandoPuntos] = useState(false);
+  const [puntosCargados, setPuntosCargados] = useState(false);
   const [filtro, setFiltro] = useState<MapFilterIndex>(0);
   const [selectedPet, setSelectedPet] = useState<MapPet | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,6 +57,7 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
       setPets(initialPets);
     } finally {
       setCargandoPuntos(false);
+      setPuntosCargados(true);
     }
   }, [initialPets]);
 
@@ -85,6 +92,46 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
       return true;
     });
   }, [pets, filtro, searchQuery]);
+
+  useEffect(() => {
+    if (!alertaId) return;
+    alertaProcesada.current = null;
+    setFiltro(0);
+    setSearchQuery('');
+    setSelectedPet(null);
+  }, [alertaId]);
+
+  useEffect(() => {
+    if (
+      !alertaId ||
+      !puntosCargados ||
+      cargandoPuntos ||
+      filtro !== 0 ||
+      searchQuery !== '' ||
+      alertaProcesada.current === alertaId
+    ) {
+      return;
+    }
+
+    alertaProcesada.current = alertaId;
+    const alerta = filteredPets.find((pet) => pet.id === alertaId);
+    if (!alerta) {
+      Alert.alert(
+        'Alerta no disponible en el mapa',
+        'No se encontró una ubicacion valida'
+      );
+      return;
+    }
+
+    setSelectedPet(alerta);
+  }, [
+    alertaId,
+    cargandoPuntos,
+    filtro,
+    filteredPets,
+    puntosCargados,
+    searchQuery,
+  ]);
 
   const handleLocate = useCallback(async () => {
     if (isLocating) return;
@@ -192,6 +239,7 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
     handleZoomOut,
     mapContainerRef,
     cargandoPuntos,
+    puntosCargados,
     recargarPuntos,
   };
 }
