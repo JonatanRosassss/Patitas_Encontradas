@@ -13,12 +13,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as ExpoLinking from 'expo-linking';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Colors, Typography, Spacing, Radius } from '@/constants/theme';
 import { obtenerAlertaConUsuarioPorId, formatearTiempoRelativo } from '@/services/mascotasService';
 import { contactarPorWhatsApp, generarMensajeContactoMascota } from '@/utils/whatsapp';
 import type { PetConUsuario } from '@/types/Pet';
+import { isValidCoordinate } from '@/utils/geoValidation';
 
 export default function DetalleScreen() {
   const router = useRouter();
@@ -72,15 +74,30 @@ export default function DetalleScreen() {
     if (!alerta) return;
     try {
       const nombreMascota = alerta.nombre || 'esta mascota';
-      const estadoTexto = alerta.estado === 'ENCONTRADO' ? 'Mascota Encontrada' : 'Alerta de Búsqueda';
+      const estadoTexto =
+        alerta.estado === 'ENCONTRADO' ? 'Mascota encontrada' : 'Mascota perdida';
       const ubicacionTexto =
         typeof alerta.ubicacion === 'string'
           ? alerta.ubicacion
-          : (alerta.ubicacion as any)?.direccion || 'Pilar';
+          : alerta.ubicacion.direccion || 'Ubicación no especificada';
+      const coordenadas = alerta.coordenadas;
+      const enlaceMapa =
+        coordenadas &&
+        isValidCoordinate(coordenadas.latitude, coordenadas.longitude)
+          ? ExpoLinking.createURL(`/mapa?alertaId=${encodeURIComponent(alerta.id)}`)
+          : null;
+      const publicacionUrl = ExpoLinking.createURL(`/detalle/${encodeURIComponent(alerta.id)}`);
 
       await Share.share({
-        title: `Patitas Encontradas: ${estadoTexto} - ${nombreMascota}`,
-        message: `🐾 ¡Ayudemos a la comunidad de Pilar! ${estadoTexto}: ${nombreMascota} en ${ubicacionTexto}. Mirá la publicación en Patitas Encontradas.`,
+        title: `Patitas Encontradas: ${nombreMascota}`,
+        message: [
+          '🐾 ¡Ayudemos a la comunidad de pilar! ALERTA DE BUSQUEDA:',
+          `${estadoTexto}: ${nombreMascota}`,
+          ` Ubicación: ${ubicacionTexto}`,
+          ...(enlaceMapa ? [` Ver en el mapa de la app patitas encontradas: ${enlaceMapa}`] : []),
+          ` Ver publicación en la app: ${publicacionUrl}`,
+          '¡Ayudanos a encontrarla!',
+        ].join('\n'),
       });
     } catch {
       // Ignorar cancelaciones del usuario

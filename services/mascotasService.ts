@@ -18,7 +18,6 @@ import {
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Platform } from 'react-native';
 import { ConexionFirebase } from '@/services/ConexionFirebase';
-import { notificarMascotaEncontrada } from "@/services/notificaciones";
 import type {
   Pet,
   NuevaAlertaMascota,
@@ -202,6 +201,9 @@ export async function crearAlertaMascota(
   fotosLocales: string[] = []
 ): Promise<string> {
   const usuario = auth.currentUser;
+  if (!usuario) {
+    throw new Error('Debes iniciar sesión para publicar una alerta.');
+  }
 
   // 1. Subir fotos a Firebase Storage en paralelo con manejo resiliente
   const urlsFotos = await Promise.all(
@@ -243,7 +245,7 @@ export async function crearAlertaMascota(
     ...datos,
     ...(coordenadasValidas ? { coordenadas: coordenadasValidas } : {}),
     fotos: urlsFotos,
-    creadoPor: usuario?.uid ?? 'anonimo',
+    creadoPor: usuario.uid,
     fechaReporte: serverTimestamp(),
   });
 
@@ -515,18 +517,6 @@ export async function listarAlertasParaMapa(): Promise<MapPet[]> {
 }
 
 /**
- * Marca una publicación como encontrada y avisa
- * a quienes interactuaron con ella.
- */
-//export async function marcarMascotaComoEncontrada(
-//  idAlerta: string
-//): Promise<void> {
-//  await notificarMascotaEncontrada(idAlerta);
-//}
-
-
-
-/**
  * Marca una publicación propia como encontrada
  * y notifica a quienes interactuaron con ella.
  */
@@ -581,7 +571,6 @@ export async function marcarMascotaComoEncontrada(
   });
 
   // Crear las notificaciones internas.
-  // Se reutiliza la misma instancia de Firestore del servicio.
   const notificacionesRef = collection(db, 'notificaciones');
 
   for (const destinatarioId of destinatarios) {
@@ -598,4 +587,4 @@ export async function marcarMascotaComoEncontrada(
     });
   }
 }
-
+

@@ -1,7 +1,9 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { Coordinates, MapFilterIndex, MapPet } from '../types/map';
+import { MASCOTAS_MOCK } from '../data/mapMockData';
 
 import { isValidCoordinate } from '../utils/geoValidation';
 import { MapContainerRef } from '../components/map/MapContainer';
@@ -22,12 +24,17 @@ export interface UseMapStateReturn {
   handleZoomOut: () => void;
   mapContainerRef: React.RefObject<MapContainerRef>;
   cargandoPuntos: boolean;
+  puntosCargados: boolean;
   recargarPuntos: () => Promise<void>;
 }
 
-export function useMapState(initialPets: MapPet[] = []): UseMapStateReturn {
+export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateReturn {
+  const { alertaId: alertaIdParam } = useLocalSearchParams<{ alertaId?: string | string[] }>();
+  const alertaId = Array.isArray(alertaIdParam) ? alertaIdParam[0] : alertaIdParam;
+  const alertaProcesada = useRef<string | null>(null);
   const [pets, setPets] = useState<MapPet[]>(initialPets);
   const [cargandoPuntos, setCargandoPuntos] = useState(false);
+  const [puntosCargados, setPuntosCargados] = useState(false);
   const [filtro, setFiltro] = useState<MapFilterIndex>(0);
   const [selectedPet, setSelectedPet] = useState<MapPet | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,20 +44,22 @@ export function useMapState(initialPets: MapPet[] = []): UseMapStateReturn {
   const mapContainerRef = useRef<MapContainerRef>(null);
 
   const recargarPuntos = useCallback(async () => {
-  try {
-  setCargandoPuntos(true);
-
-  const alertasFirebase = await listarAlertasParaMapa();
-
-  // El mapa utiliza publicaciones reales de Firebase.
-  // Si no hay publicaciones con coordenadas válidas, queda vacío.
-  setPets(alertasFirebase);
-} catch (error) {
-  console.error('Error al cargar las alertas del mapa:', error);
-  setPets([]);
-} finally {
-  setCargandoPuntos(false);
-}
+    try {
+      setCargandoPuntos(true);
+      const alertasFirebase = await listarAlertasParaMapa();
+      if (alertasFirebase && alertasFirebase.length > 0) {
+        setPets(alertasFirebase);
+      } else {
+        // Fallback a los puntos iniciales si no hay alertas en Firestore
+        setPets(initialPets);
+      }
+    } catch {
+      // Manejo resiliente offline o restricciones temporales de Firestore
+      setPets(initialPets);
+    } finally {
+      setCargandoPuntos(false);
+      setPuntosCargados(true);
+    }
   }, [initialPets]);
 
   useEffect(() => {
@@ -84,6 +93,46 @@ export function useMapState(initialPets: MapPet[] = []): UseMapStateReturn {
       return true;
     });
   }, [pets, filtro, searchQuery]);
+
+  useEffect(() => {
+    if (!alertaId) return;
+    alertaProcesada.current = null;
+    setFiltro(0);
+    setSearchQuery('');
+    setSelectedPet(null);
+  }, [alertaId]);
+
+  useEffect(() => {
+    if (
+      !alertaId ||
+      !puntosCargados ||
+      cargandoPuntos ||
+      filtro !== 0 ||
+      searchQuery !== '' ||
+      alertaProcesada.current === alertaId
+    ) {
+      return;
+    }
+
+    alertaProcesada.current = alertaId;
+    const alerta = filteredPets.find((pet) => pet.id === alertaId);
+    if (!alerta) {
+      Alert.alert(
+        'Alerta no disponible en el mapa',
+        'No se encontró una ubicacion valida'
+      );
+      return;
+    }
+
+    setSelectedPet(alerta);
+  }, [
+    alertaId,
+    cargandoPuntos,
+    filtro,
+    filteredPets,
+    puntosCargados,
+    searchQuery,
+  ]);
 
   const handleLocate = useCallback(async () => {
     if (isLocating) return;
@@ -191,6 +240,7 @@ export function useMapState(initialPets: MapPet[] = []): UseMapStateReturn {
     handleZoomOut,
     mapContainerRef,
     cargandoPuntos,
+    puntosCargados,
     recargarPuntos,
   };
 }
