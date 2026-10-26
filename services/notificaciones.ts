@@ -1,8 +1,10 @@
 
 import {
   addDoc,
+  arrayUnion,
   collection,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   query,
@@ -14,6 +16,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "./firebase";
+import { auth } from "./firebase";
 
 export type TipoNotificacion =
   | "cerca"
@@ -33,6 +36,7 @@ export interface Notificacion {
 }
 
 const notificacionesRef = collection(db, "notificaciones");
+const alertasRef = collection(db, "alertas");
 
 /**
  * Crea una notificación interna para un usuario.
@@ -48,18 +52,8 @@ export async function crearNotificacion(datos: {
     throw new Error("El destinatario es obligatorio.");
   }
 
-  if (!datos.titulo.trim() || !datos.mensaje.trim()) {
-    throw new Error(
-      "El título y el mensaje son obligatorios."
-    );
-  }
-
   const resultado = await addDoc(notificacionesRef, {
-    destinatarioId: datos.destinatarioId,
-    tipo: datos.tipo,
-    titulo: datos.titulo.trim(),
-    mensaje: datos.mensaje.trim(),
-    publicacionId: datos.publicacionId ?? null,
+    ...datos,
     leida: false,
     createdAt: serverTimestamp(),
   });
@@ -68,7 +62,102 @@ export async function crearNotificacion(datos: {
 }
 
 /**
- * Escucha en tiempo real las notificaciones de un usuario.
+ * Registra al usuario como interesado en una publicación.
+ * Se debe llamar cuando confirma que vio la mascota.
+ */
+export async function registrarInteraccionPublicacion(
+  publicacionId: string
+): Promise<void> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("Tenés que iniciar sesión para registrar la interacción.");
+  }
+
+  if (!publicacionId) {
+    throw new Error("La publicación no es válida.");
+  }
+
+  const alertaRef = doc(db, "alertas", publicacionId);
+  const alertaSnap = await getDoc(alertaRef);
+
+  if (!alertaSnap.exists()) {
+    throw new Error("La publicación ya no existe.");
+  }
+
+  const datos = alertaSnap.data();
+
+  if (datos.creadoPor === usuario.uid) {
+    throw new Error("No podés registrar una interacción en tu propia publicación.");
+  }
+
+  await updateDoc(alertaRef, {
+    usuariosInteresados: arrayUnion(usuario.uid),
+  });
+}
+
+/**
+ * Notifica a las personas que interactuaron con una publicación
+ * cuando su dueño la marca como encontrada.
+ *
+ * Esta función también actualiza el estado de la publicación.
+ */
+export async function notificarMascotaEncontrada(
+  publicacionId: string
+): Promise<void> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("Tenés que iniciar sesión.");
+  }
+
+  const alertaRef = doc(db, "alertas", publicacionId);
+  const alertaSnap = await getDoc(alertaRef);
+
+  if (!alertaSnap.exists()) {
+    throw new Error("No se encontró la publicación.");
+  }
+
+  const alerta = alertaSnap.data();
+
+  if (alerta.creadoPor !== usuario.uid) {
+    throw new Error("Solo el dueño de la publicación puede cambiar su estado.");
+  }
+
+  if (alerta.estado === "ENCONTRADO") {
+    return;
+  }
+
+  const interesados: string[] = Array.isArray(alerta.usuariosInteresados)
+    ? alerta.usuariosInteresados
+    : [];
+
+  const destinatarios = [
+    ...new Set(interesados.filter(
+      (uid) => typeof uid === "string" && uid !== usuario.uid
+    )),
+  ];
+
+  // Primero actualizamos el estado de la publicación.
+  await updateDoc(alertaRef, {
+    estado: "ENCONTRADO",
+    fechaModificacion: serverTimestamp(),
+  });
+
+  // Después generamos las notificaciones para los interesados.
+  for (const destinatarioId of destinatarios) {
+    await crearNotificacion({
+      destinatarioId,
+      tipo: "estado",
+      titulo: "¡Mascota encontrada!",
+      mensaje: `¡Buenas noticias! ${alerta.nombre || "La mascota"} fue marcada como encontrada.`,
+      publicacionId,
+    });
+  }
+}
+
+/**
+ * Escucha las notificaciones de un usuario en tiempo real.
  */
 export function escucharNotificaciones(
   usuarioId: string,
@@ -83,38 +172,25 @@ export function escucharNotificaciones(
   return onSnapshot(
     consulta,
     (snapshot) => {
-      const items: Notificacion[] = snapshot.docs.map(
-        (item) => ({
-          id: item.id,
-          ...item.data(),
-        }) as Notificacion
-      );
+      const items: Notificacion[] = snapshot.docs.map((item) => ({
+        id: item.id,
+        ...item.data(),
+      })) as Notificacion[];
 
-      // Ordenamos localmente para evitar necesitar
-      // un índice compuesto de Firestore.
       items.sort((a, b) => {
-        const fechaA = obtenerMilisegundos(a.createdAt);
-        const fechaB = obtenerMilisegundos(b.createdAt);
-
-        return fechaB - fechaA;
+        return obtenerMilisegundos(b.createdAt) -
+          obtenerMilisegundos(a.createdAt);
       });
 
       callback(items);
     },
     (error) => {
-      console.error(
-        "Error al escuchar notificaciones:",
-        error
-      );
-
+      console.error("Error al escuchar notificaciones:", error);
       alError?.(error);
     }
   );
 }
 
-/**
- * Convierte un timestamp de Firestore a milisegundos.
- */
 function obtenerMilisegundos(fecha: unknown): number {
   if (
     fecha &&
@@ -128,36 +204,17 @@ function obtenerMilisegundos(fecha: unknown): number {
   return 0;
 }
 
-/**
- * Marca una notificación como leída.
- */
 export async function marcarComoLeida(
   notificacionId: string
 ): Promise<void> {
-  if (!notificacionId) {
-    throw new Error(
-      "El identificador de la notificación es obligatorio."
-    );
-  }
-
-  await updateDoc(
-    doc(db, "notificaciones", notificacionId),
-    {
-      leida: true,
-    }
-  );
+  await updateDoc(doc(db, "notificaciones", notificacionId), {
+    leida: true,
+  });
 }
 
-/**
- * Marca todas las notificaciones pendientes de un usuario.
- */
 export async function marcarTodasComoLeidas(
   usuarioId: string
 ): Promise<void> {
-  if (!usuarioId) {
-    throw new Error("El usuario es obligatorio.");
-  }
-
   const consulta = query(
     notificacionesRef,
     where("destinatarioId", "==", usuarioId),
@@ -166,14 +223,11 @@ export async function marcarTodasComoLeidas(
 
   const resultado = await getDocs(consulta);
 
-  // Firestore permite hasta 500 operaciones por lote.
   for (let i = 0; i < resultado.docs.length; i += 500) {
     const lote = writeBatch(db);
 
     resultado.docs.slice(i, i + 500).forEach((item) => {
-      lote.update(item.ref, {
-        leida: true,
-      });
+      lote.update(item.ref, { leida: true });
     });
 
     await lote.commit();

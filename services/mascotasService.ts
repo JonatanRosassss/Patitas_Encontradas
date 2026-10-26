@@ -18,6 +18,7 @@ import {
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Platform } from 'react-native';
 import { ConexionFirebase } from '@/services/ConexionFirebase';
+import { notificarMascotaEncontrada } from "@/services/notificaciones";
 import type {
   Pet,
   NuevaAlertaMascota,
@@ -511,4 +512,90 @@ export async function listarAlertasParaMapa(): Promise<MapPet[]> {
   }
 
   return alertasMapeables;
-}
+}
+
+/**
+ * Marca una publicación como encontrada y avisa
+ * a quienes interactuaron con ella.
+ */
+//export async function marcarMascotaComoEncontrada(
+//  idAlerta: string
+//): Promise<void> {
+//  await notificarMascotaEncontrada(idAlerta);
+//}
+
+
+
+/**
+ * Marca una publicación propia como encontrada
+ * y notifica a quienes interactuaron con ella.
+ */
+export async function marcarMascotaComoEncontrada(
+  idAlerta: string
+): Promise<void> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error('Tenés que iniciar sesión.');
+  }
+
+  if (!idAlerta) {
+    throw new Error('La publicación no es válida.');
+  }
+
+  const alertaRef = doc(db, COLECCION_ALERTAS, idAlerta);
+  const alertaSnap = await getDoc(alertaRef);
+
+  if (!alertaSnap.exists()) {
+    throw new Error('La publicación no existe.');
+  }
+
+  const alerta = alertaSnap.data();
+
+  if (alerta.creadoPor !== usuario.uid) {
+    throw new Error(
+      'Solo el dueño de la publicación puede marcarla como encontrada.'
+    );
+  }
+
+  if (alerta.estado === 'ENCONTRADO') {
+    throw new Error('Esta publicación ya está marcada como encontrada.');
+  }
+
+  const interesados: string[] = Array.isArray(alerta.usuariosInteresados)
+    ? alerta.usuariosInteresados
+    : [];
+
+  const destinatarios = [
+    ...new Set(
+      interesados.filter(
+        (uid) => typeof uid === 'string' && uid !== usuario.uid
+      )
+    ),
+  ];
+
+  // Actualizar el estado de la publicación.
+  await updateDoc(alertaRef, {
+    estado: 'ENCONTRADO',
+    fechaModificacion: serverTimestamp(),
+  });
+
+  // Crear las notificaciones internas.
+  // Se reutiliza la misma instancia de Firestore del servicio.
+  const notificacionesRef = collection(db, 'notificaciones');
+
+  for (const destinatarioId of destinatarios) {
+    await addDoc(notificacionesRef, {
+      destinatarioId,
+      tipo: 'estado',
+      titulo: '¡Mascota encontrada!',
+      mensaje: `¡Buenas noticias! ${
+        alerta.nombre || 'La mascota'
+      } fue marcada como encontrada.`,
+      publicacionId: idAlerta,
+      leida: false,
+      createdAt: serverTimestamp(),
+    });
+  }
+}
+
