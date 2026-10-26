@@ -1,21 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { router } from 'expo-router';
-import { View, Text, Image, Alert, ScrollView, StyleSheet, Modal, Pressable, ActivityIndicator, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Modal,
+  Pressable,
+  ActivityIndicator,
+  Platform,
+  TextInput,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
-import { Colors, Spacing, Typography } from '../../constants/theme';
+import { Colors, Radius, Spacing, Typography } from '../../constants/theme';
 import { Button } from '../../components/ui/Button';
 import { Usuario } from '../../types/User';
 import { Pet } from '../../types/Pet';
 import { useAuth } from '@/services/AuthContext';
 import { listarAlertasPorUsuario, eliminarAlertaMascota } from '@/services/mascotasService';
+import { obtenerImagenPrincipal } from '@/utils/detalleMascota';
 
 export default function PerfilScreen() {
-  const { usuario, cerrarSesion: cerrarSesionAuth } = useAuth();
-  const [fotoPerfil, setFotoPerfil] = useState<string>('https://via.placeholder.com/150');
-  const [mostrarDatos, setMostrarDatos] = useState(false);
+  const {
+    usuario,
+    perfilUsuario,
+    cerrarSesion: cerrarSesionAuth,
+    actualizarFotoPerfil,
+    actualizarDatosPerfil,
+  } = useAuth();
+
+  const [fotoLocalTemporal, setFotoLocalTemporal] = useState<string | null>(null);
+  const [guardandoFoto, setGuardandoFoto] = useState<boolean>(false);
+  const [mostrarDatos, setMostrarDatos] = useState<boolean>(false);
+  const [editandoDatos, setEditandoDatos] = useState<boolean>(false);
+  const [nombreEditable, setNombreEditable] = useState<string>('');
+  const [telefonoEditable, setTelefonoEditable] = useState<string>('');
+  const [guardandoDatos, setGuardandoDatos] = useState<boolean>(false);
+
   const [misPublicaciones, setMisPublicaciones] = useState<Pet[]>([]);
   const [cargandoPublicaciones, setCargandoPublicaciones] = useState<boolean>(true);
+
+  const notificar = (titulo: string, mensaje: string) => {
+    if (Platform.OS === 'web') {
+      window.alert(`${titulo}\n${mensaje}`);
+    } else {
+      Alert.alert(titulo, mensaje);
+    }
+  };
+
+  // Sincronizar campos editables cuando cambia el perfil cargado
+  useEffect(() => {
+    const nombreBase =
+      perfilUsuario?.nombre ||
+      usuario?.displayName ||
+      (usuario?.email ? usuario.email.split('@')[0] : '');
+    setNombreEditable(nombreBase);
+    setTelefonoEditable(perfilUsuario?.telefono ?? '');
+  }, [perfilUsuario, usuario]);
 
   // Cargar publicaciones reales del usuario desde Firestore
   const cargarMisPublicaciones = async () => {
@@ -28,7 +72,6 @@ export default function PerfilScreen() {
       const publicaciones = await listarAlertasPorUsuario(usuario.uid);
       setMisPublicaciones(publicaciones);
     } catch {
-      // Manejo resiliente: si las reglas de seguridad de Firestore o la red restringen la consulta, se mantiene lista vacía
       setMisPublicaciones([]);
     } finally {
       setCargandoPublicaciones(false);
@@ -47,7 +90,6 @@ export default function PerfilScreen() {
     const ejecutarEliminacion = async () => {
       try {
         await eliminarAlertaMascota(idAlerta);
-        // Actualización optimista de estado
         setMisPublicaciones((prev) => prev.filter((p) => p.id !== idAlerta));
         if (Platform.OS === 'web') {
           window.alert('La publicación fue eliminada correctamente.');
@@ -90,7 +132,7 @@ export default function PerfilScreen() {
     const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permiso.granted) {
-      Alert.alert('Permiso denegado', 'No se puede acceder a la galería de fotos.');
+      notificar('Permiso denegado', 'No se puede acceder a la galería de fotos.');
       return;
     }
 
@@ -98,17 +140,55 @@ export default function PerfilScreen() {
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.8,
+      quality: 0.35,
+      base64: true,
     });
 
-    if (!resultado.canceled) {
-      const uriSeleccionada = resultado.assets[0].uri;
-      setFotoPerfil(uriSeleccionada);
-      Alert.alert('Foto seleccionada', 'Se ha seleccionado una nueva foto de perfil.');
+    if (!resultado.canceled && resultado.assets.length > 0) {
+      const activo = resultado.assets[0];
+      setFotoLocalTemporal(activo.uri);
+      setGuardandoFoto(true);
+
+      try {
+        const urlPersistida = await actualizarFotoPerfil(activo.uri, activo.base64);
+        setFotoLocalTemporal(urlPersistida);
+        notificar('Foto actualizada', 'Tu foto de perfil se ha guardado correctamente.');
+      } catch {
+        notificar('Atención', 'La foto se aplicó localmente, pero hubo una demora al sincronizar.');
+      } finally {
+        setGuardandoFoto(false);
+      }
+    }
+  };
+
+  const manejarGuardarDatosPerfil = async () => {
+    if (!nombreEditable.trim()) {
+      notificar('Atención', 'El nombre no puede quedar vacío.');
+      return;
+    }
+    try {
+      setGuardandoDatos(true);
+      await actualizarDatosPerfil({
+        nombre: nombreEditable.trim(),
+        telefono: telefonoEditable.trim(),
+      });
+      setEditandoDatos(false);
+      notificar('Perfil actualizado', 'Tus datos personales fueron guardados.');
+    } catch {
+      notificar('Error', 'No se pudieron actualizar los datos.');
+    } finally {
+      setGuardandoDatos(false);
     }
   };
 
   const manejarCerrarSesion = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('¿Estás seguro de que querés cerrar sesión?')) {
+        cerrarSesionAuth().then(() => router.replace('/(auth)/login'));
+      }
+      return;
+    }
+
     Alert.alert(
       'Cerrar sesión',
       '¿Estás seguro de que querés cerrar sesión?',
@@ -131,28 +211,52 @@ export default function PerfilScreen() {
     return texto.charAt(0).toUpperCase() + texto.slice(1);
   };
 
+  const nombreMostrado =
+    perfilUsuario?.nombre ||
+    usuario?.displayName ||
+    (usuario?.email ? usuario.email.split('@')[0] : 'Vecino Patitas');
+
+  const uriAvatarActual =
+    fotoLocalTemporal || perfilUsuario?.avatarUrl || usuario?.photoURL || null;
+
   const datosUsuario: Partial<Usuario> = {
-    nombre: usuario?.displayName || 'Usuario Patitas',
-    email: usuario?.email || 'Sin correo registrado',
-    fechaCreacion: usuario?.metadata.creationTime || 'No especificada',
+    nombre: nombreMostrado,
+    email: perfilUsuario?.email || usuario?.email || 'Sin correo registrado',
+    ...(perfilUsuario?.telefono ? { telefono: perfilUsuario.telefono } : {}),
+    fechaCreacion:
+      perfilUsuario?.fechaCreacion || usuario?.metadata.creationTime || 'No especificada',
   };
 
   return (
     <>
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Cabecera / Perfil */}
         <View style={styles.avatarSection}>
-          <Image
-            source={{ uri: usuario?.photoURL || fotoPerfil }}
-            style={styles.avatar}
-          />
-          <Text style={styles.nombreUsuario}>{usuario?.displayName || 'Usuario Patitas'}</Text>
+          <View style={styles.avatarContenedor}>
+            <Image
+              source={
+                uriAvatarActual
+                  ? { uri: uriAvatarActual }
+                  : require('../../assets/welcome_dog_badge.png')
+              }
+              style={styles.avatar}
+            />
+            {guardandoFoto && (
+              <View style={styles.avatarCargandoOverlay}>
+                <ActivityIndicator size="small" color={Colors.white} />
+              </View>
+            )}
+          </View>
+
+          <Text style={styles.nombreUsuario}>{nombreMostrado}</Text>
+
           <Button
-            title="Cambiar Foto de perfil"
+            title={guardandoFoto ? 'Guardando foto...' : 'Cambiar Foto de perfil'}
             onPress={seleccionarFoto}
+            loading={guardandoFoto}
           />
         </View>
 
@@ -169,7 +273,7 @@ export default function PerfilScreen() {
               <View key={pet.id} style={styles.tarjetaMascota}>
                 <Image
                   source={{
-                    uri: pet.fotos && pet.fotos.length > 0 ? pet.fotos[0] : 'https://via.placeholder.com/80',
+                    uri: obtenerImagenPrincipal(pet.fotos),
                   }}
                   style={styles.imagenMascota}
                 />
@@ -202,7 +306,10 @@ export default function PerfilScreen() {
           <Button
             title="Mis Datos"
             variant="outline"
-            onPress={() => setMostrarDatos(true)}
+            onPress={() => {
+              setEditandoDatos(false);
+              setMostrarDatos(true);
+            }}
           />
           <Button
             title="Cerrar sesión"
@@ -211,29 +318,90 @@ export default function PerfilScreen() {
         </View>
       </ScrollView>
 
-      {/* Modal con los datos del usuario */}
-      <Modal visible={mostrarDatos} transparent={true} animationType="fade" onRequestClose={() => setMostrarDatos(false)}>
+      {/* Modal con los datos del usuario (lectura y edición) */}
+      <Modal
+        visible={mostrarDatos}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setMostrarDatos(false)}
+      >
         <View style={styles.modalFondo}>
           <View style={styles.modalContenido}>
             <Text style={styles.modalTitulo}>MIS DATOS</Text>
 
-            <View style={styles.datosContainer}>
-              {Object.entries(datosUsuario).map(([clave, valor]) => (
-                <View key={clave} style={styles.datoItem}>
-                  <Text style={styles.datoLabel}>{formatearEtiqueta(clave)}:</Text>
-                  <Text style={styles.datoValor}>
-                    {valor !== undefined && valor !== null ? String(valor) : 'No especificado'}
-                  </Text>
-                </View>
-              ))}
-            </View>
+            {editandoDatos ? (
+              <View style={styles.datosContainer}>
+                <Text style={styles.datoLabel}>Nombre:</Text>
+                <TextInput
+                  style={styles.inputEdicion}
+                  value={nombreEditable}
+                  onChangeText={setNombreEditable}
+                  placeholder="Tu nombre completo"
+                  placeholderTextColor={Colors.textMuted}
+                />
 
-            <Pressable
-              style={styles.botonCerrar}
-              onPress={() => setMostrarDatos(false)}
-            >
-              <Text style={styles.botonCerrarTexto}>CERRAR</Text>
-            </Pressable>
+                <Text style={styles.datoLabel}>Teléfono:</Text>
+                <TextInput
+                  style={styles.inputEdicion}
+                  value={telefonoEditable}
+                  onChangeText={setTelefonoEditable}
+                  placeholder="Ej. 11 1234-5678"
+                  placeholderTextColor={Colors.textMuted}
+                  keyboardType="phone-pad"
+                />
+
+                <View style={styles.filaBotonesModal}>
+                  <Pressable
+                    style={[styles.botonCerrar, styles.botonSecundarioModal]}
+                    onPress={() => setEditandoDatos(false)}
+                    disabled={guardandoDatos}
+                  >
+                    <Text style={styles.botonSecundarioTexto}>CANCELAR</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={styles.botonCerrar}
+                    onPress={manejarGuardarDatosPerfil}
+                    disabled={guardandoDatos}
+                  >
+                    {guardandoDatos ? (
+                      <ActivityIndicator size="small" color={Colors.white} />
+                    ) : (
+                      <Text style={styles.botonCerrarTexto}>GUARDAR</Text>
+                    )}
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+              <>
+                <View style={styles.datosContainer}>
+                  {Object.entries(datosUsuario).map(([clave, valor]) => (
+                    <View key={clave} style={styles.datoItem}>
+                      <Text style={styles.datoLabel}>{formatearEtiqueta(clave)}:</Text>
+                      <Text style={styles.datoValor}>
+                        {valor !== undefined && valor !== null ? String(valor) : 'No especificado'}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={styles.filaBotonesModal}>
+                  <Pressable
+                    style={[styles.botonCerrar, styles.botonSecundarioModal]}
+                    onPress={() => setEditandoDatos(true)}
+                  >
+                    <Text style={styles.botonSecundarioTexto}>EDITAR</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={styles.botonCerrar}
+                    onPress={() => setMostrarDatos(false)}
+                  >
+                    <Text style={styles.botonCerrarTexto}>CERRAR</Text>
+                  </Pressable>
+                </View>
+              </>
+            )}
           </View>
         </View>
       </Modal>
@@ -255,12 +423,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: Spacing.xl,
   },
-  avatar: {
+  avatarContenedor: {
     width: 110,
     height: 110,
     borderRadius: 55,
     marginBottom: Spacing.sm,
+    position: 'relative',
+    overflow: 'hidden',
     backgroundColor: Colors.borderLight,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarCargandoOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: Colors.overlay,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   nombreUsuario: {
     fontSize: Typography.sizes.lg,
@@ -291,7 +477,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -322,7 +508,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   botonEliminar: {
-    backgroundColor: '#FF4D4D',
+    backgroundColor: Colors.error,
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 6,
@@ -375,6 +561,9 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 12,
   },
+  datoItem: {
+    marginBottom: 4,
+  },
   datoLabel: {
     fontSize: Typography.sizes.sm,
     fontFamily: Typography.fonts.bodyBold,
@@ -386,19 +575,46 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.text,
   },
-  botonCerrar: {
+  inputEdicion: {
+    width: '100%',
+    height: 44,
+    backgroundColor: Colors.backgroundLight,
+    borderRadius: Radius.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.md,
+    marginTop: Spacing.xs,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.text,
+  },
+  filaBotonesModal: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: Spacing.sm,
     marginTop: 16,
+    width: '100%',
+  },
+  botonCerrar: {
+    flex: 1,
     backgroundColor: Colors.primary,
     borderRadius: 10,
     paddingVertical: 10,
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  botonSecundarioModal: {
+    backgroundColor: Colors.white,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
   },
   botonCerrarTexto: {
     color: Colors.white,
     fontFamily: Typography.fonts.bodyBold,
   },
-  datoItem: {
-    marginBottom: 8,
+  botonSecundarioTexto: {
+    color: Colors.primary,
+    fontFamily: Typography.fonts.bodyBold,
   },
 });

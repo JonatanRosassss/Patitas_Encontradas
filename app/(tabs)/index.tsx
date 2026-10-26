@@ -17,14 +17,15 @@ import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { PetCard } from '@/components/ui/pet-card';
-import { BottomTabInset, MaxContentWidth, Colors, Typography, Spacing, Radius } from '@/constants/theme';
+import { MaxContentWidth, Colors, Typography, Spacing, Radius } from '@/constants/theme';
 import GuiaDeUso, { type RectanguloGuia } from '@/components/GuiaDeUso';
 import { listarTodasLasAlertas, formatearTiempoRelativo } from '@/services/mascotasService';
+import { obtenerImagenPrincipal } from '@/utils/detalleMascota';
 import { useAuth } from '@/services/AuthContext';
 import type { Pet } from '@/types/Pet';
 
 export default function HomeScreen() {
-  const { usuario } = useAuth();
+  const { usuario, perfilUsuario } = useAuth();
   const [mascotas, setMascotas] = useState<Pet[]>([]);
   const [cargandoMascotas, setCargandoMascotas] = useState<boolean>(true);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
@@ -129,15 +130,16 @@ export default function HomeScreen() {
     return item.estado?.toUpperCase() === estadoSeleccionado.toUpperCase();
   });
 
-  // Saludo personalizado con el nombre del usuario o 'VECINO'
+  // Saludo personalizado con el nombre real del perfil (Firestore / Auth) o 'VECINO'
   const nombreVecino =
+    perfilUsuario?.nombre?.split(' ')[0] ||
     usuario?.displayName?.split(' ')[0] ||
     usuario?.email?.split('@')[0] ||
     'VECINO';
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {/* HERO SECTION CON SALUDO, NOTIFICACIONES Y GUÍA */}
         <View style={styles.heroSection}>
           <View style={styles.saludoContainer}>
@@ -281,11 +283,8 @@ export default function HomeScreen() {
               const ubicacionTexto =
                 typeof item.ubicacion === 'string'
                   ? item.ubicacion
-                  : (item.ubicacion as any)?.direccion || 'Ubicación no especificada';
-              const imagenPrincipal =
-                Array.isArray(item.fotos) && item.fotos.length > 0 && item.fotos[0]
-                  ? item.fotos[0]
-                  : 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500';
+                  : item.ubicacion?.direccion || 'Ubicación no especificada';
+              const imagenPrincipal = obtenerImagenPrincipal(item.fotos);
 
               return (
                 <View
@@ -322,12 +321,7 @@ export default function HomeScreen() {
                 <>
                   <Image
                     source={{
-                      uri:
-                        Array.isArray(mascotaSeleccionada.fotos) &&
-                        mascotaSeleccionada.fotos.length > 0 &&
-                        mascotaSeleccionada.fotos[0]
-                          ? mascotaSeleccionada.fotos[0]
-                          : 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500',
+                      uri: obtenerImagenPrincipal(mascotaSeleccionada.fotos),
                     }}
                     style={styles.modalImage}
                   />
@@ -387,7 +381,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     alignItems: 'stretch',
     gap: Spacing.md,
-    paddingBottom: BottomTabInset + Spacing.three,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
@@ -418,11 +411,11 @@ const styles = StyleSheet.create({
   heroActionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    gap: Spacing.sm,
   },
   botonNotificaciones: {
-    width: 38,
-    height: 38,
+    width: 44,
+    height: 44,
     borderRadius: Radius.md,
     borderWidth: 1.5,
     borderColor: Colors.border,
@@ -439,12 +432,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.xs,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
     borderRadius: Radius.md,
     borderWidth: 1.5,
     borderColor: Colors.primary,
     backgroundColor: Colors.card,
-    height: 38,
+    height: 44,
   },
   botonGuiaPressed: {
     opacity: 0.8,
@@ -593,7 +585,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   petListContent: {
-    paddingVertical: Spacing.sm,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xl,
   },
   emptyListContent: {
     flexGrow: 1,

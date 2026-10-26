@@ -2,36 +2,48 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  Image,
   ScrollView,
   StyleSheet,
   Pressable,
   ActivityIndicator,
   Share,
-  Platform,
   useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Colors, Typography, Spacing, Radius } from '@/constants/theme';
+import { Colors, Typography, Spacing, Radius, DetailMetrics } from '@/constants/theme';
 import { obtenerAlertaConUsuarioPorId, formatearTiempoRelativo } from '@/services/mascotasService';
 import { contactarPorWhatsApp, generarMensajeContactoMascota } from '@/utils/whatsapp';
+import {
+  formatearRecompensa,
+  resolverUbicacionAlerta,
+  obtenerPresentacionEstado,
+  obtenerFotosValidas,
+} from '@/utils/detalleMascota';
+import {
+  PetHeroCarousel,
+  PetInfoHeader,
+  PetLocationSection,
+  PetAuthorCard,
+  PetContactBar,
+} from '@/components/detalle';
 import type { PetConUsuario } from '@/types/Pet';
 
 export default function DetalleScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { width } = useWindowDimensions();
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const [alerta, setAlerta] = useState<PetConUsuario | null>(null);
   const [cargando, setCargando] = useState<boolean>(true);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
-  const [indiceFotoActiva, setIndiceFotoActiva] = useState<number>(0);
   const [contactando, setContactando] = useState<boolean>(false);
+  const [alturaBarraContacto, setAlturaBarraContacto] = useState<number>(100);
 
-  // Carga de la alerta y datos del usuario creador desde Firestore
+  // Carga reactiva del detalle y autor desde Firestore
   const cargarDetalle = useCallback(async () => {
     if (!id) {
       setCargando(false);
@@ -67,41 +79,34 @@ export default function DetalleScreen() {
     }
   };
 
-  // Compartir publicación de forma nativa
+  // Compartir publicación de forma nativa (reemplazo de la G de Google)
   const handleCompartir = async () => {
     if (!alerta) return;
     try {
       const nombreMascota = alerta.nombre || 'esta mascota';
       const estadoTexto = alerta.estado === 'ENCONTRADO' ? 'Mascota Encontrada' : 'Alerta de Búsqueda';
-      const ubicacionTexto =
-        typeof alerta.ubicacion === 'string'
-          ? alerta.ubicacion
-          : (alerta.ubicacion as any)?.direccion || 'Pilar';
+      const ubicacionResuelta = resolverUbicacionAlerta(alerta);
 
       await Share.share({
         title: `Patitas Encontradas: ${estadoTexto} - ${nombreMascota}`,
-        message: `🐾 ¡Ayudemos a la comunidad de Pilar! ${estadoTexto}: ${nombreMascota} en ${ubicacionTexto}. Mirá la publicación en Patitas Encontradas.`,
+        message: `🐾 ¡Ayudemos a la comunidad de Pilar! ${estadoTexto}: ${nombreMascota} en ${ubicacionResuelta.direccion}. Mirá la publicación en Patitas Encontradas.`,
       });
     } catch {
-      // Ignorar cancelaciones del usuario
+      // Cancelación de share silenciosa
     }
   };
 
-  // Contactar al publicador vía WhatsApp
+  // Redirección contextualizada a WhatsApp
   const handleContactarWhatsApp = async () => {
     if (!alerta) return;
 
-    // Prioridad de teléfono: pet.contacto > usuario creador telefono
     const telefono = alerta.contacto || alerta.usuario?.telefono;
-    const ubicacionTexto =
-      typeof alerta.ubicacion === 'string'
-        ? alerta.ubicacion
-        : (alerta.ubicacion as any)?.direccion || '';
+    const ubicacionResuelta = resolverUbicacionAlerta(alerta);
 
     const mensaje = generarMensajeContactoMascota({
       nombreMascota: alerta.nombre,
       estado: alerta.estado,
-      ubicacion: ubicacionTexto,
+      ubicacion: ubicacionResuelta.direccion,
       idAlerta: alerta.id,
     });
 
@@ -127,7 +132,11 @@ export default function DetalleScreen() {
   if (errorCarga || !alerta) {
     return (
       <SafeAreaView style={styles.centerContainer}>
-        <Ionicons name="alert-circle-outline" size={64} color={Colors.error} />
+        <Ionicons
+          name="alert-circle-outline"
+          size={DetailMetrics.errorIconSize}
+          color={Colors.error}
+        />
         <Text style={styles.errorTitle}>Publicación no disponible</Text>
         <Text style={styles.errorDescription}>
           {errorCarga || 'No se encontró la publicación de la mascota solicitada.'}
@@ -144,224 +153,83 @@ export default function DetalleScreen() {
     );
   }
 
-  // 3. ESTADO DE ÉXITO: FICHA COMPLETA
-  const isPerdido = alerta.estado?.toUpperCase() === 'PERDIDO';
-  const fotos = Array.isArray(alerta.fotos) && alerta.fotos.length > 0
-    ? alerta.fotos
-    : ['https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500'];
-
-  const ubicacionTexto =
-    typeof alerta.ubicacion === 'string'
-      ? alerta.ubicacion
-      : (alerta.ubicacion as any)?.direccion || 'Ubicación no especificada';
-
+  // 3. ESTADO DE ÉXITO: FICHA DETALLADA PROFESIONAL
+  const fotos = obtenerFotosValidas(alerta.fotos, true);
+  const ubicacionResuelta = resolverUbicacionAlerta(alerta);
+  const presentacionEstado = obtenerPresentacionEstado(alerta.estado);
+  const tiempoRelativo = formatearTiempoRelativo(alerta.fechaReporte);
+  const recompensaFormateada = formatearRecompensa(alerta.recompensa);
   const telefonoDisponible = Boolean(alerta.contacto || alerta.usuario?.telefono);
 
+  // Alto del hero proporcional al dispositivo acotado por min/max
+  const alturaHero = Math.min(
+    Math.max(height * DetailMetrics.heroHeightRatio, DetailMetrics.heroMinHeight),
+    DetailMetrics.heroMaxHeight
+  );
+
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      {/* BARRA SUPERIOR DE NAVEGACIÓN */}
-      <View style={styles.topBar}>
-        <Pressable
-          style={styles.iconButton}
-          onPress={handleVolver}
-          accessibilityRole="button"
-          accessibilityLabel="Volver a la pantalla anterior"
-          hitSlop={8}
-        >
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
-        </Pressable>
-
-        <Text style={styles.topBarTitle} numberOfLines={1}>
-          Ficha de Mascota
-        </Text>
-
-        <Pressable
-          style={styles.iconButton}
-          onPress={handleCompartir}
-          accessibilityRole="button"
-          accessibilityLabel="Compartir alerta con la comunidad"
-          hitSlop={8}
-        >
-          <Ionicons name="share-social-outline" size={22} color={Colors.text} />
-        </Pressable>
-      </View>
-
+    <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* GALERÍA / CARRUSEL DE FOTOS */}
-        <View style={styles.galleryContainer}>
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={(e) => {
-              const offsetX = e.nativeEvent.contentOffset.x;
-              const indice = Math.round(offsetX / (width - Spacing.four * 2));
-              setIndiceFotoActiva(indice);
-            }}
-            scrollEventThrottle={16}
-          >
-            {fotos.map((uri, index) => (
-              <Image
-                key={`${uri}-${index}`}
-                source={{ uri }}
-                style={[styles.galleryImage, { width: width - Spacing.four * 2 }]}
-                resizeMode="cover"
-              />
-            ))}
-          </ScrollView>
+        {/* CARRUSEL HERO A SANGRE CON FLECHAS, VOLVER, ESTADO Y COMPARTIR */}
+        <PetHeroCarousel
+          fotos={fotos}
+          nombre={alerta.nombre || 'Mascota'}
+          estado={alerta.estado}
+          alturaHero={alturaHero}
+          insetSuperior={insets.top}
+          onVolver={handleVolver}
+          onCompartir={handleCompartir}
+        />
 
-          {/* INDICADOR DE FOTOS (PAGINADOR) */}
-          {fotos.length > 1 && (
-            <View style={styles.paginationDots}>
-              {fotos.map((_, index) => (
-                <View
-                  key={`dot-${index}`}
-                  style={[
-                    styles.dot,
-                    indiceFotoActiva === index && styles.dotActive,
-                  ]}
-                />
-              ))}
-            </View>
-          )}
+        {/* CONTENIDO PRINCIPAL EN TARJETA EDITORIAL */}
+        <View style={styles.cuerpoPrincipal}>
+          {/* CABECERA CON NOMBRE, RECOMPENSA Y ESPECIE */}
+          <PetInfoHeader
+            nombre={alerta.nombre || 'Mascota sin nombre'}
+            especie={alerta.especie}
+            tiempoRelativo={tiempoRelativo}
+            recompensa={recompensaFormateada}
+          />
 
-          {/* BADGE FLOTANTE DE ESTADO SOBRE LA FOTO */}
-          <View
-            style={[
-              styles.floatingStatusBadge,
-              {
-                backgroundColor: isPerdido
-                  ? Colors.statusPerdidoBg
-                  : Colors.statusEncontradoBg,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.floatingStatusText,
-                {
-                  color: isPerdido
-                    ? Colors.statusPerdido
-                    : Colors.statusEncontradoText,
-                },
-              ]}
-            >
-              {isPerdido ? '🚨 ALERTA: PERDIDO' : '🐾 MASCOTA ENCONTRADA'}
+          {/* DESCRIPCIÓN Y SEÑAS PARTICULARES */}
+          <View style={styles.seccionDescripcion}>
+            <Text style={styles.textoDescripcion}>
+              {alerta.descripcion || 'Sin señas particulares ni descripción provista por el autor.'}
             </Text>
           </View>
+
+          {/* SECCIÓN DE ÚLTIMA VEZ VISTO CON MAPA LEAFLET */}
+          <PetLocationSection
+            ubicacion={ubicacionResuelta}
+            tiempoRelativo={tiempoRelativo}
+            colorPin={presentacionEstado.color}
+            onAbrirMapa={() => router.push('/(tabs)/mapa')}
+          />
+
+          {/* TARJETA DEL AUTOR / VECINO */}
+          <PetAuthorCard
+            nombre={alerta.usuario?.nombre || 'Vecino de Pilar'}
+            avatarUrl={alerta.usuario?.avatarUrl}
+            telefonoDisponible={telefonoDisponible}
+          />
         </View>
 
-        {/* DETALLES PRINCIPALES */}
-        <View style={styles.cardSection}>
-          <View style={styles.titleRow}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.petName}>
-                {alerta.nombre || 'Mascota sin nombre'}
-              </Text>
-              <Text style={styles.timeText}>
-                {formatearTiempoRelativo(alerta.fechaReporte)}
-              </Text>
-            </View>
-
-            {alerta.recompensa ? (
-              <View style={styles.rewardContainer}>
-                <Text style={styles.rewardLabel}>RECOMPENSA</Text>
-                <Text style={styles.rewardAmount}>{alerta.recompensa}</Text>
-              </View>
-            ) : null}
-          </View>
-
-          {/* CHIPS DE ESPECIE Y ESTADO */}
-          <View style={styles.chipsRow}>
-            <View style={styles.chip}>
-              <Ionicons
-                name={alerta.especie === 'GATO' ? 'logo-octocat' : 'paw'}
-                size={16}
-                color={Colors.primary}
-              />
-              <Text style={styles.chipText}>{alerta.especie}</Text>
-            </View>
-
-            <View style={styles.chip}>
-              <Ionicons name="calendar-outline" size={16} color={Colors.textSecondary} />
-              <Text style={styles.chipText}>
-                {new Date(alerta.fechaReporte || Date.now()).toLocaleDateString()}
-              </Text>
-            </View>
-          </View>
-
-          {/* UBICACIÓN */}
-          <View style={styles.locationContainer}>
-            <Ionicons name="location" size={20} color={Colors.primary} />
-            <View style={styles.locationTextContainer}>
-              <Text style={styles.locationLabel}>Visto por última vez en:</Text>
-              <Text style={styles.locationValue}>{ubicacionTexto}</Text>
-            </View>
-          </View>
-
-          {/* DESCRIPCIÓN */}
-          <View style={styles.descriptionContainer}>
-            <Text style={styles.sectionTitle}>Descripción y Señas Particulares</Text>
-            <Text style={styles.descriptionText}>
-              {alerta.descripcion || 'Sin información detallada provista por el autor.'}
-            </Text>
-          </View>
-        </View>
-
-        {/* TARJETA DEL VECINO / AUTOR DE LA PUBLICACIÓN */}
-        <View style={styles.authorCard}>
-          <View style={styles.authorAvatar}>
-            {alerta.usuario?.avatarUrl ? (
-              <Image source={{ uri: alerta.usuario.avatarUrl }} style={styles.authorImage} />
-            ) : (
-              <Ionicons name="person" size={24} color={Colors.primary} />
-            )}
-          </View>
-
-          <View style={styles.authorInfo}>
-            <Text style={styles.authorLabel}>Publicado por</Text>
-            <Text style={styles.authorName}>
-              {alerta.usuario?.nombre || 'Vecino de la comunidad'}
-            </Text>
-            <Text style={styles.authorSubtitle}>
-              {telefonoDisponible ? '✅ Contacto por WhatsApp disponible' : '⚠️ Sin teléfono directo'}
-            </Text>
-          </View>
-        </View>
-
-        {/* ESPACIADOR INFERIOR PARA BOTONES STICKY */}
-        <View style={{ height: 100 }} />
+        {/* ESPACIADOR INFERIOR EXACTO PARA LA BARRA STICKY DE CONTACTO */}
+        <View style={{ height: alturaBarraContacto + Spacing.base }} />
       </ScrollView>
 
-      {/* BARRA INFERIOR DE ACCIÓN: CONTACTAR POR WHATSAPP */}
-      <View style={styles.bottomBar}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.whatsappButton,
-            pressed && styles.whatsappButtonPressed,
-            contactando && styles.buttonDisabled,
-          ]}
-          onPress={handleContactarWhatsApp}
-          disabled={contactando}
-          accessibilityRole="button"
-          accessibilityLabel="Contactar a quien publicó por WhatsApp"
-        >
-          {contactando ? (
-            <ActivityIndicator size="small" color={Colors.white} />
-          ) : (
-            <>
-              <Ionicons name="logo-whatsapp" size={24} color={Colors.white} />
-              <Text style={styles.whatsappButtonText}>
-                {telefonoDisponible ? 'CONTACTAR POR WHATSAPP' : 'CONTACTAR AL VECINO'}
-              </Text>
-            </>
-          )}
-        </Pressable>
-      </View>
-    </SafeAreaView>
+      {/* BARRA INFERIOR STICKY: CONTACTAR POR WHATSAPP CON ELEVACIÓN SEGURA */}
+      <PetContactBar
+        telefonoDisponible={telefonoDisponible}
+        contactando={contactando}
+        insetInferior={insets.bottom}
+        onContactar={handleContactarWhatsApp}
+        onCambioAltura={setAlturaBarraContacto}
+      />
+    </View>
   );
 }
 
@@ -394,7 +262,7 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.textSecondary,
     textAlign: 'center',
-    maxWidth: 320,
+    maxWidth: DetailMetrics.errorTextMaxWidth,
   },
   errorActions: {
     flexDirection: 'row',
@@ -425,276 +293,21 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fonts.bodyBold,
     fontSize: Typography.sizes.sm,
   },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.sm,
-    backgroundColor: Colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-  },
-  topBarTitle: {
-    fontSize: Typography.sizes.lg,
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.text,
-  },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: Radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   scrollContent: {
-    padding: Spacing.four,
-    gap: Spacing.base,
+    paddingBottom: Spacing.four,
   },
-  galleryContainer: {
-    borderRadius: Radius.lg,
-    overflow: 'hidden',
-    backgroundColor: Colors.accent,
-    position: 'relative',
-    height: 280,
-  },
-  galleryImage: {
-    height: 280,
-  },
-  paginationDots: {
-    position: 'absolute',
-    bottom: Spacing.sm,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.full,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: Radius.full,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-  },
-  dotActive: {
-    backgroundColor: Colors.white,
-    width: 14,
-  },
-  floatingStatusBadge: {
-    position: 'absolute',
-    top: Spacing.sm,
-    left: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.md,
-    ...Platform.select({
-      web: {
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.15)',
-      },
-      default: {
-        shadowColor: Colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
-        elevation: 3,
-      },
-    }),
-  },
-  floatingStatusText: {
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.bodyBold,
-    letterSpacing: 0.5,
-  },
-  cardSection: {
-    backgroundColor: Colors.card,
-    borderRadius: Radius.lg,
-    padding: Spacing.four,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: Spacing.base,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  petName: {
-    fontSize: Typography.sizes.xxxl,
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.text,
-  },
-  timeText: {
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.textSecondary,
-    marginTop: Spacing.xs,
-  },
-  rewardContainer: {
-    backgroundColor: Colors.secondary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.sm,
-    alignItems: 'center',
-  },
-  rewardLabel: {
-    fontSize: 10,
-    fontFamily: Typography.fonts.bodyBold,
-    color: Colors.textSecondary,
-    letterSpacing: 0.5,
-  },
-  rewardAmount: {
-    fontSize: Typography.sizes.sm,
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.text,
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    backgroundColor: Colors.backgroundLight,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.full,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  chipText: {
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.bodySemiBold,
-    color: Colors.text,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    backgroundColor: Colors.backgroundLight,
-    padding: Spacing.md,
-    borderRadius: Radius.md,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.primary,
-  },
-  locationTextContainer: {
-    flex: 1,
-  },
-  locationLabel: {
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.bodyBold,
-    color: Colors.textSecondary,
-  },
-  locationValue: {
-    fontSize: Typography.sizes.sm,
-    fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.text,
-    marginTop: Spacing.half,
-  },
-  descriptionContainer: {
-    gap: Spacing.xs,
-  },
-  sectionTitle: {
-    fontSize: Typography.sizes.sm,
-    fontFamily: Typography.fonts.bodyBold,
-    color: Colors.text,
-  },
-  descriptionText: {
-    fontSize: Typography.sizes.sm,
-    fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.textSecondary,
-    lineHeight: Typography.lineHeights.md,
-  },
-  authorCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.card,
-    padding: Spacing.four,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: Spacing.md,
-  },
-  authorAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  authorImage: {
-    width: '100%',
-    height: '100%',
-  },
-  authorInfo: {
-    flex: 1,
-  },
-  authorLabel: {
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.textSecondary,
-  },
-  authorName: {
-    fontSize: Typography.sizes.md,
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.text,
-  },
-  authorSubtitle: {
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.bodySemiBold,
-    color: Colors.primary,
-    marginTop: Spacing.half,
-  },
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: Colors.card,
+  cuerpoPrincipal: {
     paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
-    ...Platform.select({
-      web: {
-        boxShadow: '0px -2px 8px rgba(90, 58, 31, 0.1)',
-      },
-      default: {
-        shadowColor: Colors.shadow,
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 8,
-      },
-    }),
+    paddingTop: Spacing.base,
+    gap: Spacing.xl,
   },
-  whatsappButton: {
-    backgroundColor: '#25D366', // Color oficial de WhatsApp para máxima accesibilidad y reconocimiento
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-    paddingVertical: Spacing.base,
-    borderRadius: Radius.md,
-    minHeight: 52,
+  seccionDescripcion: {
+    paddingTop: Spacing.xs,
   },
-  whatsappButtonPressed: {
-    opacity: 0.88,
-  },
-  whatsappButtonText: {
-    color: Colors.white,
-    fontFamily: Typography.fonts.bodyBold,
+  textoDescripcion: {
     fontSize: Typography.sizes.md,
-    letterSpacing: 0.5,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.text,
+    lineHeight: Typography.lineHeights.md,
   },
 });
