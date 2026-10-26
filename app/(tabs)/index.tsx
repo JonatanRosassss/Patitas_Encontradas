@@ -308,7 +308,7 @@ export default function HomeScreen() {
           />
         )}
 
-        {/* MODAL DE PREVISUALIZACIÓN RÁPIDA (CON ACCESO DIRECTO A DETALLE Y WHATSAPP) */}
+        {/* MODAL DE PREVISUALIZACIÓN RÁPIDA */}
         <Modal
           visible={mascotaSeleccionada !== null}
           transparent={true}
@@ -381,6 +381,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     alignItems: 'stretch',
     gap: Spacing.md,
+    paddingBottom: Spacing.half,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
@@ -606,7 +607,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   emptySubtitle: {
-    fontSize: Typography.sizes.sm,
+    fontSize: Typography.sizes.xs,
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.textSecondary,
     textAlign: 'center',

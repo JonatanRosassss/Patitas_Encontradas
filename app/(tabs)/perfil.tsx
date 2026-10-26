@@ -20,7 +20,11 @@ import { Button } from '../../components/ui/Button';
 import { Usuario } from '../../types/User';
 import { Pet } from '../../types/Pet';
 import { useAuth } from '@/services/AuthContext';
-import { listarAlertasPorUsuario, eliminarAlertaMascota } from '@/services/mascotasService';
+import {
+  listarAlertasPorUsuario,
+  eliminarAlertaMascota,
+  marcarMascotaComoEncontrada,
+} from '@/services/mascotasService';
 import { obtenerImagenPrincipal } from '@/utils/detalleMascota';
 
 export default function PerfilScreen() {
@@ -127,6 +131,59 @@ export default function PerfilScreen() {
       ]
     );
   };
+
+
+  
+const confirmarMascotaEncontrada = (idAlerta: string, nombre?: string) => {
+  const mensaje = `¿Confirmás que ${
+    nombre || 'esta mascota'
+  } fue encontrada? Se actualizará la publicación.`;
+
+  const ejecutar = async () => {
+    try {
+      await marcarMascotaComoEncontrada(idAlerta);
+
+      if (Platform.OS === 'web') {
+        window.alert('¡Publicación actualizada! La mascota figura como encontrada.');
+      } else {
+        Alert.alert(
+          '¡Mascota encontrada!',
+          'La publicación fue actualizada correctamente.'
+        );
+      }
+
+      await cargarMisPublicaciones();
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error
+          ? error.message
+          : 'No se pudo actualizar la publicación.';
+
+      if (Platform.OS === 'web') {
+        window.alert(msg);
+      } else {
+        Alert.alert('Error', msg);
+      }
+    }
+  };
+
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined' && window.confirm(mensaje)) {
+      void ejecutar();
+    }
+    return;
+  }
+
+  Alert.alert('Marcar como encontrada', mensaje, [
+    { text: 'Cancelar', style: 'cancel' },
+    {
+      text: 'Confirmar',
+      onPress: () => void ejecutar(),
+    },
+  ]);
+};
+
+
 
   const seleccionarFoto = async () => {
     const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -284,6 +341,21 @@ export default function PerfilScreen() {
                     {pet.descripcion || 'Sin descripción'}
                   </Text>
                 </View>
+
+                
+{pet.estado !== 'ENCONTRADO' && (
+  <Pressable
+    style={styles.botonEncontrada}
+    onPress={() =>
+      confirmarMascotaEncontrada(pet.id, pet.nombre)
+    }
+  >
+    <Text style={styles.textoBotonEncontrada}>
+      Marcar como encontrada
+    </Text>
+  </Pressable>
+)}
+
 
                 {/* Botón de Eliminar Publicación */}
                 <Pressable
@@ -617,4 +689,22 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontFamily: Typography.fonts.bodyBold,
   },
+
+  
+botonEncontrada: {
+  backgroundColor: '#E87924',
+  paddingHorizontal: 10,
+  paddingVertical: 9,
+  borderRadius: 8,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginTop: 8,
+},
+textoBotonEncontrada: {
+  color: '#FFFFFF',
+  fontSize: 12,
+  fontWeight: '700',
+  textAlign: 'center',
+},
+
 });

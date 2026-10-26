@@ -26,9 +26,11 @@ import {
   type GeocodingResult,
 } from '@/services/geocodingService';
 import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
+import { useAuth } from '@/services/AuthContext';
 
 export default function PublicarAlertaScreen() {
   const router = useRouter();
+  const { usuario, cargando: cargandoSesion } = useAuth();
 
   // Estados del formulario
   const [tipoAlerta, setTipoAlerta] = useState<'perdi' | 'encontre'>('perdi');
@@ -55,6 +57,34 @@ export default function PublicarAlertaScreen() {
       router.replace('/(tabs)');
     }
   };
+
+  if (cargandoSesion) {
+    return (
+      <SafeAreaView style={[styles.container, styles.authGate]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </SafeAreaView>
+    );
+  }
+
+  if (!usuario) {
+    return (
+      <SafeAreaView style={[styles.container, styles.authGate]}>
+        <Text style={styles.title}>Iniciá sesión para publicar</Text>
+        <Text style={styles.authMessage}>
+          Necesitás una cuenta para compartir una alerta de una mascota.
+        </Text>
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={() => router.replace('/(auth)/login')}
+        >
+          <Text style={styles.submitButtonText}>INICIAR SESIÓN</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.backButton} onPress={handleVolver}>
+          <Text style={styles.backButtonText}>Volver</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   // Función para seleccionar fotos desde la galería
   const handleSeleccionarFotos = async () => {
@@ -199,16 +229,48 @@ export default function PublicarAlertaScreen() {
     }
   };
 
-  // Función para guardar y publicar la alerta a través del servicio centralizado
+  // Función para guardar y publicar la alerta con validaciones estrictas (Sprint 5)
   const handlePublicar = async () => {
-    if (!nombre.trim() || !ubicacion.trim()) {
-      Alert.alert('Campos requeridos', 'Por favor completa al menos el nombre y la ubicación de la mascota.');
+    // Helper para mostrar alertas compatibles tanto en Web como en Móvil
+    const alertar = (titulo: string, mensaje: string) => {
+      if (Platform.OS === 'web') {
+        window.alert(`${titulo}: ${mensaje}`);
+      } else {
+        Alert.alert(titulo, mensaje);
+      }
+    };
+
+    // 1. Validar nombre / referencia
+    if (!nombre || !nombre.trim()) {
+      alertar('Campo requerido', 'Por favor ingresá el nombre o referencia de la mascota.');
       return;
     }
+    if (nombre.trim().length < 2) {
+      alertar('Nombre inválido', 'El nombre o referencia debe tener al menos 2 caracteres.');
+      return;
+    }
+
+    // 2. Validar ubicación
+    if (!ubicacion || !ubicacion.trim()) {
+      alertar('Campo requerido', 'Por favor indicá la zona, barrio o calle aproximada.');
+      return;
+    }
+    if (ubicacion.trim().length < 4) {
+      alertar('Ubicación poco clara', 'Por favor ingresá una ubicación más descriptiva (mínimo 4 caracteres).');
+      return;
+    }
+
+    // 3. Validar descripción (si escribió algo, que tenga sentido)
+    if (descripcion && descripcion.trim().length > 0 && descripcion.trim().length < 5) {
+      alertar('Descripción muy corta', 'Si agregás una descripción, por favor detallá un poco más (mínimo 5 caracteres).');
+      return;
+    }
+
 
     setGuardando(true);
 
     try {
+
       // 1. Construir payload tipado omitiendo propiedades con valor undefined
       const payload: Omit<NuevaAlertaMascota, 'fotos' | 'fechaReporte' | 'creadoPor'> = {
         nombre: nombre.trim(),
@@ -503,6 +565,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundLight,
+  },
+  authGate: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.four,
+  },
+  authMessage: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
   },
   scrollContent: {
     paddingHorizontal: Spacing.four,

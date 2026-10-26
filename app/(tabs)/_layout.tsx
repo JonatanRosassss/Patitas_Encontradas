@@ -1,5 +1,6 @@
+import React from 'react';
+import { View, StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, TabBarMetrics } from '../../constants/theme';
@@ -40,6 +41,7 @@ export default function TabLayout() {
         },
       }}
     >
+      {/* 1. INICIO (HOME) */}
       <Tabs.Screen
         name="index"
         options={{
@@ -47,12 +49,14 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'home' : 'home-outline'}
-              size={size}
+              size={size || 22}
               color={color}
             />
           ),
         }}
       />
+
+      {/* 2. MAPA */}
       <Tabs.Screen
         name="mapa"
         options={{
@@ -60,25 +64,30 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'map' : 'map-outline'}
-              size={size}
+              size={size || 22}
               color={color}
             />
           ),
         }}
       />
+
+      {/* 3. BOTÓN DESTACADO AL MEDIO: PUBLICAR / REPORTAR */}
       <Tabs.Screen
         name="publicar-alerta"
         options={{
-          title: 'Publicar',
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'add-circle' : 'add-circle-outline'}
-              size={size + 2}
-              color={color}
-            />
+          title: 'Reportar',
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.botonCrearContenedor}>
+              <View style={[styles.botonCrearCirculo, focused && styles.botonCrearActivo]}>
+                <Ionicons name="add" size={30} color={Colors.white} />
+              </View>
+            </View>
           ),
+          tabBarLabel: () => null,
         }}
       />
+
+      {/* 4. PERFIL / AJUSTES */}
       <Tabs.Screen
         name="perfil"
         options={{
@@ -86,12 +95,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'person' : 'person-outline'}
-              size={size}
+              size={size || 22}
               color={color}
             />
           ),
         }}
       />
+
       {/* Soporte queda oculto de la barra inferior (href: null), accesible únicamente desde Ajustes en Perfil */}
       <Tabs.Screen
         name="reporte_error"
@@ -104,3 +114,29 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  botonCrearContenedor: {
+    top: -12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  botonCrearCirculo: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  botonCrearActivo: {
+    backgroundColor: Colors.primary,
+    opacity: 0.9,
+    transform: [{ scale: 1.05 }],
+  },
+});

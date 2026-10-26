@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as ExpoLinking from 'expo-linking';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Colors, Typography, Spacing, Radius, DetailMetrics } from '@/constants/theme';
@@ -30,6 +31,7 @@ import {
   PetContactBar,
 } from '@/components/detalle';
 import type { PetConUsuario } from '@/types/Pet';
+import { isValidCoordinate } from '@/utils/geoValidation';
 
 export default function DetalleScreen() {
   const router = useRouter();
@@ -79,17 +81,31 @@ export default function DetalleScreen() {
     }
   };
 
-  // Compartir publicación de forma nativa (reemplazo de la G de Google)
   const handleCompartir = async () => {
     if (!alerta) return;
     try {
       const nombreMascota = alerta.nombre || 'esta mascota';
-      const estadoTexto = alerta.estado === 'ENCONTRADO' ? 'Mascota Encontrada' : 'Alerta de Búsqueda';
+      const estadoTexto =
+        alerta.estado === 'ENCONTRADO' ? 'Mascota encontrada' : 'Mascota perdida';
       const ubicacionResuelta = resolverUbicacionAlerta(alerta);
+      const coordenadas = alerta.coordenadas;
+      const enlaceMapa =
+        coordenadas &&
+        isValidCoordinate(coordenadas.latitude, coordenadas.longitude)
+          ? ExpoLinking.createURL(`/mapa?alertaId=${encodeURIComponent(alerta.id)}`)
+          : null;
+      const publicacionUrl = ExpoLinking.createURL(`/detalle/${encodeURIComponent(alerta.id)}`);
 
       await Share.share({
-        title: `Patitas Encontradas: ${estadoTexto} - ${nombreMascota}`,
-        message: `🐾 ¡Ayudemos a la comunidad de Pilar! ${estadoTexto}: ${nombreMascota} en ${ubicacionResuelta.direccion}. Mirá la publicación en Patitas Encontradas.`,
+        title: `Patitas Encontradas: ${nombreMascota}`,
+        message: [
+          '🐾 ¡Ayudemos a la comunidad de pilar! ALERTA DE BUSQUEDA:',
+          `${estadoTexto}: ${nombreMascota}`,
+          ` Ubicación: ${ubicacionResuelta.direccion}`,
+          ...(enlaceMapa ? [` Ver en el mapa de la app patitas encontradas: ${enlaceMapa}`] : []),
+          ` Ver publicación en la app: ${publicacionUrl}`,
+          '¡Ayudanos a encontrarla!',
+        ].join('\n'),
       });
     } catch {
       // Cancelación de share silenciosa

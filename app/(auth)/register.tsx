@@ -181,6 +181,16 @@ export default function PantallaRegistro() {
     >
       <ScrollView contentContainerStyle={estilos.scrollContenido} keyboardShouldPersistTaps="handled">
         <View style={estilos.contenido}>
+          
+          {/* Botón Volver / Atrás */}
+          <TouchableOpacity
+            style={estilos.botonVolver}
+            onPress={() => enrutador.back()}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          </TouchableOpacity>
+
           <Text style={estilos.titulo}>Crear Cuenta</Text>
           <Text style={estilos.subtitulo}>
             Sumate a la comunidad para ayudar a que más mascotas vuelvan a casa.
@@ -327,6 +337,17 @@ const estilos = StyleSheet.create({
   },
   contenido: {
     paddingHorizontal: Spacing.two,
+  },
+  botonVolver: {
+    width: 42,
+    height: 42,
+    borderRadius: Radius.full || 21,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.two,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   titulo: {
     fontSize: Typography.sizes.xxxl,
