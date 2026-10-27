@@ -26,7 +26,10 @@ interface CarouselImageItemProps {
 function CarouselImageItem({ uri, width, height }: CarouselImageItemProps) {
   const [errorCarga, setErrorCarga] = useState(false);
 
-  if (errorCarga) {
+  const esArchivoLocalEnWeb =
+    Platform.OS === 'web' && typeof uri === 'string' && uri.startsWith('file://');
+
+  if (errorCarga || esArchivoLocalEnWeb || !uri) {
     return (
       <View style={[styles.placeholder, { width, height }]}>
         <View style={styles.placeholderCirculo}>

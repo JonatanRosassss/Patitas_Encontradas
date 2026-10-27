@@ -57,10 +57,18 @@ export function PetCard({
   const fallbackImage =
     'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500';
 
+  const esArchivoLocalEnWeb =
+    Platform.OS === 'web' && typeof imagen === 'string' && imagen.startsWith('file://');
+
+  const uriImagenFinal =
+    imagenValida && imagen && !esArchivoLocalEnWeb
+      ? imagen
+      : fallbackImage;
+
   return (
     <View style={styles.petCard}>
       {mostrarToast && (
-        <View style={styles.toast} pointerEvents="none">
+        <View style={[styles.toast, { pointerEvents: 'none' }]}>
           <Text style={styles.toastText}>
             Publicación guardada
           </Text>
@@ -79,11 +87,7 @@ export function PetCard({
         {/* Imagen de la mascota */}
         <View style={styles.imageContainer}>
           <Image
-            source={{
-              uri: imagenValida && imagen
-                ? imagen
-                : fallbackImage,
-            }}
+            source={{ uri: uriImagenFinal }}
             style={styles.petImage}
             resizeMode="cover"
             onError={() => setImagenValida(false)}

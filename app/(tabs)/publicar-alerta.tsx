@@ -20,6 +20,7 @@ import { EspecieMascota, type NuevaAlertaMascota } from '@/types/Pet';
 import { Coordinates } from '@/types/map';
 import { isValidCoordinate } from '@/utils/geoValidation';
 import { crearAlertaMascota } from '@/services/mascotasService';
+import { resolverUbicacionAlerta } from '@/utils/detalleMascota';
 import {
   geocodificarDireccion,
   ZONAS_PILAR_PRESETS,
@@ -271,7 +272,29 @@ export default function PublicarAlertaScreen() {
 
     try {
 
-      // 1. Construir payload tipado omitiendo propiedades con valor undefined
+      // 1. Asegurar coordenadas válidas: si el usuario no tocó "Buscar coordenadas" o "GPS",
+      // resolvemos automáticamente en segundo plano para que la alerta SIEMPRE aparezca en el mapa.
+      let coordenadasFinales = coordenadas;
+      if (!coordenadasFinales || !isValidCoordinate(coordenadasFinales.latitude, coordenadasFinales.longitude)) {
+        try {
+          const resGeocod = await geocodificarDireccion(ubicacion.trim());
+          if (
+            resGeocod.length > 0 &&
+            isValidCoordinate(resGeocod[0].coordenadas.latitude, resGeocod[0].coordenadas.longitude)
+          ) {
+            coordenadasFinales = resGeocod[0].coordenadas;
+          }
+        } catch {
+          // Continuar a fallback de zona
+        }
+
+        if (!coordenadasFinales || !isValidCoordinate(coordenadasFinales.latitude, coordenadasFinales.longitude)) {
+          const resuelta = resolverUbicacionAlerta({ ubicacion: ubicacion.trim() });
+          coordenadasFinales = resuelta.coordenadas;
+        }
+      }
+
+      // 2. Construir payload tipado
       const payload: Omit<NuevaAlertaMascota, 'fotos' | 'fechaReporte' | 'creadoPor'> = {
         nombre: nombre.trim(),
         especie,
@@ -279,8 +302,8 @@ export default function PublicarAlertaScreen() {
         descripcion: (descripcion.trim() + (raza.trim() ? ` · Raza: ${raza.trim()}` : '')).trim(),
         ubicacion: ubicacion.trim(),
         ...(recompensa.trim() ? { recompensa: recompensa.trim() } : { recompensa: null }),
-        ...(coordenadas && isValidCoordinate(coordenadas.latitude, coordenadas.longitude)
-          ? { coordenadas }
+        ...(coordenadasFinales && isValidCoordinate(coordenadasFinales.latitude, coordenadasFinales.longitude)
+          ? { coordenadas: coordenadasFinales }
           : {}),
       };
 

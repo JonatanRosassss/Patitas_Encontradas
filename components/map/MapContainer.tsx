@@ -241,6 +241,9 @@ const buildLeafletHtml = (): string => `
             }
             selectedMarkerId = pet.id;
             updateMarkerSelection();
+            if (map) {
+              map.flyTo([pet.coordenadas.latitude, pet.coordenadas.longitude], 16, { duration: 1.0 });
+            }
             postToRN('MARKER_CLICK', { id: pet.id });
           });
           marker.addTo(markersLayer);
@@ -250,7 +253,7 @@ const buildLeafletHtml = (): string => `
 
       centerTo: function(lat, lng, zoom) {
         if (!map) return;
-        map.flyTo([lat, lng], zoom || 15, { duration: 0.75 });
+        map.flyTo([lat, lng], zoom || 16, { duration: 1.2 });
       },
 
       zoomIn: function() {
@@ -281,7 +284,9 @@ const buildLeafletHtml = (): string => `
         updateMarkerSelection();
         if (id && markersMap.has(id) && map) {
           var entry = markersMap.get(id);
-          map.panTo([entry.pet.coordenadas.latitude, entry.pet.coordenadas.longitude]);
+          map.flyTo([entry.pet.coordenadas.latitude, entry.pet.coordenadas.longitude], 16, {
+            duration: 1.25
+          });
         }
       }
     };
@@ -362,7 +367,7 @@ export const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
     useImperativeHandle(
       ref,
       () => ({
-        centerTo: (lat: number, lng: number, zoom = 15) => {
+        centerTo: (lat: number, lng: number, zoom = 16) => {
           runInWebView(
             `window.mapBridge && window.mapBridge.centerTo(${lat}, ${lng}, ${zoom})`
           );

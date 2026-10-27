@@ -7,7 +7,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-import { db, auth } from "../../services/firebase";
+import { db, auth } from "../services/firebase";
 
 export async function crearColeccionAlertas(): Promise<void> {
   const usuario = auth.currentUser;

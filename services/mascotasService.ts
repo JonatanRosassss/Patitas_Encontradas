@@ -18,6 +18,7 @@ import {
 import { ref, uploadBytes, getDownloadURL, uploadString } from 'firebase/storage';
 import { Platform } from 'react-native';
 import { ConexionFirebase } from '@/services/ConexionFirebase';
+import { resolverUbicacionAlerta } from '@/utils/detalleMascota';
 import type {
   Pet,
   NuevaAlertaMascota,
@@ -498,13 +499,26 @@ export async function listarAlertasParaMapa(): Promise<MapPet[]> {
   const alertasMapeables: MapPet[] = [];
 
   for (const pet of alertas) {
-    // Validar existencia de coordenadas numéricas válidas
+    // Si la alerta no tiene coordenadas numéricas válidas en Firestore,
+    // se resuelve automáticamente a partir de su ubicación o zona de Pilar
+    let coords = pet.coordenadas;
     if (
-      !pet.coordenadas ||
-      typeof pet.coordenadas.latitude !== 'number' ||
-      typeof pet.coordenadas.longitude !== 'number' ||
-      isNaN(pet.coordenadas.latitude) ||
-      isNaN(pet.coordenadas.longitude)
+      !coords ||
+      typeof coords.latitude !== 'number' ||
+      typeof coords.longitude !== 'number' ||
+      isNaN(coords.latitude) ||
+      isNaN(coords.longitude)
+    ) {
+      const resuelta = resolverUbicacionAlerta(pet);
+      coords = resuelta.coordenadas;
+    }
+
+    if (
+      !coords ||
+      typeof coords.latitude !== 'number' ||
+      typeof coords.longitude !== 'number' ||
+      isNaN(coords.latitude) ||
+      isNaN(coords.longitude)
     ) {
       continue;
     }
@@ -533,8 +547,8 @@ export async function listarAlertasParaMapa(): Promise<MapPet[]> {
       recompensa: pet.recompensa ?? null,
       foto: { uri: fotoUri },
       coordenadas: {
-        latitude: pet.coordenadas.latitude,
-        longitude: pet.coordenadas.longitude,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
       },
     });
   }
