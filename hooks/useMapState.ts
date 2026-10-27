@@ -29,8 +29,22 @@ export interface UseMapStateReturn {
 }
 
 export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateReturn {
-  const { alertaId: alertaIdParam } = useLocalSearchParams<{ alertaId?: string | string[] }>();
+  const {
+    alertaId: alertaIdParam,
+    lat: latParam,
+    lng: lngParam,
+    zoom: zoomParam,
+  } = useLocalSearchParams<{
+    alertaId?: string | string[];
+    lat?: string | string[];
+    lng?: string | string[];
+    zoom?: string | string[];
+  }>();
   const alertaId = Array.isArray(alertaIdParam) ? alertaIdParam[0] : alertaIdParam;
+  const latParamVal = Array.isArray(latParam) ? latParam[0] : latParam;
+  const lngParamVal = Array.isArray(lngParam) ? lngParam[0] : lngParam;
+  const zoomParamVal = Array.isArray(zoomParam) ? zoomParam[0] : zoomParam;
+
   const alertaProcesada = useRef<string | null>(null);
   const [pets, setPets] = useState<MapPet[]>(initialPets);
   const [cargandoPuntos, setCargandoPuntos] = useState(false);
@@ -94,6 +108,21 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
     });
   }, [pets, filtro, searchQuery]);
 
+  // Centrar y hacer zoom in animado cuando vienen coordenadas explícitas por navegación
+  useEffect(() => {
+    if (latParamVal && lngParamVal) {
+      const latNum = parseFloat(latParamVal);
+      const lngNum = parseFloat(lngParamVal);
+      const zoomNum = zoomParamVal ? parseInt(zoomParamVal, 10) : 16;
+      if (isValidCoordinate(latNum, lngNum)) {
+        const timer = setTimeout(() => {
+          mapContainerRef.current?.centerTo(latNum, lngNum, zoomNum);
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [latParamVal, lngParamVal, zoomParamVal]);
+
   useEffect(() => {
     if (!alertaId) return;
     alertaProcesada.current = null;
@@ -117,19 +146,30 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
     alertaProcesada.current = alertaId;
     const alerta = filteredPets.find((pet) => pet.id === alertaId);
     if (!alerta) {
-      Alert.alert(
-        'Alerta no disponible en el mapa',
-        'No se encontró una ubicacion valida'
-      );
+      // Si la alerta no está en el listado filtrado pero vinieron coordenadas por query param,
+      // no mostramos error porque el mapa ya voló y se centró en la zona.
+      if (!latParamVal || !lngParamVal) {
+        Alert.alert(
+          'Alerta no disponible en el mapa',
+          'No se encontró una ubicación válida para esta mascota.'
+        );
+      }
       return;
     }
 
     setSelectedPet(alerta);
+    mapContainerRef.current?.centerTo(
+      alerta.coordenadas.latitude,
+      alerta.coordenadas.longitude,
+      16
+    );
   }, [
     alertaId,
     cargandoPuntos,
     filtro,
     filteredPets,
+    latParamVal,
+    lngParamVal,
     puntosCargados,
     searchQuery,
   ]);

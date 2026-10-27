@@ -338,8 +338,78 @@ Antes de dar cualquier entrega por finalizada:
   - Se realizó `git push origin dev/equipo1`.
 - **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` (58/58 PASS) | Push exitoso a `origin/dev/equipo1`.
 
+#### [2026-10-26] - Verificación de Estado del Repo, Ejecución en Localhost, Diagnóstico Integral con Navegador y Sanitización Web
+- **Solicitud del Usuario:** Correr el proyecto, verificar si está desactualizado el repositorio con `git status`, traer cambios con `git pull`, dejar el servidor en `localhost` abierto, y antes de eso abrir el navegador, navegar por la aplicación, inspeccionar la consola, comprobar que todo funcione y diagnosticar/solucionar errores.
+- **Tipo de Cambio:** `CORRECCIÓN_BUG` | `OPTIMIZACIÓN` | `CONFIGURACIÓN`
+- **Archivos Involucrados:**
+  - `scripts/crearColeccionAlertas.ts`: Creado / Movido (reubicado fuera del directorio `app/` para que Expo Router no lo interprete erróneamente como una ruta sin componente por defecto, y actualizado import relativo de Firebase).
+  - `app/scripts/crearColeccionAlertas.ts`: Eliminado (limpieza de directorio `app/scripts`).
+  - `components/ui/pet-card.tsx`: Modificado (sanitización de imágenes con prefijo local `file://` en navegador web redirigiéndolas a fallback seguro, y reemplazo de la prop deprecada `pointerEvents="none"` por `style={{ pointerEvents: 'none' }}`).
+  - `components/detalle/PetHeroCarousel.tsx`: Modificado (control para evitar peticiones prohibidas a `file://` en la web dentro del carrusel hero de detalle).
+- **Progreso Realizado:**
+  - Se ejecutó `git status` y `git pull`, confirmando que la rama de trabajo `dev/equipo1` se encuentra sincronizada con `origin/dev/equipo1`.
+  - Se inició el servidor Metro Bundler en `http://localhost:8081`.
+  - Se programó y ejecutó un script de automatización y auditoría con Playwright para recorrer de forma integral la aplicación en viewport móvil:
+    - Portada interactiva de bienvenida (`/` y `/bienvenida`) con interacción táctil en las píldoras ("Mapa en vivo", "Reporte rápido", "Comunidad").
+    - Pantalla de inicio de sesión (`/(auth)/login`).
+    - Pantalla de registro (`/(auth)/register`).
+    - Pantalla principal de alertas comunitarias (`/(tabs)`), verificando la guía de uso y carga de tarjetas en vivo desde Firestore.
+    - Mapa comunitario interactivo (`/(tabs)/mapa`) con Leaflet y OpenStreetMap centrado en Pilar.
+    - Publicar alerta (`/(tabs)/publicar-alerta`).
+    - Centro de ayuda y preguntas frecuentes (`/(tabs)/reporte_error`) con selector de pestañas (FAQs y generación de tickets).
+    - Perfil del usuario (`/(tabs)/perfil`).
+    - Pantalla de detalle de mascota (`/detalle/[id]`), verificando la ficha de "Ricardo" con carrusel a sangre, mapa de georreferenciación y botón flotante de WhatsApp.
+  - Se diagnosticaron y solucionaron 2 fallos/advertencias detectados en la consola del navegador:
+    1. Advertencia de Expo Router por archivo no-ruta dentro de `app/` (`crearColeccionAlertas.ts`).
+    2. Excepciones `Not allowed to load local resource` en el navegador provocadas por imágenes guardadas con URIs locales de Android (`file:///data/user/0/...`) en la base de datos Firestore.
+  - El servidor local `http://localhost:8081` quedó en ejecución en segundo plano para el usuario.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** En `app/scripts/crearColeccionAlertas.ts`, la presencia de un script sin `export default` dentro de `app/` generaba advertencias en cada carga de Expo Router. Por otro lado, en la web, `PetCard` y `PetHeroCarousel` intentaban pasar directamente al tag `<img>` cadenas que iniciaban con `file://`, desencadenando violaciones de seguridad del navegador.
+  - **Motivo del cambio:** Mantener una consola 100% limpia sin advertencias de ruteo ni errores de red o seguridad al abrir la aplicación en localhost.
+  - **Nueva estrategia aplicada:** Reubicar scripts de base de datos en la raíz `scripts/` y agregar guardas condicionales `Platform.OS === 'web' && uri.startsWith('file://')` para fallback automático en entornos web.
+- **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` (58/58 PASS) | Auditoría de navegador Playwright (0 errores fatales, 0 errores de consola) | Servidor Metro activo en `http://localhost:8081`.
 
+#### [2026-10-26] - Diagnóstico de Alertas en Mapa, Resolución de Coordenadas y Efecto de Zoom Interactivo (FlyTo)
+- **Solicitud del Usuario:** Corregir el problema donde al clickear sobre la ubicación de una mascota muchas veces no dirige bien o la publicación subida no aparece en el mapa (determinar si es que no se sube bien a Firebase o si el mapa no lista bien), e implementar un efecto de zoom fluido hacia la zona de la mascota al clickear la ubicación para evitar tener que hacer zoom manual desde la vista amplia.
+- **Tipo de Cambio:** `CORRECCIÓN_BUG` | `OPTIMIZACIÓN` | `NUEVA_FUNCIONALIDAD`
+- **Archivos Involucrados:**
+  - `utils/detalleMascota.ts`: Modificado (enriquecimiento de `resolverUbicacionAlerta` con diccionario georreferenciado de barrios y localidades de Pilar como Palmas, Villa Buide, Champagnat, Del Viso, Derqui, etc., y dispersión pseudo-determinista anti-colisión).
+  - `services/mascotasService.ts`: Modificado (actualización de `listarAlertasParaMapa` para resolver automáticamente coordenadas mediante `resolverUbicacionAlerta` en alertas que no poseían GPS numérico estricto en Firestore, evitando que queden descartadas).
+  - `app/(tabs)/publicar-alerta.tsx`: Modificado (resolución automática de coordenadas en `handlePublicar` antes de enviar el payload a Firestore cuando el vecino no pulsó explícitamente el botón de geocodificación o GPS).
+  - `components/detalle/PetLocationSection.tsx`: Modificado (fila de metadatos de ubicación transformada en `Pressable` táctil con microinteracción visual y badge destacado "Ver en mapa ↗").
+  - `app/detalle/[id].tsx`: Modificado (`handleAbrirUbicacionEnMapa` conectado a `onAbrirMapa` pasando parámetros tipados `alertaId`, `lat`, `lng`, y `zoom: '16'`).
+  - `components/map/MapContainer.tsx`: Modificado (actualización del bridge Leaflet en `selectPet`, click en marcador y `centerTo` utilizando `map.flyTo(..., 16, { duration: 1.25 })` en lugar del antiguo `map.panTo` que mantenía la vista amplia de Pilar).
+  - `hooks/useMapState.ts`: Modificado (consumo de parámetros `lat`, `lng`, `zoom` y `alertaId` con centrado y zoom 16 inmediato en la zona de la mascota, apertura automática de la tarjeta de la mascota y omisión de alertas de error falsas si las coordenadas son válidas).
+- **Progreso Realizado:**
+  - Se diagnosticaron en vivo las 10 alertas de la base de datos Firestore, descubriendo que publicaciones como "Jona" (Palmas del Pilar), "perro de sol" (Villa Buide) o "rosita" (Pilar) carecían del campo `coordenadas` porque al publicarse no se pulsaba el botón "Buscar coordenadas", y que a su vez `listarAlertasParaMapa()` descartaba con `continue` toda alerta sin coordenadas numéricas.
+  - Se solucionaron ambos extremos del ciclo de vida:
+    1. **Al publicar:** geocodificación y asignación automática de coordenadas en Pilar previas al guardado en Firestore.
+    2. **Al listar:** resolución contextual de barrios para alertas preexistentes, logrando que el 100% de las publicaciones aparezcan en el mapa.
+  - Se implementó la navegación contextual desde la ficha de detalle (tanto el texto de ubicación como el mapa embebido) hacia el mapa comunitario con parámetros completos.
+  - Se incorporó la animación cinematográfica `map.flyTo` con nivel de zoom 16 (calle/manzana), eliminando la necesidad de hacer zoom manual constante.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** En `app/detalle/[id].tsx`, `onAbrirMapa` navegaba con `router.push('/(tabs)/mapa')` sin parámetros, impidiendo al mapa saber qué mascota centrar. En `components/map/MapContainer.tsx`, `selectPet` ejecutaba `map.panTo(...)` conservando el zoom global 13 de Pilar. En `publicar-alerta.tsx`, si el usuario escribía la dirección pero no tocaba "Buscar coordenadas", la alerta se enviaba sin `coordenadas`, y `mascotasService.ts` la excluía del mapa.
+  - **Motivo del cambio:** Experiencia de usuario fragmentada (alertas invisibles en el mapa y sensación de pérdida al navegar a un mapa estático y alejado).
+  - **Nueva estrategia aplicada:** Validación y enriquecimiento preventivo en subida, resolución inclusiva en listado y animación fluida con `flyTo` a nivel 16.
+- **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` (58/58 PASS) | Verificación visual y funcional con Playwright (`20_detalle_juan_seccion_mapa.png`, `21_mapa_con_zoom_a_zona_juan.png`, `22_mapa_con_todas_las_alertas.png`).
 
-
-
-
+#### [2026-10-27] - Implementación de Funcionalidad de Cambio de Contraseña en Ajustes (Perfil)
+- **Solicitud del Usuario:** Dale funcionalidad al botón de cambiar contraseña en ajustes en el perfil.
+- **Tipo de Cambio:** `NUEVA_FUNCIONALIDAD` | `REFACTORIZACIÓN`
+- **Archivos Involucrados:**
+  - `types/Auth.ts`: Creado (contratos e interfaces TypeScript estrictas: `CambiarContraseniaPayload` y `CambiarContraseniaModalProps`).
+  - `services/AuthContext.tsx`: Modificado (incorporación en `AuthContextType` y `AuthProvider` de las funciones `cambiarContrasenia` y `enviarCorreoRestablecimiento`, usando `EmailAuthProvider`, `reauthenticateWithCredential`, `updatePassword`, y `sendPasswordResetEmail` de Firebase Auth con mapeo amigable de errores en español).
+  - `components/ajustes/CambiarContraseniaModal.tsx`: Creado (componente modal desacoplado con campos para contraseña actual, nueva contraseña y confirmación, alternador de visibilidad con icono ojo, opción de restablecimiento por correo si olvidó la actual, validaciones reactivas, estados de carga y adherencia 100% al Design System).
+  - `app/ajustes.tsx`: Modificado (conexión del botón 'Cambiar contraseña' con `CambiarContraseniaModal`, control de visibilidad de modal y actualización del cierre de sesión para invocar `cerrarSesion` desde `useAuth`).
+  - `tests/cambiarContraseniaAjustes.test.mjs`: Creado (suite de pruebas automatizadas que valida contratos, servicio, componente modular y pantalla de ajustes).
+  - `package.json`: Modificado (inclusión de la nueva suite en el script `test`).
+- **Progreso Realizado:**
+  - Se implementó la lógica de autenticación en la capa de servicios (`services/AuthContext.tsx`), permitiendo la re-autenticación obligatoria del usuario con su contraseña actual y la actualización segura mediante Firebase Authentication.
+  - Se añadió la capacidad de enviar un correo de restablecimiento (`sendPasswordResetEmail`) directo al email de la cuenta activa en caso de haber olvidado la contraseña actual.
+  - Se diseñó y construyó el modal modular `CambiarContraseniaModal` con soporte seguro de campos ocultos/visibles, mensajes de error contextuales y compatibilidad multiplataforma (Web y Native).
+  - Se vinculó el botón en la pantalla de Ajustes (`app/ajustes.tsx`), la cual es accesible desde el Perfil del usuario, y se protegió el flujo de cierre de sesión.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** En `app/ajustes.tsx`, el botón "Cambiar contraseña" tenía un handler vacío `onPress={() => {/* cambiar contraseña, sin función por ahora */}}`. Además, el botón de "Cerrar sesión" simplemente ejecutaba `router.push('/(auth)/login')` sin limpiar el estado del contexto de autenticación ni el token de sesión guardado en `AsyncStorage`.
+  - **Motivo del cambio:** Cumplir el requerimiento del usuario de dotar de funcionalidad al botón de cambiar contraseña en Ajustes, garantizando seguridad criptográfica, validación previa y consistencia de sesión.
+  - **Nueva estrategia aplicada:** Desacoplamiento limpio (contratos en `types/Auth.ts` -> métodos en `services/AuthContext.tsx` -> componente modular en `components/ajustes/CambiarContraseniaModal.tsx` -> orquestación en `app/ajustes.tsx`), utilizando tokens oficiales de `constants/theme.ts` y pruebas automatizadas.
+- **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | Suite completa `npm test` (62/62 PASS).

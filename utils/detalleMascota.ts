@@ -127,12 +127,33 @@ export function obtenerDireccionAlerta(alerta: Pick<Pet, 'ubicacion'>): string {
   return DIRECCION_POR_DEFECTO;
 }
 
+/** Coordenadas de referencia para barrios y localidades clave del Partido del Pilar */
+const ZONAS_REFERENCIA_PILAR: Array<{ clave: string; coords: Coordinates }> = [
+  { clave: 'palmas', coords: { latitude: -34.4410, longitude: -58.8710 } },
+  { clave: 'km 50', coords: { latitude: -34.4410, longitude: -58.8710 } },
+  { clave: 'buide', coords: { latitude: -34.4645, longitude: -58.9230 } },
+  { clave: 'champagnat', coords: { latitude: -34.4497, longitude: -58.9194 } },
+  { clave: 'del viso', coords: { latitude: -34.4430, longitude: -58.8030 } },
+  { clave: 'derqui', coords: { latitude: -34.4850, longitude: -58.8350 } },
+  { clave: 'villa rosa', coords: { latitude: -34.4320, longitude: -58.8820 } },
+  { clave: 'alberti', coords: { latitude: -34.4520, longitude: -58.7750 } },
+  { clave: 'la lonja', coords: { latitude: -34.4480, longitude: -58.8450 } },
+  { clave: 'manzanares', coords: { latitude: -34.4750, longitude: -58.9950 } },
+  { clave: 'fatima', coords: { latitude: -34.4550, longitude: -59.0300 } },
+  { clave: 'fátima', coords: { latitude: -34.4550, longitude: -59.0300 } },
+  { clave: 'zelaya', coords: { latitude: -34.3680, longitude: -58.8720 } },
+  { clave: 'centro', coords: { latitude: -34.4587, longitude: -58.9142 } },
+  { clave: 'plaza', coords: { latitude: -34.4587, longitude: -58.9142 } },
+  { clave: 'estacion', coords: { latitude: -34.4620, longitude: -58.9080 } },
+  { clave: 'estación', coords: { latitude: -34.4620, longitude: -58.9080 } },
+];
+
 /**
  * Normaliza ubicación y coordenadas de una alerta.
- * Prioridad: alerta.coordenadas > coords del MapPoint > centro de Pilar (aproximada).
+ * Prioridad: alerta.coordenadas > coords del MapPoint > coincidencia con barrios de Pilar > centro de Pilar (aproximada).
  */
 export function resolverUbicacionAlerta(
-  alerta: Pick<Pet, 'ubicacion' | 'coordenadas'>
+  alerta: Pick<Pet, 'ubicacion' | 'coordenadas'> & { id?: string }
 ): UbicacionResuelta {
   const direccion = obtenerDireccionAlerta(alerta);
   const { coordenadas, ubicacion } = alerta;
@@ -152,11 +173,30 @@ export function resolverUbicacionAlerta(
     }
   }
 
+  // Búsqueda inteligente por nombre de zona o barrio en Pilar
+  const direccionLower = direccion.toLowerCase();
+  for (const zona of ZONAS_REFERENCIA_PILAR) {
+    if (direccionLower.includes(zona.clave)) {
+      return {
+        direccion,
+        coordenadas: { ...zona.coords },
+        esAproximada: true,
+      };
+    }
+  }
+
+  // Fallback con dispersión leve determinista si hay varias aproximadas
+  const semilla = (alerta.id || direccion)
+    .split('')
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const desvioLat = ((semilla % 19) - 9) * 0.0003;
+  const desvioLng = (((semilla * 3) % 19) - 9) * 0.0003;
+
   return {
     direccion,
     coordenadas: {
-      latitude: PILAR_DEFAULT_CENTER.latitude,
-      longitude: PILAR_DEFAULT_CENTER.longitude,
+      latitude: PILAR_DEFAULT_CENTER.latitude + desvioLat,
+      longitude: PILAR_DEFAULT_CENTER.longitude + desvioLng,
     },
     esAproximada: true,
   };

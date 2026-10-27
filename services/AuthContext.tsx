@@ -1,5 +1,14 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
+import {
+  User,
+  onAuthStateChanged,
+  signOut,
+  updateProfile,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+  sendPasswordResetEmail,
+} from 'firebase/auth';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,6 +39,8 @@ export interface AuthContextType {
   recargarSesion: () => Promise<void>;
   actualizarFotoPerfil: (uriLocal: string, base64Data?: string | null) => Promise<string>;
   actualizarDatosPerfil: (datos: ActualizarPerfilPayload) => Promise<void>;
+  cambiarContrasenia: (contraseniaActual: string, nuevaContrasenia: string) => Promise<void>;
+  enviarCorreoRestablecimiento: (email?: string) => Promise<void>;
 }
 
 const COLECCION_USUARIOS = 'usuarios';
@@ -419,6 +430,90 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const cambiarContrasenia = async (
+    contraseniaActual: string,
+    nuevaContrasenia: string
+  ): Promise<void> => {
+    const usuarioActual = auth.currentUser ?? usuario;
+    if (!usuarioActual) {
+      throw new Error('No hay una sesión activa para cambiar la contraseña.');
+    }
+    if (!usuarioActual.email) {
+      throw new Error('La cuenta no tiene un correo electrónico asociado para cambiar la contraseña.');
+    }
+    if (!contraseniaActual || !contraseniaActual.trim()) {
+      throw new Error('Debes ingresar tu contraseña actual.');
+    }
+    if (!nuevaContrasenia || nuevaContrasenia.length < 6) {
+      throw new Error('La nueva contraseña debe tener al menos 6 caracteres.');
+    }
+    if (contraseniaActual === nuevaContrasenia) {
+      throw new Error('La nueva contraseña debe ser diferente a la contraseña actual.');
+    }
+
+    try {
+      // 1. Re-autenticar con la contraseña actual
+      const credencial = EmailAuthProvider.credential(usuarioActual.email, contraseniaActual);
+      await reauthenticateWithCredential(usuarioActual, credencial);
+
+      // 2. Actualizar la contraseña en Firebase Auth
+      await updatePassword(usuarioActual, nuevaContrasenia);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error) {
+        const codigo = (error as { code: string }).code;
+        switch (codigo) {
+          case 'auth/wrong-password':
+          case 'auth/invalid-credential':
+            throw new Error('La contraseña actual ingresada es incorrecta.');
+          case 'auth/weak-password':
+            throw new Error('La nueva contraseña debe tener al menos 6 caracteres.');
+          case 'auth/requires-recent-login':
+            throw new Error('Por seguridad, debes cerrar sesión y volver a ingresar antes de cambiar tu contraseña.');
+          case 'auth/too-many-requests':
+            throw new Error('Demasiados intentos fallidos. Por favor, intentá nuevamente más tarde.');
+          case 'auth/network-request-failed':
+            throw new Error('Error de conexión. Verificá tu acceso a internet.');
+          default:
+            break;
+        }
+      }
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('No se pudo cambiar la contraseña. Verificá los datos e intentá de nuevo.');
+    }
+  };
+
+  const enviarCorreoRestablecimiento = async (emailDestino?: string): Promise<void> => {
+    const emailAUsar = emailDestino?.trim() || auth.currentUser?.email || usuario?.email;
+    if (!emailAUsar) {
+      throw new Error('No se encontró un correo electrónico válido para enviar el enlace.');
+    }
+    try {
+      await sendPasswordResetEmail(auth, emailAUsar);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error) {
+        const codigo = (error as { code: string }).code;
+        switch (codigo) {
+          case 'auth/user-not-found':
+            throw new Error('No existe una cuenta registrada con este correo electrónico.');
+          case 'auth/invalid-email':
+            throw new Error('El correo electrónico no tiene un formato válido.');
+          case 'auth/too-many-requests':
+            throw new Error('Demasiadas solicitudes. Por favor, esperá unos minutos antes de reintentar.');
+          case 'auth/network-request-failed':
+            throw new Error('Error de conexión. Verificá tu acceso a internet.');
+          default:
+            break;
+        }
+      }
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('No se pudo enviar el correo de recuperación.');
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -430,6 +525,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         recargarSesion,
         actualizarFotoPerfil,
         actualizarDatosPerfil,
+        cambiarContrasenia,
+        enviarCorreoRestablecimiento,
       }}
     >
       {children}

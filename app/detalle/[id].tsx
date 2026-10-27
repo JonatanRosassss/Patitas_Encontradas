@@ -134,6 +134,21 @@ export default function DetalleScreen() {
     }
   };
 
+  // Redirección con foco y zoom automático al mapa comunitario
+  const handleAbrirUbicacionEnMapa = () => {
+    if (!alerta) return;
+    const coords = ubicacionResuelta.coordenadas;
+    router.push({
+      pathname: '/(tabs)/mapa',
+      params: {
+        alertaId: alerta.id,
+        lat: coords.latitude.toString(),
+        lng: coords.longitude.toString(),
+        zoom: '16',
+      },
+    });
+  };
+
   // 1. ESTADO DE CARGA
   if (cargando) {
     return (
@@ -222,7 +237,7 @@ export default function DetalleScreen() {
             ubicacion={ubicacionResuelta}
             tiempoRelativo={tiempoRelativo}
             colorPin={presentacionEstado.color}
-            onAbrirMapa={() => router.push('/(tabs)/mapa')}
+            onAbrirMapa={handleAbrirUbicacionEnMapa}
           />
 
           {/* TARJETA DEL AUTOR / VECINO */}

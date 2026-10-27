@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Colors, Typography, Spacing, Radius } from '@/constants/theme';
@@ -16,14 +16,26 @@ export function PetLocationSection({
     <View style={styles.contenedor}>
       <Text style={styles.titulo}>Última vez visto</Text>
 
-      {/* METADATOS DE UBICACIÓN */}
-      <View style={styles.filaMetadatos}>
+      {/* METADATOS DE UBICACIÓN CLICKEABLES */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.filaMetadatos,
+          pressed && styles.filaMetadatosPressed,
+        ]}
+        onPress={onAbrirMapa}
+        accessibilityRole="button"
+        accessibilityLabel={`Abrir mapa en ${ubicacion.direccion}`}
+      >
         <Ionicons name="location" size={18} color={Colors.primary} />
         <Text style={styles.textoMetadatos} numberOfLines={2}>
           {ubicacion.direccion}
           {tiempoRelativo ? ` - ${tiempoRelativo}` : ''}
         </Text>
-      </View>
+        <View style={styles.badgeVerMapa}>
+          <Text style={styles.badgeVerMapaTexto}>Ver en mapa</Text>
+          <Ionicons name="chevron-forward" size={14} color={Colors.primary} />
+        </View>
+      </Pressable>
 
       {/* AVISO DISCRETO SI ES ZONA APROXIMADA */}
       {ubicacion.esAproximada && (
@@ -59,6 +71,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
+    paddingVertical: Spacing.xs,
+  },
+  filaMetadatosPressed: {
+    opacity: 0.7,
+  },
+  badgeVerMapa: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: Colors.accent,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: Radius.full,
+  },
+  badgeVerMapaTexto: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.bodyBold,
+    color: Colors.primary,
   },
   textoMetadatos: {
     flex: 1,

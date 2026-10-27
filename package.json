@@ -8,7 +8,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "node --test tests/geoValidation.test.mjs tests/challenger2_integration.test.mjs tests/challenger_stress.test.mjs tests/faqSection.test.mjs tests/ticketCollectionAndForm.test.mjs tests/mapFirebasePoints.test.mjs tests/publicarAlertaService.test.mjs tests/homeAndPetDetailWhatsApp.test.mjs",
+    "test": "node --test tests/geoValidation.test.mjs tests/challenger2_integration.test.mjs tests/challenger_stress.test.mjs tests/faqSection.test.mjs tests/ticketCollectionAndForm.test.mjs tests/mapFirebasePoints.test.mjs tests/publicarAlertaService.test.mjs tests/homeAndPetDetailWhatsApp.test.mjs tests/cambiarContraseniaAjustes.test.mjs",
     "test:firebase": "node tests/firebaseLivePoints.test.mjs"
   },
   "dependencies": {
