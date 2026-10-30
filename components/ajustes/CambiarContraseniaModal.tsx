@@ -1,462 +1,261 @@
 import React, { useState } from 'react';
 import {
+  Modal,
   View,
   Text,
-  Modal,
   TextInput,
-  Pressable,
-  ActivityIndicator,
+  TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
   Alert,
-  Platform,
-  KeyboardAvoidingView,
-  ScrollView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Spacing, Typography } from '@/constants/theme';
-import { useAuth } from '@/services/AuthContext';
-import { CambiarContraseniaModalProps } from '@/types/Auth';
+import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 
-export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = ({
+interface CambiarContraseniaModalProps {
+  visible: boolean;
+  alCerrar?: () => void;
+  onClose?: () => void; // Acepta ambas opciones por compatibilidad
+}
+
+
+export function CambiarContraseniaModal({
   visible,
   alCerrar,
-  emailUsuario,
-}) => {
-  const { cambiarContrasenia, enviarCorreoRestablecimiento } = useAuth();
-
-  const [contraseniaActual, setContraseniaActual] = useState<string>('');
-  const [nuevaContrasenia, setNuevaContrasenia] = useState<string>('');
-  const [confirmarContrasenia, setConfirmarContrasenia] = useState<string>('');
-
-  const [verActual, setVerActual] = useState<boolean>(false);
-  const [verNueva, setVerNueva] = useState<boolean>(false);
-  const [verConfirmar, setVerConfirmar] = useState<boolean>(false);
-
-  const [guardando, setGuardando] = useState<boolean>(false);
-  const [enviandoRecuperacion, setEnviandoRecuperacion] = useState<boolean>(false);
-  const [mensajeError, setMensajeError] = useState<string | null>(null);
-
-  const notificar = (titulo: string, mensaje: string) => {
-    if (Platform.OS === 'web') {
-      window.alert(`${titulo}\n${mensaje}`);
-    } else {
-      Alert.alert(titulo, mensaje);
-    }
-  };
+  onClose,
+}: CambiarContraseniaModalProps) {
+  const [contraseniaActual, setContraseniaActual] = useState('');
+  const [nuevaContrasenia, setNuevaContrasenia] = useState('');
+  const [confirmarContrasenia, setConfirmarContrasenia] = useState('');
+  const [cargando, setCargando] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const limpiarFormulario = () => {
     setContraseniaActual('');
     setNuevaContrasenia('');
     setConfirmarContrasenia('');
-    setVerActual(false);
-    setVerNueva(false);
-    setVerConfirmar(false);
-    setMensajeError(null);
+    setErrorMsg('');
   };
 
   const manejarCerrar = () => {
-    if (guardando || enviandoRecuperacion) {
-      return;
-    }
     limpiarFormulario();
-    alCerrar();
+    
+    // Ejecuta alCerrar u onClose de forma segura sin romper si alguna no está definida
+    if (typeof alCerrar === 'function') {
+      alCerrar();
+    } else if (typeof onClose === 'function') {
+      onClose();
+    }
   };
 
   const manejarCambiarContrasenia = async () => {
-    setMensajeError(null);
+    setErrorMsg('');
 
-    // Validaciones previas
-    if (!contraseniaActual.trim()) {
-      setMensajeError('Ingresá tu contraseña actual.');
-      return;
-    }
-
-    if (!nuevaContrasenia.trim()) {
-      setMensajeError('Ingresá la nueva contraseña.');
+    if (!contraseniaActual || !nuevaContrasenia || !confirmarContrasenia) {
+      setErrorMsg('Por favor, completá todos los campos.');
       return;
     }
 
     if (nuevaContrasenia.length < 6) {
-      setMensajeError('La nueva contraseña debe tener al menos 6 caracteres.');
-      return;
-    }
-
-    if (nuevaContrasenia === contraseniaActual) {
-      setMensajeError('La nueva contraseña debe ser distinta a la actual.');
+      setErrorMsg('La nueva contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
     if (nuevaContrasenia !== confirmarContrasenia) {
-      setMensajeError('Las contraseñas no coinciden. Verificalas.');
+      setErrorMsg('Las nuevas contraseñas no coinciden.');
       return;
     }
 
     try {
-      setGuardando(true);
-      await cambiarContrasenia(contraseniaActual, nuevaContrasenia);
-      notificar(
-        '¡Contraseña actualizada!',
-        'Tu contraseña ha sido modificada con éxito. Usala en tu próximo inicio de sesión.'
-      );
-      limpiarFormulario();
-      alCerrar();
-    } catch (error: unknown) {
-      const mensaje =
-        error instanceof Error
-          ? error.message
-          : 'No se pudo actualizar la contraseña. Reintentá en unos momentos.';
-      setMensajeError(mensaje);
+      setCargando(true);
+      const auth = getAuth();
+      const usuario = auth.currentUser;
+
+      if (!usuario || !usuario.email) {
+        setErrorMsg('No se encontró una sesión activa de usuario.');
+        return;
+      }
+
+      // Reautenticación por seguridad antes de cambiar contraseña
+      const credencial = EmailAuthProvider.credential(usuario.email, contraseniaActual);
+      await reauthenticateWithCredential(usuario, credencial);
+
+      // Actualización de la contraseña en Firebase Auth
+      await updatePassword(usuario, nuevaContrasenia);
+
+      Alert.alert('¡Éxito!', 'Tu contraseña fue actualizada correctamente.');
+      manejarCerrar();
+    } catch (error: any) {
+      console.error('Error al cambiar contraseña:', error);
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        setErrorMsg('La contraseña actual es incorrecta.');
+      } else if (error.code === 'auth/weak-password') {
+        setErrorMsg('La nueva contraseña es demasiado débil.');
+      } else {
+        setErrorMsg('Ocurrió un error al intentar cambiar la contraseña.');
+      }
     } finally {
-      setGuardando(false);
+      setCargando(false);
     }
-  };
-
-  const manejarEnviarRecuperacion = () => {
-    const emailDestino = emailUsuario || '';
-    const mensajeConfirmacion = emailDestino
-      ? `¿Deseas enviar un correo a ${emailDestino} con las instrucciones para restablecer tu contraseña?`
-      : '¿Deseas enviar un correo con las instrucciones para restablecer tu contraseña?';
-
-    const ejecutarEnvio = async () => {
-      try {
-        setEnviandoRecuperacion(true);
-        await enviarCorreoRestablecimiento(emailDestino);
-        notificar(
-          'Correo enviado',
-          `Revisá tu casilla ${emailDestino ? `(${emailDestino})` : ''} para restablecer tu contraseña.`
-        );
-      } catch (error: unknown) {
-        const mensaje =
-          error instanceof Error
-            ? error.message
-            : 'No se pudo enviar el correo de restablecimiento.';
-        notificar('Error', mensaje);
-      } finally {
-        setEnviandoRecuperacion(false);
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined' && window.confirm(mensajeConfirmacion)) {
-        void ejecutarEnvio();
-      }
-      return;
-    }
-
-    Alert.alert('Restablecer contraseña', mensajeConfirmacion, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Enviar correo', onPress: () => void ejecutarEnvio() },
-    ]);
   };
 
   return (
     <Modal
       visible={visible}
-      transparent={true}
-      animationType="fade"
+      transparent
+      animationType="slide"
       onRequestClose={manejarCerrar}
     >
-      <View style={styles.modalFondo}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.tecladoContenedor}
-        >
-          <View style={styles.modalContenido}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollContenido}
-            >
-              {/* Encabezado */}
-              <View style={styles.iconoEncabezado}>
-                <Ionicons name="lock-closed" size={28} color={Colors.primary} />
-              </View>
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.titulo}>Cambiar Contraseña</Text>
 
-              <Text style={styles.modalTitulo}>CAMBIAR CONTRASEÑA</Text>
-              <Text style={styles.modalSubtitulo}>
-                Ingresá tu contraseña actual y la nueva que quieras utilizar en tu cuenta.
-              </Text>
+          {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
 
-              {/* Mensaje de error inline */}
-              {mensajeError && (
-                <View style={styles.cajaError}>
-                  <Ionicons name="alert-circle" size={18} color={Colors.error} />
-                  <Text style={styles.textoError}>{mensajeError}</Text>
-                </View>
-              )}
-
-              {/* Campo: Contraseña Actual */}
-              <Text style={styles.datoLabel}>Contraseña actual</Text>
-              <View style={styles.inputContenedor}>
-                <TextInput
-                  style={styles.input}
-                  value={contraseniaActual}
-                  onChangeText={(val) => {
-                    setContraseniaActual(val);
-                    if (mensajeError) setMensajeError(null);
-                  }}
-                  placeholder="Tu contraseña actual"
-                  placeholderTextColor={Colors.textMuted}
-                  secureTextEntry={!verActual}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-                <Pressable
-                  style={styles.botonOjo}
-                  onPress={() => setVerActual((prev) => !prev)}
-                  hitSlop={8}
-                >
-                  <Ionicons
-                    name={verActual ? 'eye-outline' : 'eye-off-outline'}
-                    size={20}
-                    color={Colors.textSecondary}
-                  />
-                </Pressable>
-              </View>
-
-              {/* Opción de recuperación si olvidó su contraseña actual */}
-              <Pressable
-                style={styles.botonOlvido}
-                onPress={manejarEnviarRecuperacion}
-                disabled={enviandoRecuperacion || guardando}
-              >
-                {enviandoRecuperacion ? (
-                  <ActivityIndicator size="small" color={Colors.primary} />
-                ) : (
-                  <Text style={styles.textoBotonOlvido}>
-                    ¿Olvidaste tu contraseña actual? Enviar correo
-                  </Text>
-                )}
-              </Pressable>
-
-              {/* Campo: Nueva Contraseña */}
-              <Text style={styles.datoLabel}>Nueva contraseña</Text>
-              <View style={styles.inputContenedor}>
-                <TextInput
-                  style={styles.input}
-                  value={nuevaContrasenia}
-                  onChangeText={(val) => {
-                    setNuevaContrasenia(val);
-                    if (mensajeError) setMensajeError(null);
-                  }}
-                  placeholder="Mínimo 6 caracteres"
-                  placeholderTextColor={Colors.textMuted}
-                  secureTextEntry={!verNueva}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-                <Pressable
-                  style={styles.botonOjo}
-                  onPress={() => setVerNueva((prev) => !prev)}
-                  hitSlop={8}
-                >
-                  <Ionicons
-                    name={verNueva ? 'eye-outline' : 'eye-off-outline'}
-                    size={20}
-                    color={Colors.textSecondary}
-                  />
-                </Pressable>
-              </View>
-
-              {/* Campo: Confirmar Nueva Contraseña */}
-              <Text style={styles.datoLabel}>Confirmar nueva contraseña</Text>
-              <View style={styles.inputContenedor}>
-                <TextInput
-                  style={styles.input}
-                  value={confirmarContrasenia}
-                  onChangeText={(val) => {
-                    setConfirmarContrasenia(val);
-                    if (mensajeError) setMensajeError(null);
-                  }}
-                  placeholder="Repetí la nueva contraseña"
-                  placeholderTextColor={Colors.textMuted}
-                  secureTextEntry={!verConfirmar}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-                <Pressable
-                  style={styles.botonOjo}
-                  onPress={() => setVerConfirmar((prev) => !prev)}
-                  hitSlop={8}
-                >
-                  <Ionicons
-                    name={verConfirmar ? 'eye-outline' : 'eye-off-outline'}
-                    size={20}
-                    color={Colors.textSecondary}
-                  />
-                </Pressable>
-              </View>
-
-              {/* Botones de acción */}
-              <View style={styles.filaBotonesModal}>
-                <Pressable
-                  style={[styles.botonAccion, styles.botonCancelar]}
-                  onPress={manejarCerrar}
-                  disabled={guardando || enviandoRecuperacion}
-                >
-                  <Text style={styles.textoBotonCancelar}>CANCELAR</Text>
-                </Pressable>
-
-                <Pressable
-                  style={[styles.botonAccion, styles.botonGuardar]}
-                  onPress={manejarCambiarContrasenia}
-                  disabled={guardando || enviandoRecuperacion}
-                >
-                  {guardando ? (
-                    <ActivityIndicator size="small" color={Colors.white} />
-                  ) : (
-                    <Text style={styles.textoBotonGuardar}>GUARDAR</Text>
-                  )}
-                </Pressable>
-              </View>
-            </ScrollView>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Contraseña actual</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry
+              value={contraseniaActual}
+              onChangeText={setContraseniaActual}
+              placeholder="Ingresá tu contraseña actual"
+              placeholderTextColor="#9CA3AF"
+            />
           </View>
-        </KeyboardAvoidingView>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Nueva contraseña</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry
+              value={nuevaContrasenia}
+              onChangeText={setNuevaContrasenia}
+              placeholder="Mínimo 6 caracteres"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Confirmar nueva contraseña</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry
+              value={confirmarContrasenia}
+              onChangeText={setConfirmarContrasenia}
+              placeholder="Repetí la nueva contraseña"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
+          <View style={styles.botonesRow}>
+            <TouchableOpacity
+              style={[styles.boton, styles.botonCancelar]}
+              onPress={manejarCerrar}
+              disabled={cargando}
+            >
+              <Text style={styles.textoBotonCancelar}>Cancelar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.boton, styles.botonGuardar]}
+              onPress={manejarCambiarContrasenia}
+              disabled={cargando}
+            >
+              {cargando ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text style={styles.textoBotonGuardar}>Guardar</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     </Modal>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  modalFondo: {
+  overlay: {
     flex: 1,
-    backgroundColor: Colors.overlay,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Spacing.base,
+    padding: 20,
   },
-  tecladoContenedor: {
+  modalContainer: {
     width: '100%',
-    maxWidth: 420,
-    alignItems: 'center',
+    maxWidth: 400,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  modalContenido: {
-    width: '100%',
-    backgroundColor: Colors.card,
-    borderRadius: Radius.lg,
-    padding: Spacing.lg,
-    maxHeight: '90%',
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  scrollContenido: {
-    paddingBottom: Spacing.sm,
-  },
-  iconoEncabezado: {
-    alignSelf: 'center',
-    width: 52,
-    height: 52,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.tintPrimary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  modalTitulo: {
-    fontSize: Typography.sizes.lg,
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.primary,
+  titulo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 16,
     textAlign: 'center',
-    letterSpacing: 0.5,
   },
-  modalSubtitulo: {
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.textSecondary,
+  errorText: {
+    color: '#EF4444',
+    fontSize: 14,
+    marginBottom: 12,
     textAlign: 'center',
-    marginTop: Spacing.xs,
-    marginBottom: Spacing.base,
-    paddingHorizontal: Spacing.sm,
   },
-  cajaError: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.statusPerdidoBg,
-    borderColor: Colors.error,
-    borderWidth: 1,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: Radius.sm,
-    marginBottom: Spacing.base,
-    gap: Spacing.xs,
+  inputGroup: {
+    marginBottom: 16,
   },
-  textoError: {
-    flex: 1,
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.bodySemiBold,
-    color: Colors.error,
-  },
-  datoLabel: {
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.bodyBold,
-    color: Colors.text,
-    marginBottom: Spacing.xs,
-    marginTop: Spacing.xs,
-  },
-  inputContenedor: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.backgroundLight,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: Radius.sm,
-    marginBottom: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 6,
   },
   input: {
-    flex: 1,
-    paddingVertical: Spacing.sm,
-    fontSize: Typography.sizes.sm,
-    fontFamily: Typography.fonts.bodyRegular,
-    color: Colors.text,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    color: '#1F2937',
+    backgroundColor: '#F9FAFB',
   },
-  botonOjo: {
-    padding: Spacing.xs,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  botonOlvido: {
-    alignSelf: 'flex-end',
-    marginBottom: Spacing.md,
-    marginTop: Spacing.half,
-  },
-  textoBotonOlvido: {
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.bodySemiBold,
-    color: Colors.primary,
-    textDecorationLine: 'underline',
-  },
-  filaBotonesModal: {
+  botonesRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: Spacing.md,
-    marginTop: Spacing.lg,
+    gap: 12,
+    marginTop: 8,
   },
-  botonAccion: {
+  boton: {
     flex: 1,
-    paddingVertical: Spacing.md,
-    borderRadius: Radius.sm,
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   botonCancelar: {
-    backgroundColor: Colors.backgroundLight,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  textoBotonCancelar: {
-    color: Colors.textSecondary,
-    fontFamily: Typography.fonts.bodyBold,
-    fontSize: Typography.sizes.sm,
+    backgroundColor: '#E5E7EB',
   },
   botonGuardar: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#2563EB',
+  },
+  textoBotonCancelar: {
+    color: '#374151',
+    fontWeight: '600',
+    fontSize: 16,
   },
   textoBotonGuardar: {
-    color: Colors.white,
-    fontFamily: Typography.fonts.bodyBold,
-    fontSize: Typography.sizes.sm,
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
+
+export default CambiarContraseniaModal;
+
