@@ -1,22 +1,21 @@
-
 import {
   addDoc,
   arrayUnion,
   collection,
   doc,
   getDoc,
-  getDocs,
   onSnapshot,
   query,
   serverTimestamp,
   updateDoc,
   where,
   writeBatch,
-  type Unsubscribe,
 } from "firebase/firestore";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import { Platform } from "react-native";
 
-import { db } from "./firebase";
-import { auth } from "./firebase";
+import { db, auth } from "./firebase";
 
 export type TipoNotificacion =
   | "cerca"
@@ -36,10 +35,33 @@ export interface Notificacion {
 }
 
 const notificacionesRef = collection(db, "notificaciones");
-const alertasRef = collection(db, "alertas");
 
 /**
- * Crea una notificación interna para un usuario.
+ * Escucha las notificaciones de un usuario en tiempo real desde Firestore.
+ */
+export function escucharNotificaciones(
+  usuarioId: string,
+  alRecibirNotificaciones: (notificaciones: Notificacion[]) => void
+) {
+  if (!usuarioId) return () => {};
+
+  const q = query(
+    collection(db, "notificaciones"),
+    where("destinatarioId", "==", usuarioId)
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const lista = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    })) as Notificacion[];
+
+    alRecibirNotificaciones(lista);
+  });
+}
+
+/**
+ * Crea una notificación interna para un usuario en Firestore.
  */
 export async function crearNotificacion(datos: {
   destinatarioId: string;
@@ -63,7 +85,6 @@ export async function crearNotificacion(datos: {
 
 /**
  * Registra al usuario como interesado en una publicación.
- * Se debe llamar cuando confirma que vio la mascota.
  */
 export async function registrarInteraccionPublicacion(
   publicacionId: string
@@ -99,8 +120,6 @@ export async function registrarInteraccionPublicacion(
 /**
  * Notifica a las personas que interactuaron con una publicación
  * cuando su dueño la marca como encontrada.
- *
- * Esta función también actualiza el estado de la publicación.
  */
 export async function notificarMascotaEncontrada(
   publicacionId: string
@@ -133,103 +152,74 @@ export async function notificarMascotaEncontrada(
     : [];
 
   const destinatarios = [
-    ...new Set(interesados.filter(
-      (uid) => typeof uid === "string" && uid !== usuario.uid
-    )),
+    ...new Set(
+      interesados.filter(
+        (uid) => typeof uid === "string" && uid !== usuario.uid
+      )
+    ),
   ];
 
-  // Primero actualizamos el estado de la publicación.
-  await updateDoc(alertaRef, {
+  const batch = writeBatch(db);
+
+  batch.update(alertaRef, {
     estado: "ENCONTRADO",
-    fechaModificacion: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   });
 
-  // Después generamos las notificaciones para los interesados.
-  for (const destinatarioId of destinatarios) {
-    await crearNotificacion({
+  destinatarios.forEach((destinatarioId) => {
+    const nuevaNotifRef = doc(notificacionesRef);
+    batch.set(nuevaNotifRef, {
       destinatarioId,
       tipo: "estado",
       titulo: "¡Mascota encontrada!",
-      mensaje: `¡Buenas noticias! ${alerta.nombre || "La mascota"} fue marcada como encontrada.`,
+      mensaje: `La publicación de "${alerta.nombreMascota || "mascota"}" se marcó como encontrada.`,
       publicacionId,
+      leida: false,
+      createdAt: serverTimestamp(),
     });
-  }
+  });
+
+  await batch.commit();
 }
 
 /**
- * Escucha las notificaciones de un usuario en tiempo real.
+ * Registra y obtiene el token de Expo Notifications para notificaciones push.
  */
-export function escucharNotificaciones(
-  usuarioId: string,
-  callback: (items: Notificacion[]) => void,
-  alError?: (error: Error) => void
-): Unsubscribe {
-  const consulta = query(
-    notificacionesRef,
-    where("destinatarioId", "==", usuarioId)
-  );
-
-  return onSnapshot(
-    consulta,
-    (snapshot) => {
-      const items: Notificacion[] = snapshot.docs.map((item) => ({
-        id: item.id,
-        ...item.data(),
-      })) as Notificacion[];
-
-      items.sort((a, b) => {
-        return obtenerMilisegundos(b.createdAt) -
-          obtenerMilisegundos(a.createdAt);
-      });
-
-      callback(items);
-    },
-    (error) => {
-      console.error("Error al escuchar notificaciones:", error);
-      alError?.(error);
-    }
-  );
-}
-
-function obtenerMilisegundos(fecha: unknown): number {
-  if (
-    fecha &&
-    typeof fecha === "object" &&
-    "toMillis" in fecha &&
-    typeof fecha.toMillis === "function"
-  ) {
-    return fecha.toMillis();
+export async function registrarPushToken(usuarioId?: string) {
+  // En Web ignoramos el registro de tokens push de celular de forma limpia
+  if (Platform.OS === "web") {
+    console.log("Las notificaciones push nativas solo están disponibles en celulares.");
+    return null;
   }
 
-  return 0;
-}
+  if (!Device.isDevice) {
+    console.log("Las notificaciones push solo funcionan en dispositivos físicos.");
+    return null;
+  }
 
-export async function marcarComoLeida(
-  notificacionId: string
-): Promise<void> {
-  await updateDoc(doc(db, "notificaciones", notificacionId), {
-    leida: true,
-  });
-}
+  const { status: statusExistente } = await Notifications.getPermissionsAsync();
+  let statusFinal = statusExistente;
 
-export async function marcarTodasComoLeidas(
-  usuarioId: string
-): Promise<void> {
-  const consulta = query(
-    notificacionesRef,
-    where("destinatarioId", "==", usuarioId),
-    where("leida", "==", false)
-  );
+  if (statusExistente !== "granted") {
+    const { status } = await Notifications.requestPermissionsAsync();
+    statusFinal = status;
+  }
 
-  const resultado = await getDocs(consulta);
+  if (statusFinal !== "granted") {
+    console.log("No se obtuvieron permisos para notificaciones.");
+    return null;
+  }
 
-  for (let i = 0; i < resultado.docs.length; i += 500) {
-    const lote = writeBatch(db);
+  const respuestaToken = await Notifications.getExpoPushTokenAsync();
+  const token = respuestaToken.data;
 
-    resultado.docs.slice(i, i + 500).forEach((item) => {
-      lote.update(item.ref, { leida: true });
+  if (usuarioId && token) {
+    const userRef = doc(db, "usuarios", usuarioId);
+    await updateDoc(userRef, {
+      pushToken: token,
+      notificacionesActivas: true,
     });
-
-    await lote.commit();
   }
+
+  return token;
 }
