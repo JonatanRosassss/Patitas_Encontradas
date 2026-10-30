@@ -11,3 +11,15 @@ web-build/
 # Python
 __pycache__/
 *.pyc
+
+# Android
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/.idea/
+*.apk
+*.aab
+
+# OS
+.DS_Store
