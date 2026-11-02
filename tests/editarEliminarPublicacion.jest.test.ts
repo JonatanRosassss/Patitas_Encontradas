@@ -34,7 +34,10 @@ jest.mock('firebase/storage', () => ({
 }));
 
 jest.mock('react-native', () => ({
-  Platform: { OS: 'web' },
+  Platform: {
+    OS: 'web',
+    select: jest.fn((obj: any) => obj.web || obj.default || obj.android || obj.ios),
+  },
 }));
 
 import {

@@ -1,4 +1,4 @@
-﻿// services/mascotasService.ts
+// services/mascotasService.ts
 import {
   collection,
   addDoc,
@@ -558,7 +558,7 @@ export async function listarAlertasParaMapa(): Promise<MapPet[]> {
 }
 
 /**
- * Marca una publicaci├│n propia como encontrada
+ * Marca una publicación propia como encontrada
  * y notifica a quienes interactuaron con ella.
  */
 export async function marcarMascotaComoEncontrada(
@@ -567,30 +567,30 @@ export async function marcarMascotaComoEncontrada(
   const usuario = auth.currentUser;
 
   if (!usuario) {
-    throw new Error('Ten├⌐s que iniciar sesi├│n.');
+    throw new Error('Tenés que iniciar sesión.');
   }
 
   if (!idAlerta) {
-    throw new Error('La publicaci├│n no es v├ílida.');
+    throw new Error('La publicación no es válida.');
   }
 
   const alertaRef = doc(db, COLECCION_ALERTAS, idAlerta);
   const alertaSnap = await getDoc(alertaRef);
 
   if (!alertaSnap.exists()) {
-    throw new Error('La publicaci├│n no existe.');
+    throw new Error('La publicación no existe.');
   }
 
   const alerta = alertaSnap.data();
 
   if (alerta.creadoPor !== usuario.uid) {
     throw new Error(
-      'Solo el due├▒o de la publicaci├│n puede marcarla como encontrada.'
+      'Solo el dueño de la publicación puede marcarla como encontrada.'
     );
   }
 
   if (alerta.estado === 'ENCONTRADO') {
-    throw new Error('Esta publicaci├│n ya est├í marcada como encontrada.');
+    throw new Error('Esta publicación ya está marcada como encontrada.');
   }
 
   const interesados: string[] = Array.isArray(alerta.usuariosInteresados)

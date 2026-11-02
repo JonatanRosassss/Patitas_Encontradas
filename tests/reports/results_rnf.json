@@ -1,11 +1,11 @@
 {
   "suite": "Suite de Requisitos No Funcionales (RNF-1 a RNF-5) - Patitas Encontradas",
   "norma": "ISO/IEC 25010:2011 / ISO/IEC 25010:2023 - Systems and software Quality Requirements and Evaluation (SQuaRE)",
-  "fechaEjecucion": "2026-11-02T05:31:15.768Z",
+  "fechaEjecucion": "2026-11-02T05:57:10.654Z",
   "totalCasos": 5,
   "pasados": 5,
   "fallados": 0,
-  "duracionTotalMs": 41.733,
+  "duracionTotalMs": 40.633,
   "casos": [
     {
       "id": "TC-601",
@@ -19,13 +19,13 @@
       "evidencia": {
         "testName": "TC-601 [RNF-1] Compatibilidad e Independencia",
         "archivo": "tests/rnf_iso25010_suite.test.mjs",
-        "salidaConsola": "[TC-601 PASÓ] RNF-1 Validado: MapContainer y PetLocationMap operan con Leaflet 1.9.4 y OpenStreetMap con 0% dependencias de Google Play Services o API Keys privativas. Tiempo: 1.516ms",
+        "salidaConsola": "[TC-601 PASÓ] RNF-1 Validado: MapContainer y PetLocationMap operan con Leaflet 1.9.4 y OpenStreetMap con 0% dependencias de Google Play Services o API Keys privativas. Tiempo: 2.17ms",
         "metricas": {
           "motorCartografico": "Leaflet 1.9.4 (unpkg CDN)",
           "proveedorTeselas": "OpenStreetMap contributors (libre/abierto)",
           "dependenciaGoogleMaps": "Ninguna (0 referencias a react-native-maps o claves AIza)",
           "soporteMultiplataforma": "Nativo (WebView) + Web (iframe)",
-          "tiempoEjecucionMs": 1.516
+          "tiempoEjecucionMs": 2.17
         }
       }
     },
@@ -35,21 +35,21 @@
       "norma": "ISO/IEC 25010 (Comportamiento Temporal / Capacidad)",
       "descripcion": "Medir con precisión de nanosegundos (performance.now) el tiempo de respuesta del algoritmo de filtrado y procesamiento geoespacial sobre un lote de 100 alertas activas, validando que sea inferior a 100ms.",
       "estado": "Aprobado (PASS)",
-      "resultadoReal": "El filtrado de 100 alertas complejas en memoria se resolvió en 0.2466ms para consulta individual y 10.657ms para una ráfaga de 500 ejecuciones (promedio 0.0213ms por consulta), superando holgadamente el requisito (< 100ms).",
+      "resultadoReal": "El filtrado de 100 alertas complejas en memoria se resolvió en 0.158ms para consulta individual y 7.974ms para una ráfaga de 500 ejecuciones (promedio 0.0159ms por consulta), superando holgadamente el requisito (< 100ms).",
       "postcondiciones": "La interfaz gráfica garantiza una tasa de refresco a 60 FPS sin caídas de cuadros (jank) al escribir en el buscador o alternar filtros.",
       "herramienta": "Node.js Performance Hooks (node:perf_hooks) + node:test",
       "evidencia": {
         "testName": "TC-602 [RNF-2] Eficiencia de Desempeño",
         "archivo": "tests/rnf_iso25010_suite.test.mjs",
-        "salidaConsola": "[TC-602 PASÓ] RNF-2 Validado: 100 alertas procesadas. Consulta individual: 0.2466ms. Lote de 500 filtros: 10.657ms (0.0213ms/op, 46918 ops/seg). Límite < 100ms cumplido holgadamente.",
+        "salidaConsola": "[TC-602 PASÓ] RNF-2 Validado: 100 alertas procesadas. Consulta individual: 0.158ms. Lote de 500 filtros: 7.974ms (0.0159ms/op, 62704 ops/seg). Límite < 100ms cumplido holgadamente.",
         "metricas": {
           "volumenDataset": "100 alertas completas en memoria con coordenadas y metadatos",
-          "latenciaConsultaSimpleMs": 0.2466,
-          "latenciaRafaga500OpsMs": 10.657,
-          "latenciaPromedioPorQueryMs": 0.0213,
-          "rendimientoThroughput": "46918 consultas/segundo",
+          "latenciaConsultaSimpleMs": 0.158,
+          "latenciaRafaga500OpsMs": 7.974,
+          "latenciaPromedioPorQueryMs": 0.0159,
+          "rendimientoThroughput": "62704 consultas/segundo",
           "umbralRequisitoMaximo": "< 100 ms",
-          "tiempoTotalEjecucionMs": 11.486
+          "tiempoTotalEjecucionMs": 9.012
         }
       }
     },
@@ -65,13 +65,13 @@
       "evidencia": {
         "testName": "TC-603 [RNF-3] Fiabilidad y Tolerancia a Fallos",
         "archivo": "tests/rnf_iso25010_suite.test.mjs",
-        "salidaConsola": "[TC-603 PASÓ] RNF-3 Validado: Arquitectura tolerante a fallos confirmada. Fallback automático a datos mock en mapa y caché AsyncStorage en autenticación ante pérdidas de conectividad. Tiempo: 2.149ms",
+        "salidaConsola": "[TC-603 PASÓ] RNF-3 Validado: Arquitectura tolerante a fallos confirmada. Fallback automático a datos mock en mapa y caché AsyncStorage en autenticación ante pérdidas de conectividad. Tiempo: 2.616ms",
         "metricas": {
           "moduloAutenticacionOffline": "services/authMock.ts (USUARIOS_MOCK validado)",
           "moduloMapaOffline": "data/mapMockData.ts (PILAR_DEFAULT_CENTER y MASCOTAS_MOCK validados)",
           "politicaFallbackMapa": "setPets(initialPets) ante fallo en listarAlertasParaMapa()",
           "politicaCachePerfil": "AsyncStorage clave perfil_usuario_${uid}",
-          "tiempoEjecucionMs": 2.149
+          "tiempoEjecucionMs": 2.616
         }
       }
     },
@@ -87,7 +87,7 @@
       "evidencia": {
         "testName": "TC-604 [RNF-4] Seguridad y Persistencia",
         "archivo": "tests/rnf_iso25010_suite.test.mjs",
-        "salidaConsola": "[TC-604 PASÓ] RNF-4 Validado: Persistencia de sesión segura en AsyncStorage ('user_session' y 'perfil_usuario_uid') con restauración automática y revocación garantizada. Tiempo: 1.082ms",
+        "salidaConsola": "[TC-604 PASÓ] RNF-4 Validado: Persistencia de sesión segura en AsyncStorage ('user_session' y 'perfil_usuario_uid') con restauración automática y revocación garantizada. Tiempo: 0.802ms",
         "metricas": {
           "claveSesion": "user_session",
           "clavePrefijoPerfil": "perfil_usuario_${uid}",
@@ -97,7 +97,7 @@
             "token"
           ],
           "mecanismoRevocacion": "AsyncStorage.removeItem('user_session')",
-          "tiempoEjecucionMs": 1.082
+          "tiempoEjecucionMs": 0.802
         }
       }
     },
@@ -113,7 +113,7 @@
       "evidencia": {
         "testName": "TC-605 [RNF-5] Usabilidad y Accesibilidad",
         "archivo": "tests/rnf_iso25010_suite.test.mjs",
-        "salidaConsola": "[TC-605 PASÓ] RNF-5 Validado: Cumplimiento estricto de WCAG 2.5.5 y accesibilidad TalkBack: controles táctiles >= 44x44dp (44dp, 46dp, 48dp y hitSlop={8}) y roles semánticos universales. Tiempo: 1.981ms",
+        "salidaConsola": "[TC-605 PASÓ] RNF-5 Validado: Cumplimiento estricto de WCAG 2.5.5 y accesibilidad TalkBack: controles táctiles >= 44x44dp (44dp, 46dp, 48dp y hitSlop={8}) y roles semánticos universales. Tiempo: 3.07ms",
         "metricas": {
           "tokensDisenioVerificados": [
             "DetailMetrics.floatingButtonSize (44dp)",
@@ -128,7 +128,7 @@
             "saveButton pet-card (28x28dp + hitSlop 8 = 44dp)"
           ],
           "etiquetasAccesibilidadTalkBack": "100% de controles analizados cuentan con accessibilityLabel y accessibilityRole=\"button\"",
-          "tiempoEjecucionMs": 1.981
+          "tiempoEjecucionMs": 3.07
         }
       }
     }

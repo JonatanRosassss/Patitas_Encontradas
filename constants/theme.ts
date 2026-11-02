@@ -216,7 +216,7 @@ export const DetailMetrics = {
   rewardMaxWidthRatio: 0.42,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+export const BottomTabInset = Platform?.select ? (Platform.select({ ios: 50, android: 80 }) ?? 0) : 0;
 export const MaxContentWidth = 800;
 
 /**

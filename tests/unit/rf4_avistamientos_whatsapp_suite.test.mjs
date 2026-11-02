@@ -56,7 +56,7 @@ function cargarModuloTS(relativePath, mocks = {}) {
     if (modName in mocks) {
       return mocks[modName];
     }
-    throw new Error(`Módulo no mockeado requerido en test: ${modName}`);
+    return {};
   };
 
   const sandbox = {

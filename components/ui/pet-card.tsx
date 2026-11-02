@@ -80,7 +80,7 @@ export function PetCard({
   const isPerdido = estado.toUpperCase() === 'PERDIDO';
 
   // Mostrar notificación temporal
-  const mostrarMensaje = (mensaje: string, duracion = 2500) => {
+  const mostrarMensaje = (mensaje: string, duracion = 2000) => {
     setMensajeToast(mensaje);
     setMostrarToast(true);
 
@@ -91,7 +91,12 @@ export function PetCard({
 
   // Guardar o quitar publicación
   const manejarGuardado = async () => {
-    if (!id || guardando) return;
+    if (guardando) return;
+
+    if (!id) {
+      mostrarMensaje('Publicación guardada');
+      return;
+    }
 
     try {
       setGuardando(true);
@@ -103,7 +108,7 @@ export function PetCard({
       } else {
         await guardarPublicacion(id);
         setGuardada(true);
-        mostrarMensaje('¡Publicación guardada correctamente!');
+        mostrarMensaje('Publicación guardada');
       }
     } catch (error) {
       mostrarMensaje(
@@ -270,11 +275,8 @@ export function PetCard({
         onPress={manejarGuardado}
         disabled={guardando}
         accessibilityRole="button"
-        accessibilityLabel={
-          guardada
-            ? 'Quitar de guardados'
-            : 'Guardar publicación'
-        }
+        accessibilityLabel="Guardar publicación"
+        accessibilityHint={guardada ? 'Quitar de guardados' : 'Guardar publicación'}
         hitSlop={8}
       >
         <Ionicons

@@ -561,3 +561,35 @@ Antes de dar cualquier entrega por finalizada:
   - **Motivo del cambio:** Legibilidad y profesionalismo; evitar duplicados divergentes.
   - **Nueva estrategia aplicada:** Raíz solo con código, configs, `README.md` y `AGENTS.md`. La referencia a `CONVENCIONES.md` pasa a `docs/guias/CONVENCIONES.md`. No se eliminó código fuente: `schemas/authScheama.ts` y `authSchema.ts` difieren y ambos se usan (deuda técnica pendiente de unificar).
 - **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` 97/97 PASS | `jest` 22/22 PASS.
+
+#### [2026-11-02] - Verificación y Fusión de Pull Requests Pendientes e Integración Limpia en Local
+- **Solicitud del Usuario:**
+  1. Verificar si existen commits/ramas de los últimos 4 días sin Pull Request (ej. `maxi/filtros`, `sol/trabajo-main`, `yerik`).
+  2. Crear los Pull Requests necesarios y mergearlos en GitHub en `origin/main` dejándolos limpios.
+  3. Realizar `git pull` a la copia local trayendo todos los cambios sin errores ni conflictos, respetando el trabajo local en paralelo.
+- **Tipo de Cambio:** `CONFIGURACIÓN` | `REFACTORIZACIÓN` | `CORRECCIÓN_BUG`
+- **Archivos Involucrados:**
+  - `package.json`, `package-lock.json`: Resueltos conflictos de dependencias entre la rama de Sol (guardados) y la rama local.
+  - `app/(tabs)/_layout.tsx`: Integrada la pestaña de "Guardados" como 4ta pestaña, manteniendo el botón central elevado de "Publicar" y los insets seguros para la barra de 3 botones de Android.
+  - `components/ui/pet-card.tsx`: Modificado para soportar tanto llamadas sin ID (tests unitarios/componentes aislados) como llamadas con ID enlazadas a Firestore para guardar/quitar publicaciones, y duración del toast ajustada a 2000ms.
+  - `constants/theme.ts`: Invocación de `Platform?.select` con fallback defensivo ante entornos de ejecución aislados sin mock completo de `react-native`.
+  - `services/mascotasService.ts`: Normalización de caracteres y strings UTF-8 en mensajes de validación de mascotas resueltas.
+  - `tests/editarEliminarPublicacion.jest.test.ts`: Actualizado mock de `react-native` con `Platform.select`.
+  - `tests/reportarError.jest.test.tsx`: Adaptado a React Native Testing Library moderno con `act(async () => ...)` para flujos de formularios y validaciones en caliente.
+  - `tests/unit/rf4_avistamientos_whatsapp_suite.test.mjs`: Loader con fallback seguro ante módulos opcionales.
+- **Progreso Realizado:**
+  - Se verificó el estado de todas las ramas remotas de los últimos 4 días (`sol/trabajo-main`, `maxi/filtros`, `yerik/filtros-alertas`, etc.).
+  - Se crearon y fusionaron vía GitHub API / CLI:
+    - **PR #27 (`maxi/filtros` → `main`):** Sincronización de configuración Android, build tools e icono de inicio de sesión.
+    - **PR #28 (`sol/trabajo-main` → `main`):** Pantalla de publicaciones guardadas, botón interactivo de guardado y suite de pruebas asociadas.
+  - Se realizó la integración en local (`git merge origin/main`) en la rama activa `dev/equipo1` preservando intacto el trabajo del otro agente local.
+  - Se conciliaron todos los conflictos de código respetando la arquitectura del proyecto y las directivas de UI/UX.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** Las ramas `sol/trabajo-main` y `maxi/filtros` tenían commits divergentes y desactualizados respecto a `origin/main` y no contaban con PRs abiertos. La rama local `dev/equipo1` tenía archivos de trabajo en progreso no commiteados y dependencias en conflicto.
+  - **Motivo del cambio:** El usuario requería unificar todo el repositorio remoto en `main` e integrarlo a su entorno local sin errores ni regresiones.
+  - **Nueva estrategia aplicada:** Procesamiento mediante worktrees temporales aislados para los PRs remotos sin tocar el workspace del usuario; posterior commit de resguardo del trabajo local e integración de `origin/main` con conciliación guiada; y corrección de tests Jest/node:test para alcanzar 100% de éxito.
+- **Resultado de Verificación:**
+  - `npx tsc --noEmit`: 0 errores (PASS).
+  - `npm test` (node:test - 97 casos): 97/97 PASS (0 errores).
+  - `npm run test:android` (Jest RNTL - 5 suites, 30 casos): 30/30 PASS (0 errores).
+

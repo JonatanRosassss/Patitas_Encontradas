@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, waitFor, act } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { TicketForm } from '../components/soporte/TicketForm';
 import { enviarTicketSoporte } from '../services/soporteService';
@@ -23,52 +23,60 @@ jest.mock('@expo/vector-icons', () => ({
 }));
 
 describe('Reporte de errores - TicketForm', () => {
+  let alertSpy: ReturnType<typeof jest.spyOn>;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   });
 
-  it('muestra el formulario de reporte', () => {
-    const { getByText } = render(<TicketForm />) as any;
+  afterEach(() => {
+    alertSpy.mockRestore();
+  });
+
+  it('muestra el formulario de reporte', async () => {
+    const { getByText } = await render(<TicketForm />);
 
     expect(getByText('Generar Ticket de Soporte')).toBeTruthy();
     expect(getByText('Motivo del reporte')).toBeTruthy();
     expect(getByText('Enviar Ticket a Soporte')).toBeTruthy();
   });
 
-  it('valida los campos obligatorios al intentar enviar vacío', () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  it('valida los campos obligatorios al intentar enviar vacío', async () => {
+    const { getByLabelText, getByText } = await render(<TicketForm />);
 
-    const { getByLabelText, getByText } = render(<TicketForm />) as any;
-
-    fireEvent.press(getByLabelText('Enviar Ticket a Soporte'));
+    await act(async () => {
+      fireEvent.press(getByLabelText('Enviar Ticket a Soporte'));
+    });
 
     expect(alertSpy).toHaveBeenCalledWith(
       'Datos incompletos',
       expect.any(String),
     );
     expect(getByText('El título o asunto es obligatorio.')).toBeTruthy();
-
-    alertSpy.mockRestore();
   });
 
   it('envía el ticket con los datos válidos', async () => {
     (enviarTicketSoporte as any).mockResolvedValue('ticket123');
 
-    const { getByPlaceholderText, getByLabelText } = render(
+    const { getByPlaceholderText, getByLabelText } = await render(
       <TicketForm />,
-    ) as any;
-
-    fireEvent.changeText(
-      getByPlaceholderText('Ej: No se cargan las fotos de avistamientos'),
-      'Error al cargar fotos',
     );
 
-    fireEvent.changeText(
-      getByPlaceholderText('Explicá lo sucedido con el mayor detalle posible...'),
-      'La aplicación no permite cargar las fotos de mi mascota.',
-    );
+    await act(async () => {
+      fireEvent.changeText(
+        getByPlaceholderText('Ej: No se cargan las fotos de avistamientos'),
+        'Error al cargar fotos',
+      );
+      fireEvent.changeText(
+        getByPlaceholderText('Explicá lo sucedido con el mayor detalle posible...'),
+        'La aplicación no permite cargar las fotos de mi mascota.',
+      );
+    });
 
-    fireEvent.press(getByLabelText('Enviar Ticket a Soporte'));
+    await act(async () => {
+      fireEvent.press(getByLabelText('Enviar Ticket a Soporte'));
+    });
 
     await waitFor(() => {
       expect(enviarTicketSoporte).toHaveBeenCalledWith(
@@ -88,37 +96,34 @@ describe('Reporte de errores - TicketForm', () => {
   });
 
   it('muestra un error si falla el envío del ticket', async () => {
-    jest
-      .spyOn(Alert, 'alert')
-      .mockImplementation(() => {});
-
     (enviarTicketSoporte as any).mockRejectedValue(
       new Error('Error de conexión'),
     );
 
-    const { getByPlaceholderText, getByLabelText } = render(
+    const { getByPlaceholderText, getByLabelText } = await render(
       <TicketForm />,
-    ) as any;
-
-    fireEvent.changeText(
-      getByPlaceholderText('Ej: No se cargan las fotos de avistamientos'),
-      'Error al cargar fotos',
     );
 
-    fireEvent.changeText(
-      getByPlaceholderText('Explicá lo sucedido con el mayor detalle posible...'),
-      'La aplicación no permite cargar las fotos de mi mascota.',
-    );
+    await act(async () => {
+      fireEvent.changeText(
+        getByPlaceholderText('Ej: No se cargan las fotos de avistamientos'),
+        'Error al cargar fotos',
+      );
+      fireEvent.changeText(
+        getByPlaceholderText('Explicá lo sucedido con el mayor detalle posible...'),
+        'La aplicación no permite cargar las fotos de mi mascota.',
+      );
+    });
 
-    fireEvent.press(getByLabelText('Enviar Ticket a Soporte'));
+    await act(async () => {
+      fireEvent.press(getByLabelText('Enviar Ticket a Soporte'));
+    });
 
     await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith(
+      expect(alertSpy).toHaveBeenCalledWith(
         'Error de conexión',
         'Error de conexión',
       );
     });
-
-    jest.restoreAllMocks();
   });
 });
