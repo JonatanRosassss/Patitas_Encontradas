@@ -1,4 +1,4 @@
-// services/mascotasService.ts
+﻿// services/mascotasService.ts
 import {
   collection,
   addDoc,
@@ -7,6 +7,7 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
+  setDoc,
   query,
   where,
   orderBy,
@@ -136,11 +137,11 @@ function docAPet(id: string, data: any): Pet {
 }
 
 // ==========================================
-// GESTIÓN DE ARCHIVOS / STORAGE
+// GESTI├ôN DE ARCHIVOS / STORAGE
 // ==========================================
 
 /**
- * Convierte un Blob a Data URL base64 para entornos web donde las políticas
+ * Convierte un Blob a Data URL base64 para entornos web donde las pol├¡ticas
  * de CORS de Firebase Storage restrinjan las llamadas XMLHttpRequest.
  */
 async function blobADataUrl(blob: Blob): Promise<string> {
@@ -159,12 +160,12 @@ async function blobADataUrl(blob: Blob): Promise<string> {
 }
 
 /**
- * Sube una imagen local a Firebase Storage y retorna su URL pública de descarga.
- * Soporta Data URLs base64 nativos con uploadString para máxima resiliencia en React Native.
+ * Sube una imagen local a Firebase Storage y retorna su URL p├║blica de descarga.
+ * Soporta Data URLs base64 nativos con uploadString para m├íxima resiliencia en React Native.
  */
 export async function subirImagenMascota(uriLocal: string): Promise<string> {
   if (!uriLocal || uriLocal.includes('RmlsZSBub3QgZm91bmQ=')) {
-    throw new Error('Imagen inválida');
+    throw new Error('Imagen inv├ílida');
   }
 
   // Si ya es una URL remota de Storage o HTTP, retornarla
@@ -172,7 +173,7 @@ export async function subirImagenMascota(uriLocal: string): Promise<string> {
     return uriLocal;
   }
 
-  // Si es un Data URL base64 válido (data:image/...;base64,...)
+  // Si es un Data URL base64 v├ílido (data:image/...;base64,...)
   if (uriLocal.startsWith('data:')) {
     const match = uriLocal.match(/^data:([^;]+);base64,(.+)$/);
     if (match) {
@@ -230,7 +231,7 @@ export async function crearAlertaMascota(
 ): Promise<string> {
   const usuario = auth.currentUser;
   if (!usuario) {
-    throw new Error('Debes iniciar sesión para publicar una alerta.');
+    throw new Error('Debes iniciar sesi├│n para publicar una alerta.');
   }
 
   // 1. Subir fotos a Firebase Storage en paralelo con manejo resiliente
@@ -242,7 +243,7 @@ export async function crearAlertaMascota(
       try {
         return await subirImagenMascota(uri);
       } catch {
-        // Si el archivo local falló pero es un data URL genuino, conservarlo
+        // Si el archivo local fall├│ pero es un data URL genuino, conservarlo
         if (uri.startsWith('data:image/')) {
           return uri;
         }
@@ -255,7 +256,7 @@ export async function crearAlertaMascota(
     (url): url is string => Boolean(url && !url.includes('RmlsZSBub3QgZm91bmQ='))
   );
 
-  // 2. Si vienen coordenadas, validar que sean numéricas y finitas
+  // 2. Si vienen coordenadas, validar que sean num├⌐ricas y finitas
   let coordenadasValidas = datos.coordenadas;
   if (
     coordenadasValidas &&
@@ -323,7 +324,7 @@ export async function eliminarAlertaMascota(idAlerta: string): Promise<void> {
 }
 
 /**
- * Obtiene los datos de una única alerta por su ID.
+ * Obtiene los datos de una ├║nica alerta por su ID.
  */
 export async function obtenerAlertaPorId(idAlerta: string): Promise<Pet | null> {
   const docRef = doc(db, COLECCION_ALERTAS, idAlerta);
@@ -337,7 +338,7 @@ export async function obtenerAlertaPorId(idAlerta: string): Promise<Pet | null> 
 }
 
 /**
- * Obtiene los datos de una alerta cruzando y enriqueciendo con la información
+ * Obtiene los datos de una alerta cruzando y enriqueciendo con la informaci├│n
  * de contacto del usuario creador (para la pantalla de detalle de mascota y enlace a WhatsApp).
  */
 export async function obtenerAlertaConUsuarioPorId(
@@ -408,7 +409,7 @@ export async function listarTodasLasAlertas(
     const snap = await getDocs(qOrdenada);
     return snap.docs.map((d) => docAPet(d.id, d.data()));
   } catch (error) {
-    // Si Firestore requiere un índice compuesto aún no creado en consola,
+    // Si Firestore requiere un ├¡ndice compuesto a├║n no creado en consola,
     // ordenamos en memoria para garantizar continuidad
     const qSinOrder = query(
       collection(db, COLECCION_ALERTAS),
@@ -428,20 +429,20 @@ export async function listarTodasLasAlertas(
 
 /**
  * [SELECT ALL PUBLICACIONES JOIN USER: idUser == publicacion.idUser]
- * Obtiene todas las alertas cruzando y enriqueciendo cada una con la información del usuario creador
- * (nombre, correo, teléfono, avatar) desde la colección 'usuarios'.
+ * Obtiene todas las alertas cruzando y enriqueciendo cada una con la informaci├│n del usuario creador
+ * (nombre, correo, tel├⌐fono, avatar) desde la colecci├│n 'usuarios'.
  */
 export async function listarAlertasConUsuario(
   filtros?: FiltrosListadoMascotas
 ): Promise<PetConUsuario[]> {
-  // 1. Obtener todas las alertas según los filtros
+  // 1. Obtener todas las alertas seg├║n los filtros
   const alertas = await listarTodasLasAlertas(filtros);
 
   if (alertas.length === 0) {
     return [];
   }
 
-  // 2. Extraer UIDs únicos de los autores para evitar llamadas duplicadas (deduplicación en memoria)
+  // 2. Extraer UIDs ├║nicos de los autores para evitar llamadas duplicadas (deduplicaci├│n en memoria)
   const uidsUnicos = Array.from(
     new Set(
       alertas
@@ -469,7 +470,7 @@ export async function listarAlertasConUsuario(
           });
         }
       } catch {
-        // Silencioso en producción: si no se puede cargar el perfil, continúa sin datos adicionales
+        // Silencioso en producci├│n: si no se puede cargar el perfil, contin├║a sin datos adicionales
       }
     })
   );
@@ -482,16 +483,16 @@ export async function listarAlertasConUsuario(
 }
 
 /**
- * Obtiene las publicaciones creadas por un usuario específico (para la pantalla de Perfil "Mis Publicaciones").
+ * Obtiene las publicaciones creadas por un usuario espec├¡fico (para la pantalla de Perfil "Mis Publicaciones").
  */
 export async function listarAlertasPorUsuario(idUsuario: string): Promise<Pet[]> {
   return listarTodasLasAlertas({ creadoPor: idUsuario });
 }
 
 /**
- * [MÉTODO DE LISTAR PARA MAPS]
+ * [M├ëTODO DE LISTAR PARA MAPS]
  * Desacoplado y modular: Consulta las publicaciones activas, filtra las que cuentan con
- * coordenadas geográficas válidas y las adapta a la estructura MapPet requerida por el mapa.
+ * coordenadas geogr├íficas v├ílidas y las adapta a la estructura MapPet requerida por el mapa.
  */
 export async function listarAlertasParaMapa(): Promise<MapPet[]> {
   const alertas = await listarTodasLasAlertas();
@@ -499,8 +500,8 @@ export async function listarAlertasParaMapa(): Promise<MapPet[]> {
   const alertasMapeables: MapPet[] = [];
 
   for (const pet of alertas) {
-    // Si la alerta no tiene coordenadas numéricas válidas en Firestore,
-    // se resuelve automáticamente a partir de su ubicación o zona de Pilar
+    // Si la alerta no tiene coordenadas num├⌐ricas v├ílidas en Firestore,
+    // se resuelve autom├íticamente a partir de su ubicaci├│n o zona de Pilar
     let coords = pet.coordenadas;
     if (
       !coords ||
@@ -535,7 +536,7 @@ export async function listarAlertasParaMapa(): Promise<MapPet[]> {
     const ubicacionTexto =
       typeof pet.ubicacion === 'string'
         ? pet.ubicacion
-        : (pet.ubicacion as any)?.direccion ?? 'Ubicación no especificada';
+        : (pet.ubicacion as any)?.direccion ?? 'Ubicaci├│n no especificada';
 
     alertasMapeables.push({
       id: pet.id,
@@ -557,7 +558,7 @@ export async function listarAlertasParaMapa(): Promise<MapPet[]> {
 }
 
 /**
- * Marca una publicación propia como encontrada
+ * Marca una publicaci├│n propia como encontrada
  * y notifica a quienes interactuaron con ella.
  */
 export async function marcarMascotaComoEncontrada(
@@ -566,30 +567,30 @@ export async function marcarMascotaComoEncontrada(
   const usuario = auth.currentUser;
 
   if (!usuario) {
-    throw new Error('Tenés que iniciar sesión.');
+    throw new Error('Ten├⌐s que iniciar sesi├│n.');
   }
 
   if (!idAlerta) {
-    throw new Error('La publicación no es válida.');
+    throw new Error('La publicaci├│n no es v├ílida.');
   }
 
   const alertaRef = doc(db, COLECCION_ALERTAS, idAlerta);
   const alertaSnap = await getDoc(alertaRef);
 
   if (!alertaSnap.exists()) {
-    throw new Error('La publicación no existe.');
+    throw new Error('La publicaci├│n no existe.');
   }
 
   const alerta = alertaSnap.data();
 
   if (alerta.creadoPor !== usuario.uid) {
     throw new Error(
-      'Solo el dueño de la publicación puede marcarla como encontrada.'
+      'Solo el due├▒o de la publicaci├│n puede marcarla como encontrada.'
     );
   }
 
   if (alerta.estado === 'ENCONTRADO') {
-    throw new Error('Esta publicación ya está marcada como encontrada.');
+    throw new Error('Esta publicaci├│n ya est├í marcada como encontrada.');
   }
 
   const interesados: string[] = Array.isArray(alerta.usuariosInteresados)
@@ -604,7 +605,7 @@ export async function marcarMascotaComoEncontrada(
     ),
   ];
 
-  // Actualizar el estado de la publicación.
+  // Actualizar el estado de la publicaci├│n.
   await updateDoc(alertaRef, {
     estado: 'ENCONTRADO',
     fechaModificacion: serverTimestamp(),
@@ -617,8 +618,8 @@ export async function marcarMascotaComoEncontrada(
     await addDoc(notificacionesRef, {
       destinatarioId,
       tipo: 'estado',
-      titulo: '¡Mascota encontrada!',
-      mensaje: `¡Buenas noticias! ${
+      titulo: '┬íMascota encontrada!',
+      mensaje: `┬íBuenas noticias! ${
         alerta.nombre || 'La mascota'
       } fue marcada como encontrada.`,
       publicacionId: idAlerta,
@@ -627,4 +628,81 @@ export async function marcarMascotaComoEncontrada(
     });
   }
 }
-
+
+
+// ==========================================
+// PUBLICACIONES GUARDADAS
+// ==========================================
+
+/**
+ * Guarda una publicacion en la cuenta del usuario autenticado.
+ */
+export async function guardarPublicacion(idPublicacion: string): Promise<void> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error('Debes iniciar sesion para guardar publicaciones.');
+  }
+
+  if (!idPublicacion) {
+    throw new Error('No se recibio el ID de la publicacion.');
+  }
+
+  const referencia = doc(
+    db,
+    COLECCION_USUARIOS,
+    usuario.uid,
+    'guardadas',
+    idPublicacion
+  );
+
+  await setDoc(referencia, {
+    publicacionId: idPublicacion,
+    guardadaEn: serverTimestamp(),
+  });
+}
+
+/**
+ * Elimina una publicacion de los guardados del usuario.
+ */
+export async function quitarPublicacionGuardada(
+  idPublicacion: string
+): Promise<void> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error('Debes iniciar sesion para modificar tus guardados.');
+  }
+
+  const referencia = doc(
+    db,
+    COLECCION_USUARIOS,
+    usuario.uid,
+    'guardadas',
+    idPublicacion
+  );
+
+  await deleteDoc(referencia);
+}
+
+/**
+ * Obtiene los IDs de las publicaciones guardadas por el usuario.
+ */
+export async function obtenerIdsPublicacionesGuardadas(): Promise<string[]> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error('Debes iniciar sesion para consultar tus guardados.');
+  }
+
+  const referencia = collection(
+    db,
+    COLECCION_USUARIOS,
+    usuario.uid,
+    'guardadas'
+  );
+
+  const resultado = await getDocs(referencia);
+
+  return resultado.docs.map((documento) => documento.id);
+}

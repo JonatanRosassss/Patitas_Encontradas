@@ -132,7 +132,8 @@ export default function AjustesScreen() {
       {/* Modal para cambiar contraseña */}
       <CambiarContraseniaModal 
         visible={mostrarModalContrasenia}
-        onClose={() => setMostrarModalContrasenia(false)}
+        alCerrar={() => setMostrarModalContrasenia(false)}
+        emailUsuario={usuario?.email}
       />
     </SafeAreaView>
   );
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   seccionTitulo: {
-    fontSize: Typography.subtitle?.fontSize || 14,
+    fontSize: Typography.sizes.sm,
     fontWeight: 'bold',
     color: '#8E8E93',
     marginTop: 20,

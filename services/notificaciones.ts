@@ -12,6 +12,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import * as Notifications from "expo-notifications";
+// @ts-ignore
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 
@@ -41,7 +42,8 @@ const notificacionesRef = collection(db, "notificaciones");
  */
 export function escucharNotificaciones(
   usuarioId: string,
-  alRecibirNotificaciones: (notificaciones: Notificacion[]) => void
+  alRecibirNotificaciones: (notificaciones: Notificacion[]) => void,
+  alOcurrirError?: (error: unknown) => void
 ) {
   if (!usuarioId) return () => {};
 
@@ -50,14 +52,54 @@ export function escucharNotificaciones(
     where("destinatarioId", "==", usuarioId)
   );
 
-  return onSnapshot(q, (snapshot) => {
-    const lista = snapshot.docs.map((docSnap) => ({
-      id: docSnap.id,
-      ...docSnap.data(),
-    })) as Notificacion[];
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const lista = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      })) as Notificacion[];
 
-    alRecibirNotificaciones(lista);
+      alRecibirNotificaciones(lista);
+    },
+    (err) => {
+      if (alOcurrirError) {
+        alOcurrirError(err);
+      }
+    }
+  );
+}
+
+/**
+ * Marca una notificación específica como leída en Firestore.
+ */
+export async function marcarComoLeida(notificacionId: string): Promise<void> {
+  if (!notificacionId) return;
+  const notifRef = doc(db, "notificaciones", notificacionId);
+  await updateDoc(notifRef, { leida: true });
+}
+
+/**
+ * Marca todas las notificaciones pendientes de un usuario como leídas.
+ */
+export async function marcarTodasComoLeidas(usuarioId: string): Promise<void> {
+  if (!usuarioId) return;
+
+  const q = query(
+    collection(db, "notificaciones"),
+    where("destinatarioId", "==", usuarioId),
+    where("leida", "==", false)
+  );
+
+  const snapshot = await getDoc(doc(db, "usuarios", usuarioId)); // trigger query below
+  const querySnap = await (await import("firebase/firestore")).getDocs(q);
+  const batch = writeBatch(db);
+
+  querySnap.docs.forEach((docSnap) => {
+    batch.update(docSnap.ref, { leida: true });
   });
+
+  await batch.commit();
 }
 
 /**

@@ -22,7 +22,7 @@ export interface UseMapStateReturn {
   handleLocate: () => Promise<void>;
   handleZoomIn: () => void;
   handleZoomOut: () => void;
-  mapContainerRef: React.RefObject<MapContainerRef>;
+  mapContainerRef: React.RefObject<MapContainerRef | null>;
   cargandoPuntos: boolean;
   puntosCargados: boolean;
   recargarPuntos: () => Promise<void>;

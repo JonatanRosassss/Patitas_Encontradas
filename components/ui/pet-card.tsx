@@ -14,6 +14,11 @@ import {
   Spacing,
   Radius,
 } from '@/constants/theme';
+import {
+  guardarPublicacion,
+  quitarPublicacionGuardada,
+  obtenerIdsPublicacionesGuardadas,
+} from '@/services/mascotasService';
 
 export interface PetCardProps {
   id?: string;
@@ -28,6 +33,7 @@ export interface PetCardProps {
 }
 
 export function PetCard({
+  id,
   tipo,
   estado,
   nombre,
@@ -38,20 +44,77 @@ export function PetCard({
   onPress,
 }: PetCardProps) {
   const [mostrarToast, setMostrarToast] = useState(false);
+  const [mensajeToast, setMensajeToast] = useState('');
   const [imagenValida, setImagenValida] = useState(true);
+  const [guardada, setGuardada] = useState(false);
+  const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
     setImagenValida(true);
   }, [imagen]);
 
+  // Consultar si la publicación está guardada
+  useEffect(() => {
+    let montado = true;
+
+    async function verificarGuardado() {
+      if (!id) return;
+
+      try {
+        const guardadas = await obtenerIdsPublicacionesGuardadas();
+        if (montado) {
+          setGuardada(guardadas.includes(id));
+        }
+      } catch {
+        // Si no está autenticado o falla la consulta, no marcamos como guardada
+      }
+    }
+
+    verificarGuardado();
+
+    return () => {
+      montado = false;
+    };
+  }, [id]);
+
   const isPerdido = estado.toUpperCase() === 'PERDIDO';
 
-  const guardarPublicacion = () => {
+  // Mostrar notificación temporal
+  const mostrarMensaje = (mensaje: string, duracion = 2500) => {
+    setMensajeToast(mensaje);
     setMostrarToast(true);
 
     setTimeout(() => {
       setMostrarToast(false);
-    }, 2000);
+    }, duracion);
+  };
+
+  // Guardar o quitar publicación
+  const manejarGuardado = async () => {
+    if (!id || guardando) return;
+
+    try {
+      setGuardando(true);
+
+      if (guardada) {
+        await quitarPublicacionGuardada(id);
+        setGuardada(false);
+        mostrarMensaje('Publicación eliminada de tus guardados');
+      } else {
+        await guardarPublicacion(id);
+        setGuardada(true);
+        mostrarMensaje('¡Publicación guardada correctamente!');
+      }
+    } catch (error) {
+      mostrarMensaje(
+        error instanceof Error
+          ? error.message
+          : 'No se pudo completar la operación',
+        3000
+      );
+    } finally {
+      setGuardando(false);
+    }
   };
 
   const fallbackImage =
@@ -69,8 +132,13 @@ export function PetCard({
     <View style={styles.petCard}>
       {mostrarToast && (
         <View style={[styles.toast, { pointerEvents: 'none' }]}>
+          <Ionicons
+            name="checkmark-circle"
+            size={18}
+            color="#FFFFFF"
+          />
           <Text style={styles.toastText}>
-            Publicación guardada
+            {mensajeToast || 'Publicación guardada'}
           </Text>
         </View>
       )}
@@ -87,6 +155,8 @@ export function PetCard({
         {/* Imagen de la mascota */}
         <View style={styles.imageContainer}>
           <Image
+            testID="pet-card-image"
+            accessibilityRole="image"
             source={{ uri: uriImagenFinal }}
             style={styles.petImage}
             resizeMode="cover"
@@ -194,17 +264,23 @@ export function PetCard({
       <Pressable
         style={({ pressed }) => [
           styles.saveButton,
+          guardada && styles.saveButtonGuardado,
           pressed && styles.saveButtonPressed,
         ]}
-        onPress={guardarPublicacion}
+        onPress={manejarGuardado}
+        disabled={guardando}
         accessibilityRole="button"
-        accessibilityLabel="Guardar publicación"
+        accessibilityLabel={
+          guardada
+            ? 'Quitar de guardados'
+            : 'Guardar publicación'
+        }
         hitSlop={8}
       >
         <Ionicons
-          name="bookmark-outline"
-          size={16}
-          color={Colors.white}
+          name={guardada ? 'bookmark' : 'bookmark-outline'}
+          size={18}
+          color={guardada ? '#F28C28' : Colors.white}
         />
       </Pressable>
     </View>
@@ -313,14 +389,20 @@ const styles = StyleSheet.create({
   },
 
   saveButton: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     borderRadius: Radius.sm,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: Spacing.xs,
     zIndex: 2,
+  },
+
+  saveButtonGuardado: {
+    backgroundColor: '#FFF0DF',
+    borderWidth: 1,
+    borderColor: '#F28C28',
   },
 
   saveButtonPressed: {
@@ -370,6 +452,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: Spacing.sm,
     alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
     backgroundColor: Colors.overlay,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
