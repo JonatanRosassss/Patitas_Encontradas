@@ -1,0 +1,70 @@
+{
+  "modulo": "Módulo 5 (RF-5: Cierre / Resolución de Publicación y Centro de Ayuda / Soporte)",
+  "proyecto": "Patitas Encontradas",
+  "fechaEjecucion": "2026-10-30T04:25:09Z",
+  "herramienta": "Node.js Test Runner (node --test)",
+  "archivoTest": "tests/rf5_cierre_soporte_suite.test.mjs",
+  "resumen": {
+    "total": 5,
+    "pasados": 5,
+    "fallidos": 0,
+    "estadoGeneral": "APROBADO (PASS)"
+  },
+  "resultadosDetallados": [
+    {
+      "casoPrueba": "TC-501",
+      "descripcion": "Cierre exitoso de publicación por mascota recuperada por el Autor original",
+      "resultadoReal": "Validación de creador exitosa, actualización de estado a 'ENCONTRADO' con timestamp e emisión de notificación '¡Mascota encontrada!'.",
+      "estado": "Aprobado",
+      "postcondiciones": "Publicación marcada como ENCONTRADO en Firestore, notificación generada para el usuario.",
+      "evidencia": {
+        "testName": "TC-501: Cierre exitoso de publicación por mascota recuperada por el Autor original",
+        "duracionMs": 2.81
+      }
+    },
+    {
+      "casoPrueba": "TC-502",
+      "descripcion": "Seguridad / Negativa — Rechazo de cierre de publicación al ser intentado por un usuario NO autor",
+      "resultadoReal": "Lanzamiento correcto del error 'Solo el dueño de la publicación puede marcarla como encontrada.' al intentar cerrar con uid distinto.",
+      "estado": "Aprobado",
+      "postcondiciones": "Publicación permanece inalterada en estado ACTIVO.",
+      "evidencia": {
+        "testName": "TC-502: Seguridad / Negativa — Rechazo de cierre de publicación al ser intentado por un usuario NO autor",
+        "duracionMs": 1.25
+      }
+    },
+    {
+      "casoPrueba": "TC-503",
+      "descripcion": "Consulta de Preguntas Frecuentes (FAQs) por categoría en Centro de Ayuda",
+      "resultadoReal": "Categorías oficiales verificadas, filtrado por categoría 'PUBLICACIONES' correcto (3 ítems) y expansión/colapso de acordeón validado.",
+      "estado": "Aprobado",
+      "postcondiciones": "FAQs filtradas correctamente y acordeón interactivo operativo.",
+      "evidencia": {
+        "testName": "TC-503: Consulta de Preguntas Frecuentes (FAQs) por categoría en Centro de Ayuda",
+        "duracionMs": 0.16
+      }
+    },
+    {
+      "casoPrueba": "TC-504",
+      "descripcion": "Creación exitosa de Ticket de Soporte / Incidencia en Firestore",
+      "resultadoReal": "Sanitización de inputs verificada, campos de título, correo en minúsculas y descripción detallados correctamente validados.",
+      "estado": "Aprobado",
+      "postcondiciones": "Ticket preparado para persistencia en colección 'tickets_soporte' con estado 'ABIERTO'.",
+      "evidencia": {
+        "testName": "TC-504: Creación exitosa de Ticket de Soporte / Incidencia en Firestore",
+        "duracionMs": 0.09
+      }
+    },
+    {
+      "casoPrueba": "TC-505",
+      "descripcion": "UI / Validación (Negativa) — Rechazo de envío de Ticket de Soporte con campos obligatorios vacíos",
+      "resultadoReal": "Detección y rechazo de campos obligatorios vacíos (título/descripción) lanzando error esperado.",
+      "estado": "Aprobado",
+      "postcondiciones": "Formulario bloqueado y alerta mostrada al usuario sin realizar escritura en Firestore.",
+      "evidencia": {
+        "testName": "TC-505: UI / Validación (Negativa) — Rechazo de envío de Ticket de Soporte con campos obligatorios vacíos",
+        "duracionMs": 0.67
+      }
+    }
+  ]
+}

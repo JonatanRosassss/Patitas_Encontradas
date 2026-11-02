@@ -8,8 +8,11 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "node --test tests/geoValidation.test.mjs tests/challenger2_integration.test.mjs tests/challenger_stress.test.mjs tests/faqSection.test.mjs tests/ticketCollectionAndForm.test.mjs tests/mapFirebasePoints.test.mjs tests/publicarAlertaService.test.mjs tests/homeAndPetDetailWhatsApp.test.mjs tests/cambiarContraseniaAjustes.test.mjs",
-    "test:firebase": "node tests/firebaseLivePoints.test.mjs"
+    "test": "node --test tests/unit/geoValidation.test.mjs tests/unit/challenger2_integration.test.mjs tests/unit/challenger_stress.test.mjs tests/unit/faqSection.test.mjs tests/unit/ticketCollectionAndForm.test.mjs tests/unit/mapFirebasePoints.test.mjs tests/unit/publicarAlertaService.test.mjs tests/unit/homeAndPetDetailWhatsApp.test.mjs tests/unit/cambiarContraseniaAjustes.test.mjs tests/unit/rf1_auth_suite.test.mjs tests/unit/rf2_publicaciones_suite.test.mjs tests/unit/rf3_mapa_feed_suite.test.mjs tests/unit/rf4_avistamientos_whatsapp_suite.test.mjs tests/unit/rf5_cierre_soporte_suite.test.mjs tests/unit/rnf_iso25010_suite.test.mjs",
+    "test:catedra": "node --test tests/unit/rf1_auth_suite.test.mjs tests/unit/rf2_publicaciones_suite.test.mjs tests/unit/rf3_mapa_feed_suite.test.mjs tests/unit/rf4_avistamientos_whatsapp_suite.test.mjs tests/unit/rf5_cierre_soporte_suite.test.mjs tests/unit/rnf_iso25010_suite.test.mjs",
+    "test:android": "jest",
+    "test:e2e": "playwright test",
+    "test:firebase": "node tests/unit/firebaseLivePoints.test.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/baloo-2": "^0.4.2",
@@ -42,11 +45,18 @@
     "react-native-svg": "15.15.4",
     "react-native-web": "^0.21.2",
     "react-native-webview": "13.16.1",
+    "react-test-renderer": "19.2.3",
     "zod": "^3.23.8",
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@react-native/jest-preset": "^0.88.1",
+    "@testing-library/react-native": "^14.1.0",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.2.4",
+    "jest": "^30.5.2",
+    "jest-expo": "^58.0.13",
     "tailwindcss": "^3.4.7",
     "typescript": "~6.0.3"
   },

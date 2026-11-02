@@ -87,6 +87,8 @@ export function PetCard({
         {/* Imagen de la mascota */}
         <View style={styles.imageContainer}>
           <Image
+            testID="pet-card-image"
+            accessibilityRole="image"
             source={{ uri: uriImagenFinal }}
             style={styles.petImage}
             resizeMode="cover"

@@ -1,0 +1,127 @@
+{
+  "modulo": "Módulo 1 (RF-1: Gestionar cuenta de usuario y sesión)",
+  "proyecto": "Patitas Encontradas",
+  "fechaEjecucion": "2026-10-30T04:28:40Z",
+  "herramienta": "Node.js Test Runner (node --test) / node:assert/strict",
+  "archivoTest": "tests/rf1_auth_suite.test.mjs",
+  "resumen": {
+    "total": 8,
+    "pasados": 8,
+    "fallidos": 0,
+    "estadoGeneral": "APROBADO (PASS)"
+  },
+  "resultadosDetallados": [
+    {
+      "casoPrueba": "TC-101",
+      "descripcion": "Registro exitoso de nuevo vecino con datos válidos (Juan Pérez, juan.perez@unpilar.edu.ar, Patitas2026!, +5491122334455, Villa Rosa, Pilar)",
+      "resultadoReal": "Validación de inputs completa, invocación de createUserWithEmailAndPassword y updateProfile, persistencia de perfil y user_session en AsyncStorage, escritura en Firestore colección 'usuarios' con { merge: true }, y redirección a /(auth)/login.",
+      "estado": "Aprobado",
+      "postcondiciones": "Usuario registrado en Firebase Auth, documento indexado en 'usuarios' y sesión iniciada en caché local.",
+      "evidencia": {
+        "testName": "TC-101: Registro exitoso de nuevo vecino con datos válidos en register.tsx",
+        "archivo": "tests/rf1_auth_suite.test.mjs",
+        "salidaConsola": "✔ TC-101: Registro exitoso de nuevo vecino con datos válidos en register.tsx",
+        "duracionMs": 14.96
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-102",
+      "descripcion": "Rechazo de registro por correo electrónico duplicado (profesor@patitas.com)",
+      "resultadoReal": "Detección de colisión por correo existente, captura de código 'auth/email-already-in-use', emisión de alerta amigable ('Ya existe una cuenta registrada con este correo electrónico...') sin duplicar documentos en Firestore ni generar sesión espuria.",
+      "estado": "Aprobado",
+      "postcondiciones": "Base de datos y AsyncStorage se mantienen limpios e inalterados, preservando integridad de la cuenta existente.",
+      "evidencia": {
+        "testName": "TC-102: Rechazo de registro por correo electrónico duplicado (profesor@patitas.com)",
+        "archivo": "tests/rf1_auth_suite.test.mjs",
+        "salidaConsola": "✔ TC-102: Rechazo de registro por correo electrónico duplicado (profesor@patitas.com)",
+        "duracionMs": 0.48
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-103",
+      "descripcion": "Inicio de sesión exitoso con credenciales válidas (profesor@patitas.com / 123456)",
+      "resultadoReal": "Autenticación correcta en authMock y Firebase Auth (signInWithEmailAndPassword), obtención de token JWT, guardado de 'user_session' en AsyncStorage y navegación a /(tabs).",
+      "estado": "Aprobado",
+      "postcondiciones": "Credencial persistida en AsyncStorage ('user_session') y contexto de sesión activo disponible para la app.",
+      "evidencia": {
+        "testName": "TC-103: Inicio de sesión exitoso con credenciales válidas (profesor@patitas.com / 123456)",
+        "archivo": "tests/rf1_auth_suite.test.mjs",
+        "salidaConsola": "✔ TC-103: Inicio de sesión exitoso con credenciales válidas (profesor@patitas.com / 123456)",
+        "duracionMs": 1.21
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-104",
+      "descripcion": "Inicio de sesión fallido por contraseña incorrecta (ClaveErronea99)",
+      "resultadoReal": "Rechazo de credenciales por authMock y Firebase Auth ante código 'auth/wrong-password' / 'auth/invalid-credential', emisión de alerta 'Correo o contraseña incorrectos.' sin escribir sesión en AsyncStorage y manteniendo al usuario en login.",
+      "estado": "Aprobado",
+      "postcondiciones": "Acceso denegado, AsyncStorage sin datos de sesión y ningún token generado.",
+      "evidencia": {
+        "testName": "TC-104: Inicio de sesión fallido por contraseña incorrecta (ClaveErronea99)",
+        "archivo": "tests/rf1_auth_suite.test.mjs",
+        "salidaConsola": "✔ TC-104: Inicio de sesión fallido por contraseña incorrecta (ClaveErronea99)",
+        "duracionMs": 0.45
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-105",
+      "descripcion": "Validación de esquema de seguridad en formato de correo (usuariocorreo_invalido) y longitud mínima de clave (123)",
+      "resultadoReal": "Ejecución de loginSchema de Zod confirmando rechazo con mensajes exactos: 'El formato no es valido' para formato de email y 'La contrasenia debe tener minimo 6 caracteres' para longitud mínima. Validación exitosa al enviar datos correctos.",
+      "estado": "Aprobado",
+      "postcondiciones": "Formularios de autenticación blindados ante inputs sintácticamente inválidos antes de invocar la red.",
+      "evidencia": {
+        "testName": "TC-105: Validación de esquema Zod en authSchema.ts (usuariocorreo_invalido y clave 123)",
+        "archivo": "tests/rf1_auth_suite.test.mjs",
+        "salidaConsola": "✔ TC-105: Validación de esquema Zod en authSchema.ts (usuariocorreo_invalido y clave 123)",
+        "duracionMs": 0.80
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-106",
+      "descripcion": "Solicitud de recuperación de contraseña con correo existente (juan.perez@unpilar.edu.ar) en forgetPassword.tsx / AuthContext.tsx",
+      "resultadoReal": "Validación de email con loginSchema exitosa, invocación segura de enviarCorreoRestablecimiento y sendPasswordResetEmail con el correo destino especificado sin errores.",
+      "estado": "Aprobado",
+      "postcondiciones": "Enlace de restablecimiento despachado por Firebase Authentication hacia el correo verificado del vecino.",
+      "evidencia": {
+        "testName": "TC-106: Solicitud de recuperación de contraseña con correo existente (juan.perez@unpilar.edu.ar)",
+        "archivo": "tests/rf1_auth_suite.test.mjs",
+        "salidaConsola": "✔ TC-106: Solicitud de recuperación de contraseña con correo existente (juan.perez@unpilar.edu.ar)",
+        "duracionMs": 0.51
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-107",
+      "descripcion": "Solicitud de recuperación de contraseña con correo inexistente (noexiste@dominio.com)",
+      "resultadoReal": "Captura del código 'auth/user-not-found' de Firebase Auth y transformación en mensaje seguro al usuario ('No existe una cuenta registrada con este correo electrónico.') sin exponer fallas internas ni tokens sensibles.",
+      "estado": "Aprobado",
+      "postcondiciones": "Solicitud rechazada de forma amigable y segura, sin filtración de vectores de enumeración ni modificaciones de estado.",
+      "evidencia": {
+        "testName": "TC-107: Solicitud de recuperación de contraseña con correo inexistente (noexiste@dominio.com)",
+        "archivo": "tests/rf1_auth_suite.test.mjs",
+        "salidaConsola": "✔ TC-107: Solicitud de recuperación de contraseña con correo inexistente (noexiste@dominio.com)",
+        "duracionMs": 0.83
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-108",
+      "descripcion": "Actualización de datos/foto de perfil (Del Viso, Pilar, avatar_nuevo.jpg) y cierre de sesión seguro en perfil.tsx y AuthContext.tsx",
+      "resultadoReal": "actualizarFotoPerfil guarda la nueva URL en Firestore y en caché local; actualizarDatosPerfil actualiza nombre ('Del Viso, Pilar') y teléfono con { merge: true }; cerrarSesion purga 'user_session' de AsyncStorage, resetea estado a null y redirige a /(auth)/login.",
+      "estado": "Aprobado",
+      "postcondiciones": "Perfil persistido con nuevos datos, sesión revocada limpiamente de AsyncStorage y pantalla de login activa.",
+      "evidencia": {
+        "testName": "TC-108: Actualización de perfil (Del Viso, avatar_nuevo.jpg) y cierre de sesión seguro",
+        "archivo": "tests/rf1_auth_suite.test.mjs",
+        "salidaConsola": "✔ TC-108: Actualización de perfil (Del Viso, avatar_nuevo.jpg) y cierre de sesión seguro",
+        "duracionMs": 0.74
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    }
+  ]
+}

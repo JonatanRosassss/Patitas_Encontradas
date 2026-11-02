@@ -1,0 +1,90 @@
+/* Patitas Encontradas - Local Typography Definitions for Remotion Deterministic Rendering */
+
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('../../public/fonts/Baloo2_400Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url('../../public/fonts/Baloo2_500Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url('../../public/fonts/Baloo2_600SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('../../public/fonts/Baloo2_700Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 800;
+  font-display: block;
+  src: url('../../public/fonts/Baloo2_800ExtraBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 300;
+  font-display: block;
+  src: url('../../public/fonts/Nunito_300Light.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('../../public/fonts/Nunito_400Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url('../../public/fonts/Nunito_600SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('../../public/fonts/Nunito_700Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: block;
+  src: url('../../public/fonts/Nunito_800ExtraBold.ttf') format('truetype');
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

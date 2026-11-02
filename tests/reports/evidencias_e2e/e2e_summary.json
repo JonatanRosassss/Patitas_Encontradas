@@ -1,0 +1,51 @@
+{
+  "timestamp": "2026-10-30T01:31:00-03:00",
+  "viewport": "390x844 (Mobile Android/iOS)",
+  "baseUrl": "http://localhost:8081",
+  "screenshotsCaptured": [
+    "01_RF1_bienvenida.png",
+    "02_RF1_login_screen.png",
+    "03_RF1_register_screen.png",
+    "04_RF1_forget_password.png",
+    "05_RF3_home_feed_activas.png",
+    "06_RF3_RNF1_mapa_leaflet_pilar.png",
+    "07_RF2_publicar_alerta_gate.png",
+    "08_RF5_centro_ayuda_faqs.png",
+    "09_RF5_formulario_ticket_soporte.png",
+    "10_RF1_RF2_perfil_usuario.png",
+    "11_RF1_ajustes_cuenta.png"
+  ],
+  "consoleFatalErrors": 0,
+  "results": [
+    {
+      "module": "RF-1",
+      "status": "PASS",
+      "duration_ms": 13045.78
+    },
+    {
+      "module": "RF-3-Feed",
+      "status": "PASS",
+      "duration_ms": 4524.26
+    },
+    {
+      "module": "RF-3-Mapa-RNF1",
+      "status": "PASS",
+      "duration_ms": 2869.54
+    },
+    {
+      "module": "RF-2",
+      "status": "PASS",
+      "duration_ms": 1835.45
+    },
+    {
+      "module": "RF-5",
+      "status": "PASS",
+      "duration_ms": 2919.99
+    },
+    {
+      "module": "RF-1-Perfil-Ajustes",
+      "status": "PASS",
+      "duration_ms": 3330.79
+    }
+  ]
+}

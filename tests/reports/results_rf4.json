@@ -1,0 +1,71 @@
+{
+  "modulo": "Módulo 4 (RF-4: Gestionar avistamiento y contacto con el dueño)",
+  "proyecto": "Patitas Encontradas",
+  "fechaEjecucion": "2026-10-30T04:28:38.000Z",
+  "herramienta": "Node.js Test Runner (node --test)",
+  "archivoTest": "tests/rf4_avistamientos_whatsapp_suite.test.mjs",
+  "resumen": {
+    "total": 4,
+    "pasados": 4,
+    "fallidos": 0,
+    "estadoGeneral": "APROBADO (PASS)"
+  },
+  "resultadosDetallados": [
+    {
+      "casoPrueba": "TC-401",
+      "descripcion": "Registro exitoso de un avistamiento comunitario sobre una publicación ACTIVA (REP-01)",
+      "resultadoReal": "Se validaron las coordenadas del avistamiento (Lat: -34.460, Lng: -58.910) mediante isValidCoordinate() retornando true. Se registró la interacción del usuario colaborador sobre la publicación activa REP-01 (estado 'PERDIDO') vía registrarInteraccionPublicacion('REP-01') con arrayUnion en Firestore y se creó la notificación interna ('NOTIF-1', tipo: 'avistamiento', leida: false) dirigida al dueño ('dueno-uid-01') incluyendo el comentario 'Lo vi corriendo hacia la ruta 8 hace 10 min' y la foto 'avistamiento1.jpg'.",
+      "estado": "Aprobado",
+      "postcondiciones": "El nuevo avistamiento e interacción quedan vinculados al reporte REP-01 en Firestore y se dispara una notificación al autor de la alerta.",
+      "evidencia": {
+        "testName": "TC-401: Registro exitoso de un avistamiento comunitario e interacción sobre publicación ACTIVA (REP-01)",
+        "duracionMs": 34.93,
+        "consola": "✔ TC-401: Registro exitoso de un avistamiento comunitario e interacción sobre publicación ACTIVA (REP-01) (34.9277ms)",
+        "archivo": "tests/rf4_avistamientos_whatsapp_suite.test.mjs"
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-402",
+      "descripcion": "Solicitud de contacto directo con el dueño vía WhatsApp (+54 9 11 2233-4455)",
+      "resultadoReal": "La función real formatearTelefonoParaWhatsApp('+54 9 11 2233-4455') sanitizó y normalizó el teléfono retornando exactamente '5491122334455'. generarMensajeContactoMascota() construyó el mensaje contextualizado para 'Toby' en 'Ruta 8, Pilar' y contactarPorWhatsApp() invocó Linking.openURL con la URL 'https://wa.me/5491122334455?text=...' retornando true sin alertas de error. Se verificó la integración en app/detalle/[id].tsx, PetContactBar.tsx y PetAuthorCard.tsx.",
+      "estado": "Aprobado",
+      "postcondiciones": "Se abre la aplicación externa o web de WhatsApp lista para enviar el mensaje al dueño de la mascota.",
+      "evidencia": {
+        "testName": "TC-402: Solicitud de contacto directo con el dueño vía WhatsApp (+54 9 11 2233-4455)",
+        "duracionMs": 3.01,
+        "consola": "✔ TC-402: Solicitud de contacto directo con el dueño vía WhatsApp (+54 9 11 2233-4455) (3.0052ms)",
+        "archivo": "tests/rf4_avistamientos_whatsapp_suite.test.mjs"
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-403",
+      "descripcion": "Funcional (Negativa) — Impedimento de carga de avistamiento o cambio de estado sobre una publicación ya RESUELTA o CERRADA (REP-02)",
+      "resultadoReal": "Al ejecutar marcarMascotaComoEncontrada('REP-02') sobre una publicación cuyo estado ya es 'ENCONTRADO', el servicio lanzó la excepción controlada Error('Esta publicación ya está marcada como encontrada.') y bloqueó cualquier llamada a updateDoc o addDoc en Firestore (0 escrituras). Asimismo, notificarMascotaEncontrada('REP-02') abortó la operación sin duplicar notificaciones y el validador de estado impidió registrar nuevos avistamientos sobre el caso resuelto.",
+      "estado": "Aprobado",
+      "postcondiciones": "No se permiten nuevos registros ni modificaciones redundantes sobre el caso cerrado REP-02.",
+      "evidencia": {
+        "testName": "TC-403: Funcional (Negativa) - Impedimento de avistamiento o cambio de estado sobre publicación RESUELTA (REP-02)",
+        "duracionMs": 11.29,
+        "consola": "✔ TC-403: Funcional (Negativa) - Impedimento de avistamiento o cambio de estado sobre publicación RESUELTA (REP-02) (11.2878ms)",
+        "archivo": "tests/rf4_avistamientos_whatsapp_suite.test.mjs"
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-404",
+      "descripcion": "Funcional (Negativa) — Validación de datos obligatorios al reportar un avistamiento (ubicación geográfica faltante Lat/Lng: undefined)",
+      "resultadoReal": "Al evaluar el reporte con mensaje 'Creo que lo vi' pero sin coordenadas seleccionadas (Lat/Lng: undefined), isValidCoordinate(undefined, undefined) en utils/geoValidation.ts retornó false (al igual que ante null o NaN). El validador bloqueó el envío exigiendo indicar la ubicación geográfica en el mapa y crearAlertaMascota() en services/mascotasService.ts filtró el objeto coordenadas inválido evitando corromper Firestore.",
+      "estado": "Aprobado",
+      "postcondiciones": "El formulario de avistamiento permanece en pantalla sin enviarse hasta completar la ubicación geográfica obligatoria en el mapa.",
+      "evidencia": {
+        "testName": "TC-404: Funcional (Negativa) - Bloqueo de envío de avistamiento sin ubicación geográfica (Lat/Lng: undefined)",
+        "duracionMs": 5.08,
+        "consola": "✔ TC-404: Funcional (Negativa) - Bloqueo de envío de avistamiento sin ubicación geográfica (Lat/Lng: undefined) (5.0833ms)",
+        "archivo": "tests/rf4_avistamientos_whatsapp_suite.test.mjs"
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    }
+  ]
+}

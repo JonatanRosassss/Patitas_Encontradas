@@ -1,0 +1,651 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\UNI PILAR\\AppsMoviles\\Patitas_Encontradas\\node_modules\\@playwright\\test\\cli.js",
+      "test"
+    ],
+    "configFile": "C:\\UNI PILAR\\AppsMoviles\\Patitas_Encontradas\\playwright.config.ts",
+    "rootDir": "C:/UNI PILAR/AppsMoviles/Patitas_Encontradas/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/UNI PILAR/AppsMoviles/Patitas_Encontradas/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "android-moto-g52",
+        "name": "android-moto-g52",
+        "testDir": "C:/UNI PILAR/AppsMoviles/Patitas_Encontradas/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 45000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\UNI PILAR\\AppsMoviles\\Patitas_Encontradas\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "android-moto-g52",
+        "testDir": "C:\\UNI PILAR\\AppsMoviles\\Patitas_Encontradas\\e2e\\specs",
+        "snapshotDir": "C:\\UNI PILAR\\AppsMoviles\\Patitas_Encontradas\\e2e\\specs",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 45000,
+        "use": {
+          "baseURL": "http://localhost:8081",
+          "trace": "retain-on-failure",
+          "screenshot": "only-on-failure",
+          "userAgent": "Mozilla/5.0 (Linux; Android 13; Moto G52) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "screen": {
+            "width": 393,
+            "height": 851
+          },
+          "deviceScaleFactor": 2.75,
+          "isMobile": true,
+          "hasTouch": true,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "android-moto-g52"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "tests/results_playwright_e2e.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npx expo start --web --port 8081",
+      "url": "http://localhost:8081",
+      "reuseExistingServer": true,
+      "timeout": 120000,
+      "env": {
+        "CI": "1"
+      }
+    }
+  },
+  "suites": [
+    {
+      "title": "rf1-auth-onboarding.spec.ts",
+      "file": "rf1-auth-onboarding.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "RF-1: Onboarding y Autenticación Segura",
+          "file": "rf1-auth-onboarding.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-101: Interacción completa con Portada de Bienvenida y Pilares Activos",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "android-moto-g52",
+                  "projectName": "android-moto-g52",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1748,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navegar a la pantalla de bienvenida",
+                          "duration": 1068
+                        },
+                        {
+                          "title": "Intercambiar píldoras interactivas (Mapa, Reporte, Comunidad)",
+                          "duration": 308
+                        },
+                        {
+                          "title": "Verificar que el botón Comenzar Ahora redirige a Login",
+                          "duration": 119
+                        }
+                      ],
+                      "startTime": "2026-10-30T05:56:04.121Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90ee01d5d58e47fd50a7-fd6cf76d92d79bf54ce7",
+              "file": "rf1-auth-onboarding.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "TC-105: Validación estricta de credenciales inválidas en Login con Zod y Alert Dialog",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "android-moto-g52",
+                  "projectName": "android-moto-g52",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1393,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navegar al formulario de Login",
+                          "duration": 1051
+                        },
+                        {
+                          "title": "Ingresar correo con formato inválido y contraseña corta",
+                          "duration": 73
+                        },
+                        {
+                          "title": "Presionar Ingresar y capturar el diálogo web nativo con el error de Zod",
+                          "duration": 84
+                        }
+                      ],
+                      "startTime": "2026-10-30T05:56:05.998Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90ee01d5d58e47fd50a7-bfdcab8a9c7640d20147",
+              "file": "rf1-auth-onboarding.spec.ts",
+              "line": 42,
+              "column": 7
+            },
+            {
+              "title": "TC-106: Rechazo preventivo en Registro por contraseñas no coincidentes o campos incompletos",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "android-moto-g52",
+                  "projectName": "android-moto-g52",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1698,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navegar a Registro de cuenta",
+                          "duration": 1193
+                        },
+                        {
+                          "title": "Intentar registrar con formulario vacío y verificar rechazo",
+                          "duration": 81
+                        },
+                        {
+                          "title": "Completar datos pero con contraseñas no coincidentes",
+                          "duration": 228
+                        }
+                      ],
+                      "startTime": "2026-10-30T05:56:07.400Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90ee01d5d58e47fd50a7-810e14a507338f67cf68",
+              "file": "rf1-auth-onboarding.spec.ts",
+              "line": 64,
+              "column": 7
+            },
+            {
+              "title": "TC-107: Navegación y estructura de recuperación de contraseña",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "android-moto-g52",
+                  "projectName": "android-moto-g52",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1618,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navegar a Olvidé Contraseña",
+                          "duration": 1325
+                        },
+                        {
+                          "title": "Ingresar correo para solicitud de restablecimiento",
+                          "duration": 68
+                        }
+                      ],
+                      "startTime": "2026-10-30T05:56:09.110Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90ee01d5d58e47fd50a7-ffcf86859601d0755548",
+              "file": "rf1-auth-onboarding.spec.ts",
+              "line": 92,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "rf2-rf3-feed-map.spec.ts",
+      "file": "rf2-rf3-feed-map.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "RF-2 & RF-3: Feed Comunitario, Publicación y Mapa Leaflet",
+          "file": "rf2-rf3-feed-map.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-201: Carga inicial del Feed comunitario y disponibilidad de controles táctiles",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "android-moto-g52",
+                  "projectName": "android-moto-g52",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2060,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navegar a la pantalla principal del Feed",
+                          "duration": 1593
+                        },
+                        {
+                          "title": "Verificar presencia de botones principales de interacción",
+                          "duration": 23
+                        },
+                        {
+                          "title": "Desplegar panel de filtros y alternar entre Perdidos, Encontrados y Todos",
+                          "duration": 282
+                        }
+                      ],
+                      "startTime": "2026-10-30T05:56:10.750Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d8d530e0ba5dd11ea44b-b3a4c3fd9b923c449474",
+              "file": "rf2-rf3-feed-map.spec.ts",
+              "line": 4,
+              "column": 7
+            },
+            {
+              "title": "TC-202: Gate de seguridad en Publicación de Alertas para usuarios invitados",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "android-moto-g52",
+                  "projectName": "android-moto-g52",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1689,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navegar a Publicar Alerta sin autenticación previa",
+                          "duration": 971
+                        },
+                        {
+                          "title": "Comprobar que el Gate de seguridad bloquea el formulario",
+                          "duration": 400
+                        },
+                        {
+                          "title": "Presionar INICIAR SESIÓN y verificar redirección hacia el Login",
+                          "duration": 117
+                        }
+                      ],
+                      "startTime": "2026-10-30T05:56:12.820Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d8d530e0ba5dd11ea44b-ec23ca2641405b092a47",
+              "file": "rf2-rf3-feed-map.spec.ts",
+              "line": 38,
+              "column": 7
+            },
+            {
+              "title": "TC-301 & TC-601: Montaje y visibilidad del Mapa interactivo Leaflet con OpenStreetMap sin API Key de Google",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "android-moto-g52",
+                  "projectName": "android-moto-g52",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1624,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navegar al Mapa Comunitario",
+                          "duration": 1193
+                        },
+                        {
+                          "title": "Verificar que el iframe de Leaflet 1.9.4 se monta en el DOM",
+                          "duration": 11
+                        },
+                        {
+                          "title": "Acceder al contexto interno del iframe y verificar la capa Leaflet y teselas OpenStreetMap",
+                          "duration": 173
+                        }
+                      ],
+                      "startTime": "2026-10-30T05:56:14.517Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d8d530e0ba5dd11ea44b-c5f32e462587519b85df",
+              "file": "rf2-rf3-feed-map.spec.ts",
+              "line": 59,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "rf5-rnf-support-a11y.spec.ts",
+      "file": "rf5-rnf-support-a11y.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "RF-5 & RNF: Centro de Ayuda, Validación de Tickets y Accesibilidad",
+          "file": "rf5-rnf-support-a11y.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-503: Navegación por FAQs, filtrado reactivo por categorías y expansión de acordeón",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "android-moto-g52",
+                  "projectName": "android-moto-g52",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1817,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navegar al Centro de Ayuda",
+                          "duration": 1190
+                        },
+                        {
+                          "title": "Filtrar FAQs por categorías: Mapa, Publicaciones y Cuenta",
+                          "duration": 307
+                        },
+                        {
+                          "title": "Expandir una pregunta frecuente y verificar despliegue de respuesta en el DOM",
+                          "duration": 78
+                        }
+                      ],
+                      "startTime": "2026-10-30T05:56:16.164Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d6b30db0c693943b9374-3bc7e0c5aebaaf098475",
+              "file": "rf5-rnf-support-a11y.spec.ts",
+              "line": 5,
+              "column": 7
+            },
+            {
+              "title": "TC-505: Validación interactiva en caliente del formulario de Tickets sin impacto en Firestore",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "android-moto-g52",
+                  "projectName": "android-moto-g52",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1515,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navegar a la pestaña Generar Ticket",
+                          "duration": 1198
+                        },
+                        {
+                          "title": "Intentar enviar el formulario vacío y verificar mensajes de error en caliente",
+                          "duration": 75
+                        },
+                        {
+                          "title": "Ingresar descripción corta (< 15 caracteres) y validar regla específica",
+                          "duration": 50
+                        }
+                      ],
+                      "startTime": "2026-10-30T05:56:17.994Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d6b30db0c693943b9374-85e1ef000360fc42bdec",
+              "file": "rf5-rnf-support-a11y.spec.ts",
+              "line": 34,
+              "column": 7
+            },
+            {
+              "title": "TC-605: Verificación de accesibilidad táctil móvil (Área de toque >= 44px)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "android-moto-g52",
+                  "projectName": "android-moto-g52",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1535,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navegar al Centro de Ayuda en viewport móvil estándar (390x844)",
+                          "duration": 1157
+                        },
+                        {
+                          "title": "Medir altura de los chips de filtrado FAQ (minHeight >= 44px)",
+                          "duration": 60
+                        },
+                        {
+                          "title": "Medir altura del botón de envío de ticket y campos de texto (minHeight >= 44px)",
+                          "duration": 117
+                        }
+                      ],
+                      "startTime": "2026-10-30T05:56:19.520Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d6b30db0c693943b9374-46028ac2cf2b8f4e587d",
+              "file": "rf5-rnf-support-a11y.spec.ts",
+              "line": 60,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-30T05:56:03.497Z",
+    "duration": 17728.370000000003,
+    "expected": 10,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

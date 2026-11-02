@@ -1,0 +1,26 @@
+{
+  "name": "patitas-launch-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Estudio de renderizado determinista para el video cinematográfico de lanzamiento de Patitas Encontradas",
+  "scripts": {
+    "start": "remotion studio src/index.ts",
+    "build": "node scripts/build_all.js",
+    "build:typography": "remotion render src/index.ts PatitasLaunchTypography out/patitas_launch_typography.mp4",
+    "build:voiceover": "remotion render src/index.ts PatitasLaunchVoiceover out/patitas_launch_voiceover.mp4",
+    "verify": "node verify_output.js"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.539",
+    "@remotion/cli": "^4.0.539",
+    "@remotion/media-utils": "^4.0.539",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "^4.0.539"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "typescript": "~5.7.2"
+  }
+}

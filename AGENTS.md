@@ -413,3 +413,151 @@ Antes de dar cualquier entrega por finalizada:
   - **Motivo del cambio:** Cumplir el requerimiento del usuario de dotar de funcionalidad al botón de cambiar contraseña en Ajustes, garantizando seguridad criptográfica, validación previa y consistencia de sesión.
   - **Nueva estrategia aplicada:** Desacoplamiento limpio (contratos en `types/Auth.ts` -> métodos en `services/AuthContext.tsx` -> componente modular en `components/ajustes/CambiarContraseniaModal.tsx` -> orquestación en `app/ajustes.tsx`), utilizando tokens oficiales de `constants/theme.ts` y pruebas automatizadas.
 - **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | Suite completa `npm test` (62/62 PASS).
+
+#### [2026-10-30] - Generación y Modelado de DFD Nivel 1 y Diccionario de Datos para Draw.io
+- **Solicitud del Usuario:** Convertir el Diagrama de Flujo de Datos (DFD) Nivel 1 y el Diccionario de Datos provistos en la documentación IEEE-830 a un formato entendible e importable directamente por Draw.io (`app.diagrams.net` y Draw.io Desktop/VS Code) para visualizarlos de manera profesional y balanceada con el Nivel 0.
+- **Tipo de Cambio:** `NUEVA_FUNCIONALIDAD` | `CONFIGURACIÓN`
+- **Archivos Involucrados:**
+  - `documentacion/diagramas/DFD_Nivel_1_Patitas_Encontradas.drawio`: Creado (archivo multi-página nativo con DFD Nivel 1 balanceado con Nivel 0 y Diccionario de Datos en tablas normalizadas).
+  - `scripts/generar_drawio_dfd1.py`: Creado (generador automatizado de la estructura XML de Draw.io con layout geométrico y validación).
+- **Progreso Realizado:**
+  - Se formalizó la topología de 4 macroprocesos (P1 a P4), 1 entidad externa (`Usuario EE`) y 3 almacenes (`D1 Usuarios`, `D2 Publicaciones`, `D3 Avistamientos`), respetando el balanceo estricto con el Nivel 0 (5 inputs y 7 outputs de frontera).
+  - Se codificaron los 21 flujos de datos con coordenadas y anclas ortogonales exactas para evitar cruces caóticos de líneas.
+  - Se aplicó una paleta semántica institucional (Azul = Entradas EE, Verde = Salidas EE, Naranja = Escritura en Almacén, Índigo = Lectura de Almacén).
+  - Se integró la Página 2 con el Diccionario de Datos completo (Almacenamientos y Flujos con su estructura sintáctica estándar de cátedra).
+  - Se provee además el código Mermaid limpio para importación rápida vía menú Avanzado de Draw.io.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** El proyecto contaba únicamente con el diagrama Nivel 0 en `Reqs corregidos.pdf` y un fragmento Mermaid incompleto en un PDF de especificaciones, sin archivo visual editable ni estructuración para Draw.io.
+  - **Motivo del cambio:** El usuario requería visualizar el DFD Nivel 1 en Draw.io de forma inmediata y fidedigna al diccionario de datos y requisitos SRS IEEE-830.
+  - **Nueva estrategia aplicada:** Generar un archivo `.drawio` multi-página nativo con coordenadas ortogonales optimizadas y proveer simultáneamente el código Mermaid para máxima flexibilidad.
+- **Resultado de Verificación:** Validación XML con `xml.etree.ElementTree` (OK, 2 diagramas) | `npx tsc --noEmit` (0 errores) | `npm test` (62/62 PASS).
+
+#### [2026-10-30] - Corrección de Escapado HTML y Desahogo de Espaciado en Draw.io
+- **Solicitud del Usuario:** Corregir el aspecto visual del diagrama en Draw.io ("creo que quedó poquito mal jaja") donde se mostraban etiquetas de código HTML sin renderizar en los textos y las flechas de flujos inferiores estaban demasiado amontonadas.
+- **Tipo de Cambio:** `CORRECCIÓN_BUG` | `OPTIMIZACIÓN`
+- **Archivos Involucrados:**
+  - `documentacion/diagramas/DFD_Nivel_1_Patitas_Encontradas.drawio`: Modificado (eliminación de HTML embebido con doble escape, adopción de texto plano `html=0` con saltos de línea `\n`, asignación de pistas verticales paralelas A a E entre procesos y almacenes, y separación mínima de 50-60px entre flechas).
+  - `scripts/generar_drawio_dfd1.py`: Modificado (actualización del generador para evitar doble serialización XML y optimizar los anclajes de conexión).
+- **Progreso Realizado:**
+  - Se eliminaron las etiquetas `<b style='...'>` que aparecían como texto literal en Draw.io debido al doble escape en la serialización XML.
+  - Se configuró `html=0` y saltos nativos `&#10;` en todos los nodos y aristas, garantizando tipografía limpia y compatible universalmente.
+  - Se aumentó la separación vertical en el bloque inferior (P4 y Usuario EE) a 50-60px por arista, eliminando por completo la colisión y superposición de las etiquetas de avistamiento y cierre.
+  - Se crearon 5 pistas verticales ordenadas (Tracks A: 900, B: 960, C: 1020, D: 1080, E: 1140) para que las líneas que viajan hacia y desde los almacenes D1, D2 y D3 no se crucen caóticamente.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** El XML previo incluía strings HTML con etiquetas que se escapaban dos veces (`&amp;lt;b...&amp;gt;`), haciendo que Draw.io las mostrara como código crudo en lugar de texto con estilo. Asimismo, los 5 flujos del Proceso 4 compartían un rango vertical de apenas 100px, solapando sus textos.
+  - **Motivo del cambio:** Subsanar los defectos visuales reportados por el usuario para lograr un diagrama profesional, legible y presentable para defensa académica.
+  - **Nueva estrategia aplicada:** Uso de texto plano con estilo nativo Draw.io (`html=0`), ruteo ortogonal por canales paralelos y espaciado generoso.
+- **Resultado de Verificación:** Validación XML con `xml.etree.ElementTree` (0 errores) | Verificación de legibilidad.
+
+#### [2026-10-30] - Orquestación Multi-Agente de QA, Batería Completa de Pruebas (TC-101 a TC-605) y Generación de Matriz Excel (.xlsx / .csv)
+- **Solicitud del Usuario:** Clonar e integrar la colección de skills y agentes `fugazi/test-automation-skills-agents`, asociar el PDF oficial de la cátedra con todos los casos de prueba (`TC-101` a `TC-605`), armar un orquestador multi-agente asignando modelos según la complejidad de cada requerimiento (Flash Lite / Flash / Argon Medium / Pro Thinking), ejecutar los 35 tests sobre la aplicación y generar el archivo Excel completo con los resultados reales, pasos, evidencias y trazabilidad.
+- **Tipo de Cambio:** `NUEVA_FUNCIONALIDAD` | `CONFIGURACIÓN` | `OPTIMIZACIÓN`
+- **Archivos Involucrados:**
+  - `.agents/skills/*` y `C:\Users\Chouni\.gemini\config\skills\*`: Creados/Actualizados (instalación de las 10 skills y 7 agentes del repositorio `test-automation-skills-agents`).
+  - `tests/rf1_auth_suite.test.mjs` y `tests/results_rf1.json`: Creados por Agente 1 (RF-1: `TC-101` a `TC-108`, 8/8 PASS).
+  - `tests/rf2_publicaciones_suite.test.mjs` y `tests/results_rf2.json`: Creados por Agente 2 (RF-2: `TC-201` a `TC-207`, 7/7 PASS).
+  - `tests/rf3_mapa_feed_suite.test.mjs` y `tests/results_rf3.json`: Creados por Agente 3 (RF-3: `TC-301` a `TC-306`, 6/6 PASS).
+  - `tests/rf4_avistamientos_whatsapp_suite.test.mjs` y `tests/results_rf4.json`: Creados por Agente 4 (RF-4: `TC-401` a `TC-404`, 4/4 PASS).
+  - `tests/rf5_cierre_soporte_suite.test.mjs` y `tests/results_rf5.json`: Creados por Agente 5 (RF-5: `TC-501` a `TC-505`, 5/5 PASS).
+  - `tests/rnf_iso25010_suite.test.mjs` y `tests/results_rnf.json`: Creados por Agente 6 (RNF 1-5 ISO/IEC 25010: `TC-601` a `TC-605`, 5/5 PASS).
+  - `scripts/ejecutar_e2e_playwright.py` y `tests/evidencias_e2e/*.png`: Creados (recorrido E2E automatizado con Playwright sobre la app en vivo `http://localhost:8081` capturando 11 pantallas de evidencia en viewport móvil `390x844`).
+  - `scripts/generar_excel_pruebas_completo.py`: Creado (generador de planilla `.xlsx` formateada con `openpyxl` y `.csv` con BOM UTF-8).
+  - `Matriz_Completa_Pruebas_Patitas_Encontradas.xlsx`, `documentacion/Matriz_Completa_Pruebas_Patitas_Encontradas.xlsx` y `Matriz_Completa_Pruebas_Patitas_Encontradas.csv`: Creados (35 casos de prueba completos con las 16 columnas del formato del usuario + Hoja 2 con la Matriz de Trazabilidad RTM de la cátedra).
+  - `package.json`: Modificado (incorporación de las 6 nuevas suites al script `npm test` y creación del script `npm run test:catedra`).
+- **Progreso Realizado:**
+  - Se diseñó y ejecutó una arquitectura de orquestación multi-agente paralela con 6 sub-agentes especialistas (`qa-module-specialist`) ruteados por complejidad cognitiva:
+    - **Complejidad Baja (`RF-5`):** Modelo `flash_lite` -> 5 casos (`TC-501` a `TC-505`).
+    - **Complejidad Media-Baja (`RF-1`):** Modelo `flash` -> 8 casos (`TC-101` a `TC-108`).
+    - **Complejidad Media (`RF-4`):** Modelo `inherit` (Argon Medium) -> 4 casos (`TC-401` a `TC-404`).
+    - **Complejidad Alta (`RF-2`, `RF-3`, `RNF 1-5`):** Modelo `pro` (Thinking) -> 18 casos (`TC-201` a `TC-207`, `TC-301` a `TC-306`, `TC-601` a `TC-605`).
+  - Se ejecutó además una inspección E2E en navegador real con Playwright sobre `http://localhost:8081`, generando capturas de evidencia de cada pantalla de la aplicación.
+  - Se compiló el archivo Excel final `Matriz_Completa_Pruebas_Patitas_Encontradas.xlsx` (y su par `.csv`) reemplazando la planilla incompleta previa de 4 filas por los 35 casos de prueba trazados de punta a punta.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** El proyecto contaba con 62 tests técnicos internos, pero no tenía suites mapeadas 1:1 a los 35 casos formales (`TC-101` a `TC-605`) exigidos por el documento de cátedra, y el Excel preliminar solo tenía 4 filas incompletas.
+  - **Motivo del cambio:** Cumplir el requerimiento del usuario de ejecutar todos los casos del PDF mediante delegación multi-agente por complejidad y entregar el Excel completo con evidencias y resultados reales.
+  - **Nueva estrategia aplicada:** Orquestación paralela de 6 agentes especialistas + verificación E2E con Playwright + generación automatizada de `.xlsx` multi-hoja y `.csv`.
+- **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` (97/97 PASS: 62 previos + 35 nuevos casos `TC-101` a `TC-605`) | Playwright E2E (11 capturas móviles sin errores fatales).
+
+#### [2026-10-30] - Implementación de Opción A (Jest + RNTL Android Nativo) y Opción B (@playwright/test TypeScript POM) + Consolidación Multi-Tabla en Excel
+- **Solicitud del Usuario:** Asegurar que la aplicación no presente errores específicos de Android frente a Web aplicando simultáneamente la **Opción A** (`jest-expo/android` + `@testing-library/react-native`) y la **Opción B** (`@playwright/test` TypeScript con Page Object Model), y volcar esos resultados reales (100% ejecutados y verificados, cero resultados simulados) tanto en saltos de línea dentro de la matriz principal como en tablas/hojas dedicadas dentro del mismo archivo Excel.
+- **Tipo de Cambio:** `NUEVA_FUNCIONALIDAD` | `CONFIGURACIÓN` | `REFACTORIZACIÓN` | `OPTIMIZACIÓN`
+- **Archivos Involucrados:**
+  - `jest.config.js` y `jest.setup.ts`: Creados (configuración `preset: 'jest-expo/android'`, `Platform.OS === 'android'`, insets de barra de 3 botones de Android de `48dp`, `UIManager.setLayoutAnimationEnabledExperimental` y mocks deterministas sin `any`).
+  - `__tests__/rf1_auth_screens.android.test.tsx`: Creado (8 pruebas sobre árbol nativo Android para `PantallaRegistro`, `LoginScreen` y `WelcomeScreenView`, validando `Alert.alert` nativo sin `window.alert`).
+  - `__tests__/rf2_rf3_rf4_pet_components.android.test.tsx`: Creado (9 pruebas sobre árbol nativo Android para `PetCard`, `MapPetCard`, `PetContactBar` y `PetFloatingButton`, validando rutas `file:///`, fallback `onError`, `insetInferior={48}` y `TalkBack`).
+  - `__tests__/rf5_soporte_components.android.test.tsx`: Creado (5 pruebas sobre árbol nativo Android para `FaqAccordion` con `LayoutAnimation` y `TicketForm` con `dispositivo: 'android (Expo/React Native)'` + `<Modal>` `#TKT-...`).
+  - `tests/results_jest_rntl.json`: Creado (reporte JSON real de ejecución de las 22 pruebas Android RNTL).
+  - `playwright.config.ts`: Creado (configuración `@playwright/test` con emulación `Android 13 Moto G52 390x844` y `webServer` reutilizable con `CI=1`).
+  - `e2e/data/testData.ts`, `e2e/fixtures/test-base.ts`, `e2e/pages/WelcomeAndAuthPage.ts`, `e2e/pages/FeedAndMapPage.ts`, `e2e/pages/SupportCenterPage.ts`: Creados (arquitectura Page Object Model y fixtures tipados sin `waitForTimeout`).
+  - `e2e/specs/rf1-auth-onboarding.spec.ts`, `e2e/specs/rf2-rf3-feed-map.spec.ts`, `e2e/specs/rf5-rnf-support-a11y.spec.ts`: Creados (10 specs E2E interactivos con 30 pasos `test.step`).
+  - `tests/results_playwright_e2e.json`: Creado (reporte JSON real de ejecución de los 10 specs Playwright TypeScript).
+  - `components/ui/pet-card.tsx`: Modificado (incorporación de `testID="pet-card-image"` y `accessibilityRole="image"` en `<Image>`).
+  - `hooks/useMapState.ts`: Modificado (alineación estricta de `React.RefObject<MapContainerRef | null>` con `@types/react@19.2.4`).
+  - `tsconfig.json` y `package.json`: Modificados (habilitación de `"types": ["jest"]` en TypeScript 6.0 y adición de scripts `test:android` y `test:e2e`).
+  - `scripts/generar_excel_pruebas_completo.py`, `Matriz_Completa_Pruebas_Patitas_Encontradas.xlsx`, `documentacion/Matriz_Completa_Pruebas_Patitas_Encontradas.xlsx` y `Matriz_Completa_Pruebas_Patitas_Encontradas.csv`: Modificados (lectura directa de `results_jest_rntl.json` y `results_playwright_e2e.json`, inyección de saltos de línea `\n` en Hoja 1 y creación de Hoja 2 `Opcion_A_RNTL_Android_Nativo`, Hoja 3 `Opcion_B_Playwright_TS_E2E` y Hoja 4 `RTM_y_Motores_Ejecutados`).
+- **Progreso Realizado:**
+  - Se ejecutó con éxito la **Opción A** (`npm run test:android` -> **22/22 PASS en 2.87s**, 69 aserciones sobre árbol nativo Android), comprobando la bifurcación segura de `Alert.alert` vs `window.alert`, la aceptación de URIs nativas `file:///` en Android, el relleno inferior de `48dp` para la barra de 3 botones de Android, `LayoutAnimation` en FAQs y etiquetas `TalkBack`.
+  - Se ejecutó con éxito la **Opción B** (`npm run test:e2e` -> **10/10 PASS en 17.7s**, 0 hard waits), comprobando interacción táctil real en `http://localhost:8081`, diálogos nativos web sin deadlocks, Gate de autenticación, inspección interna del `iframe` de Leaflet 1.9.4 + OpenStreetMap y medición geométrica `boundingBox() >= 44px`.
+  - Se regeneró el libro Excel con 4 hojas estructuradas a partir de los archivos JSON reales de ejecución.
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:**
+    1. Las pruebas automatizadas iniciales corrían sobre `node:test`, lo cual validaba servicios y lógica pura pero no montaba el árbol nativo de componentes `.tsx` bajo `Platform.OS === 'android'` ni ejercitaba flujos interactivos POM con `@playwright/test`.
+    2. En `components/ui/pet-card.tsx`, el componente `<Image>` carecía de `accessibilityRole="image"` y `testID`, dificultando inspeccionar de manera determinista en RNTL la conmutación entre URI nativa `file:///` y el fallback ante `onError`.
+    3. En `hooks/useMapState.ts`, `UseMapStateReturn.mapContainerRef` estaba tipado como `React.RefObject<MapContainerRef>` en lugar de `React.RefObject<MapContainerRef | null>`, lo cual generaba error `TS2322` bajo `@types/react@19.2.4` y TypeScript 6.0 estricto.
+    4. En `scripts/generar_excel_pruebas_completo.py`, el libro Excel tenía 2 hojas únicamente con resultados de `node:test`.
+  - **Motivo del cambio:** Garantizar cobertura real contra bugs exclusivos de Android nativo (Hermes sin `window.alert`, `file:///`, `SafeArea` 48dp, `LayoutAnimation`), cumplir `0 errores` en `npx tsc --noEmit` sin usar `any`, y reflejar 100% de resultados verdaderos multi-motor con saltos de línea y tablas dedicadas en el mismo Excel.
+#### [2026-11-02] - Integración del Ecosistema de Motion Graphics & Launch Video Skills (ui-skills.com) para el App Launch de Patitas Encontradas
+- **Solicitud del Usuario:** Acceder a `https://www.ui-skills.com/skills/motion`, analizar los videos de referencia de la carpeta `C:\UNI PILAR\Testing_y_calidad\Referencias` (Apple Music, iPhone 15 Pro Launch, Google Gemini, Bring Any Agent, Outbound Agent) y descargar/instalar todas las skills de motion design necesarias para orquestar un video App Launch cinematográfico, profesional y de alto impacto ("wow") para *Patitas Encontradas*.
+- **Tipo de Cambio:** `NUEVA_FUNCIONALIDAD` | `CONFIGURACIÓN` | `DISEÑO_SISTEMA`
+- **Archivos Involucrados:**
+  - `C:\Users\Chouni\.gemini\config\skills\*`: Creadas/Instaladas 24 skills de motion graphics y dirección de video de `ui-skills.com`:
+    - `cinematic-shot` (1weiho): Rodaje cinematográfico de UI de software, planos macro oblicuos, profundidad de campo, drifting de cámara y specs completas en `references/look.md` y `references/shot-list-example.md`.
+    - `clean-ui-shot` (1weiho): Encuadres flotantes 3D de UI, bordes de cristal biselado y escenarios studio.
+    - `product-launch-video` (memex-lab): Metodología integral para videos de lanzamiento de producto de alto impacto.
+    - `product-film` (rieranthony): Estructura narrativa de cortometrajes de producto tecnológico.
+    - `video-shotcraft` (vincentwei1021): Fichas de encuadre, coreografía de cámara y storyboarding.
+    - `motion-doctrine` (heygen-com): Doctrina y leyes fundamentales de animación, jerarquía espacial y timing.
+    - `apple-design` (emilkowalski): Estándar Apple de motion, física de resortes y refinamiento táctil.
+    - `animation-vocabulary` (emilkowalski): Taxonomía de curvas de aceleración, easings y coreografía.
+    - `improve-animations` (emilkowalski): Diagnóstico y eliminación de jank, sobre-animación y movimientos robóticos.
+    - `cut-the-curve` (heygen-com): Transiciones de velocidad acoplada (zoom-through, whip pans, cortes invisibles).
+    - `oversized-cursor` (heygen-com): Coreografía y física de cursor realista para demos de software.
+    - `seam-craft` (heygen-com): Unión imperceptible entre escenas cinematográficas.
+    - `motion-ad` (danny): Pacing y hooks de alta conversión y dinamismo visual.
+    - `remotion-best-practices` (remotion-dev): Generación determinista de video programmatic por código con React/Remotion.
+    - `delight` (pbakaus): Micro-interacciones emotivas y físicas de satisfacción.
+    - `stageshow` (benjitaylor): Escenarios y presentación de dispositivos en escena.
+    - `fun-isometric` (kelvinkn17): Perspectiva isométrica 3D para características de apps.
+    - `3dicon` (samyost1): Iconografía 3D flotante, iluminación y sombreado volumétrico.
+    - `gsap-timeline` y `gsap-scrolltrigger` (greensock): Orquestación multi-pista y timelines sincronizados.
+    - `feel` (diip3sh): Peso perceptivo y resonancia emocional del movimiento.
+    - `figma-implement-motion` (figma): Traducción de prototipos a motion assets de producción.
+    - `frost-sequence-camera-orbit` (heygen-com): Órbitas 3D de cámara envolvente.
+    - `transitions-polish` (jakubantalik): Pulido de transiciones y continuidad espacial.
+- **Progreso Realizado:**
+  - Se mapeó y analizó el catálogo completo de 112 skills de movimiento en `ui-skills.com/skills/motion` y se filtraron las 24 herramientas esenciales para el App Launch.
+  - Se implementó la descarga y estructuración automática de cada skill con sus metadatos YAML frontmatter y sus archivos de referencia técnica (`look.md`, `shot-list-example.md`).
+  - Se analizaron los 5 videos de referencia de la cátedra/usuario extrayendo sus patrones de ritmo, tipografía cinética, iluminación rim light, macro close-ups y sincronización sonora.
+  - Se diseñó el plan maestro de dirección cinematográfica y el shot list detallado (45-60s) adaptado a la identidad de *Patitas Encontradas* (naranja `#FF8A00`, marrón cálido `#5A3A1F`, crema `#FAF8F5`, Leaflet georreferenciado y conexión con WhatsApp).
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:** El entorno del agente no disponía de directivas de motion graphics ni de plantillas de storyboard cinematográfico para software, dependiendo de intuición genérica que suele producir videos planos o animaciones estilo plantilla básica.
+  - **Motivo del cambio:** El usuario exigió un lanzamiento "bien profesional y wow", alineado con referentes de nivel Apple y Google, integrando las mejores prácticas de la comunidad de design engineering (`ui-skills.com`).
+  - **Nueva estrategia aplicada:** Integración nativa de 24 skills de nivel industrial directamente en `C:\Users\Chouni\.gemini\config\skills\`, permitiendo orquestar storyboards, guiones técnicos, tablas de tiro (Shot List con pitch/roll/yaw/drift) y código determinista (Remotion / GSAP / After Effects / WebGL).
+- **Resultado de Verificación:** 24 skills instaladas y validadas con frontmatter YAML estricto | Referencias técnicas sincronizadas en `cinematic-shot/references/`.
+
+
+
+#### [2026-11-02] - Reorganización de la Estructura de Carpetas del Repositorio
+- **Solicitud del Usuario:** Ordenar el repositorio para que se vea limpio, legible y profesional (archivos sueltos, `.md` muertos o duplicados).
+- **Tipo de Cambio:** `REFACTORIZACIÓN` | `ELIMINACIÓN_CÓDIGO` | `CONFIGURACIÓN`
+- **Archivos Involucrados:**
+  - `documentacion/` → `docs/` con `entregas/` (PDFs renombrados), `diagramas/`, `guias/` (`PROJECT.md`, `CONVENCIONES.md` + `convenciones_equipo.txt` fusionados, `GUIA_BASE_DE_DATOS.md` ex `services/`), `informes/` (`DOSSIER_PROGRESO.md`, `PLAN_DE_PROYECTO.md`, `Matriz_Pruebas.xlsx`).
+  - Eliminados: `ORIGINAL_REQUEST.md`, copias duplicadas de dossier/plan (se conservó la versión más completa de la raíz), `__pycache__/`, `test-results/`, y archivos de `.agents/` sin modificar desde antes del 15-oct.
+  - `Generar/*.py` + `scripts/*.py` → `tools/docs-generators/` (rutas de salida actualizadas). `scripts/` queda solo con TS del proyecto.
+  - Tests unificados: `tests/unit` (node:test), `tests/components` (ex `__tests__`, Jest), `tests/e2e` (ex `e2e`, Playwright), `tests/reports` (resultados JSON y evidencias).
+  - `package.json`, `jest.config.js`, `playwright.config.ts`, `tsconfig.json`: Modificados (nuevas rutas; `launch_studio` excluido del typecheck por ser un proyecto Remotion independiente).
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** Raíz con ~10 documentos sueltos y duplicados, tres carpetas de tests distintas y scripts Python dispersos.
+  - **Motivo del cambio:** Legibilidad y profesionalismo; evitar duplicados divergentes.
+  - **Nueva estrategia aplicada:** Raíz solo con código, configs, `README.md` y `AGENTS.md`. La referencia a `CONVENCIONES.md` pasa a `docs/guias/CONVENCIONES.md`. No se eliminó código fuente: `schemas/authScheama.ts` y `authSchema.ts` difieren y ambos se usan (deuda técnica pendiente de unificar).
+- **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` 97/97 PASS | `jest` 22/22 PASS.

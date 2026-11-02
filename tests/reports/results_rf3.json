@@ -1,0 +1,93 @@
+{
+  "modulo": "Módulo 3 (RF-3: Consultar mapa interactivo y feed de alertas)",
+  "proyecto": "Patitas Encontradas",
+  "fechaEjecucion": "2026-11-02T05:31:15.741Z",
+  "herramienta": "Node.js Test Runner (node --test)",
+  "archivoTest": "tests/rf3_mapa_feed_suite.test.mjs",
+  "resumen": {
+    "total": 6,
+    "pasados": 6,
+    "fallidos": 0,
+    "estadoGeneral": "APROBADO (PASS)"
+  },
+  "resultadosDetallados": [
+    {
+      "casoPrueba": "TC-301",
+      "descripcion": "Visualización de alertas ACTIVAS en Mapa Interactivo y Feed ordenadas por proximidad y fecha",
+      "resultadoReal": "Alertas ordenadas cronológicamente para Feed y filtradas a 5 km por Haversine con Luna (0.01 km), Milo (1.09 km) y Rocky (4.39 km). Mapeo de PetState (1=Perdido, 2=Encontrado) y clases de pin verificados.",
+      "estado": "Aprobado",
+      "postcondiciones": "Alertas desplegadas en mapa con pines coloreados y lista de feed correctamente ordenada.",
+      "evidencia": {
+        "testName": "TC-301: Visualización de alertas ACTIVAS en Mapa Interactivo y Feed ordenadas por proximidad y fecha",
+        "duracionMs": 4.7,
+        "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-302",
+      "descripcion": "Filtrado rápido por estado de alerta (Perdidos / Encontrados) y por especie (PERRO)",
+      "resultadoReal": "Filtrado por estado (Perdidos=2, Encontrados=2, Todos=4) y por especie PERRO (1 resultado: Toby) ejecutado sin fallas. Contrato de emisión SET_MARKERS para Leaflet bridge validado.",
+      "estado": "Aprobado",
+      "postcondiciones": "Markers del mapa y listado de alertas sincronizados reactivamente con los filtros activos.",
+      "evidencia": {
+        "testName": "TC-302: Filtrado rápido por estado de alerta (Perdidos / Encontrados) y por especie (PERRO)",
+        "duracionMs": 2.74,
+        "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-303",
+      "descripcion": "Funcional / Valor Límite — Búsqueda textual combinada insensible a mayúsculas, minúsculas y espacios laterales",
+      "resultadoReal": "Las 3 entradas del PDF (\" cAnIcHe \", \"VILLA ROSA\", \"toby\") fueron normalizadas con trim().toLowerCase() encontrando exitosamente a Milo (descripción), Luna (ubicación) y Toby (nombre) sin falsos positivos ni excepciones.",
+      "estado": "Aprobado",
+      "postcondiciones": "Filtro de búsqueda retorna los registros concordantes independientemente del formato de entrada.",
+      "evidencia": {
+        "testName": "TC-303: Funcional / Valor Límite — Búsqueda textual combinada insensible a mayúsculas, minúsculas y espacios laterales",
+        "duracionMs": 0.16,
+        "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-304",
+      "descripcion": "Consulta en radio geográfico o filtro sin publicaciones coincidentes (Vista vacía)",
+      "resultadoReal": "Búsqueda de \"Dinosaurio123\" retornó un array vacío [] de forma segura. Se verificó el renderizado del ListEmptyComponent con título \"No hay alertas registradas\" y botón de acción en index.tsx.",
+      "estado": "Aprobado",
+      "postcondiciones": "Pantalla de feed muestra Empty State amigable y mapa despeja los marcadores de la capa Leaflet.",
+      "evidencia": {
+        "testName": "TC-304: Consulta en radio geográfico o filtro sin publicaciones coincidentes (Vista vacía)",
+        "duracionMs": 0.67,
+        "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-305",
+      "descripcion": "Interacción con marcador en el mapa y apertura de tarjeta emergente (MapPetCard) ante evento MARKER_CLICK sobre el pin de Toby, y navegación a /detalle/[id]",
+      "resultadoReal": "Despacho de MARKER_CLICK sobre Toby activó MapPetCard, ejecutó flyTo a [-34.443, -58.803] zoom 16, y validó la navegación a /detalle/pet-toby-001 y su posterior cierre sin fugas de estado.",
+      "estado": "Aprobado",
+      "postcondiciones": "Tarjeta emergente abierta con datos íntegros y navegación a detalle garantizada.",
+      "evidencia": {
+        "testName": "TC-305: Interacción con marcador en el mapa y apertura de tarjeta emergente (MapPetCard) ante evento MARKER_CLICK sobre el pin de Toby, y navegación a /detalle/[id]",
+        "duracionMs": 0.85,
+        "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    },
+    {
+      "casoPrueba": "TC-306",
+      "descripcion": "Valor Límite / Resiliencia — Resiliencia del mapa ante registros corruptos en base de datos con coordenadas inválidas",
+      "resultadoReal": "Filtrado geoespacial procesó dataset mixto descartando 4 registros corruptos (null, \"abc\", NaN, 999) y conservando los 5 válidos sin excepciones en tiempo de ejecución.",
+      "estado": "Aprobado",
+      "postcondiciones": "Leaflet WebView protegido contra colapsos por NaN o coordenadas corruptas.",
+      "evidencia": {
+        "testName": "TC-306: Valor Límite / Resiliencia — Resiliencia del mapa ante registros corruptos en base de datos con coordenadas inválidas",
+        "duracionMs": 0.88,
+        "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
+      },
+      "herramienta": "Node.js Test Runner (node --test)"
+    }
+  ]
+}

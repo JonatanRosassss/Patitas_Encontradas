@@ -1,0 +1,99 @@
+{
+  "modulo": "Módulo 2 (RF-2: Publicar reporte de mascota - Alta, Modificación, Baja y Fronteras Geoespaciales)",
+  "proyecto": "Patitas Encontradas",
+  "fechaEjecucion": "2026-11-02T05:31:15.688Z",
+  "herramienta": "Node.js Test Runner (node --test)",
+  "archivoTest": "tests/rf2_publicaciones_suite.test.mjs",
+  "resumen": {
+    "total": 7,
+    "pasados": 7,
+    "fallidos": 0,
+    "estadoGeneral": "APROBADO (PASS)"
+  },
+  "resultadosDetallados": [
+    {
+      "casoPrueba": "TC-201",
+      "descripcion": "Publicación exitosa de mascota PERDIDA con todos los datos y recompensa",
+      "resultadoReal": "Flujo de crearAlertaMascota ejecutado exitosamente: fotos subidas a Storage, serverTimestamp asignado, creadoPor verificado con usuario.uid, persistido en colección \"alertas\" y recompensa formateada a $15.000.",
+      "estado": "Aprobado",
+      "postcondiciones": "Publicación creada con ID REP-TOBY-01 en colección \"alertas\" con fotos y recompensa.",
+      "evidencia": {
+        "testName": "TC-201: Publicación exitosa de mascota PERDIDA con todos los datos y recompensa",
+        "duracionMs": 2.3,
+        "archivo": "tests/rf2_publicaciones_suite.test.mjs"
+      }
+    },
+    {
+      "casoPrueba": "TC-202",
+      "descripcion": "Publicación exitosa de mascota AVISTADA / ENCONTRADA sin campos opcionales",
+      "resultadoReal": "limpiarUndefined eliminó recursivamente los campos undefined (recompensa, contacto, subobjetos de coordenadas) impidiendo errores en Firestore.",
+      "estado": "Aprobado",
+      "postcondiciones": "Publicación persistida con éxito en Firestore sin campos con valor undefined.",
+      "evidencia": {
+        "testName": "TC-202: Publicación exitosa de mascota AVISTADA / ENCONTRADA sin campos opcionales",
+        "duracionMs": 0.46,
+        "archivo": "tests/rf2_publicaciones_suite.test.mjs"
+      }
+    },
+    {
+      "casoPrueba": "TC-203",
+      "descripcion": "Bloqueo de publicación por omisión de campos obligatorios en publicar-alerta.tsx",
+      "resultadoReal": "Guardas de validación de UI y controlador bloquearon la publicación sin llamar a crearAlertaMascota cuando faltaron nombre, ubicación válida o descripción suficiente.",
+      "estado": "Aprobado",
+      "postcondiciones": "Formulario retenido en pantalla con alerta al usuario y 0 escrituras en base de datos.",
+      "evidencia": {
+        "testName": "TC-203: Bloqueo de publicación por omisión de campos obligatorios en publicar-alerta.tsx",
+        "duracionMs": 1.28,
+        "archivo": "tests/rf2_publicaciones_suite.test.mjs"
+      }
+    },
+    {
+      "casoPrueba": "TC-204",
+      "descripcion": "Valor Límite / Frontera — Bloqueo de publicación por coordenadas GPS nulas, corruptas (NaN/Infinity) o fuera de rango planetario",
+      "resultadoReal": "isValidCoordinate y crearAlertaMascota rechazaron y sanitizaron con éxito los 3 casos: Caso A (null/undefined), Caso B (NaN/Infinity) y Caso C (-95.00, -190.00), garantizando robustez ante Leaflet y Firestore.",
+      "estado": "Aprobado",
+      "postcondiciones": "Coordenadas corruptas bloqueadas o descartadas sin causar crash en runtime ni excepciones de Firestore.",
+      "evidencia": {
+        "testName": "TC-204: Valor Límite / Frontera — Bloqueo de publicación por coordenadas GPS nulas, corruptas (NaN/Infinity) o fuera de rango planetario",
+        "duracionMs": 1.52,
+        "archivo": "tests/rf2_publicaciones_suite.test.mjs"
+      }
+    },
+    {
+      "casoPrueba": "TC-205",
+      "descripcion": "Valor Límite / Frontera — Validación de coordenadas en los límites geográficos operativos de Pilar",
+      "resultadoReal": "Aceptación validada para coordenadas en límites SO (-34.55, -59.05) y NE (-34.35, -58.80). Presets de Pilar y resolución geoespacial operan de forma exacta sin degradación.",
+      "estado": "Aprobado",
+      "postcondiciones": "Coordenadas del Partido del Pilar admitidas y renderizables en el mapa comunitario.",
+      "evidencia": {
+        "testName": "TC-205: Valor Límite / Frontera — Validación de coordenadas en los límites geográficos operativos de Pilar",
+        "duracionMs": 0.77,
+        "archivo": "tests/rf2_publicaciones_suite.test.mjs"
+      }
+    },
+    {
+      "casoPrueba": "TC-206",
+      "descripcion": "Edición o baja de publicación por su autor original desde Perfil",
+      "resultadoReal": "modificarAlertaMascota y eliminarAlertaMascota validados. En perfil.tsx se verificó el flujo de confirmación multiplataforma y la actualización optimista del estado local sin recargar.",
+      "estado": "Aprobado",
+      "postcondiciones": "Publicación editada y posteriormente eliminada por el autor original, reflejándose de inmediato en la UI.",
+      "evidencia": {
+        "testName": "TC-206: Edición o baja de publicación por su autor original desde Perfil",
+        "duracionMs": 4.14,
+        "archivo": "tests/rf2_publicaciones_suite.test.mjs"
+      }
+    },
+    {
+      "casoPrueba": "TC-207",
+      "descripcion": "Seguridad / Negativa — Intento de eliminación o edición de publicación por un usuario NO autor",
+      "resultadoReal": "Bloqueo estricto verificado: la UI pública (detalle/[id].tsx) no expone controles de baja ni edición a terceros y el servicio rechazó el intento de uid_vecino_B sobre la publicación de uid_autor_A.",
+      "estado": "Aprobado",
+      "postcondiciones": "Publicación original inalterada y permisos respetados.",
+      "evidencia": {
+        "testName": "TC-207: Seguridad / Negativa — Intento de eliminación o edición de publicación por un usuario NO autor",
+        "duracionMs": 4.9,
+        "archivo": "tests/rf2_publicaciones_suite.test.mjs"
+      }
+    }
+  ]
+}
