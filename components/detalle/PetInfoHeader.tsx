@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   },
   filaTitulo: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     justifyContent: 'space-between',
     gap: Spacing.sm,
   },
@@ -66,10 +66,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.detailRewardBg,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.md,
+    paddingVertical: 6,
+    borderRadius: Radius.full,
     borderWidth: 1,
     borderColor: Colors.detailRewardBorder,
+    flexShrink: 0,
   },
   recompensaPrefijo: {
     fontSize: Typography.sizes.xs,

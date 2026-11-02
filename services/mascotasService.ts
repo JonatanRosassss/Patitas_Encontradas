@@ -637,10 +637,13 @@ export async function marcarMascotaComoEncontrada(
 /**
  * Guarda una publicacion en la cuenta del usuario autenticado.
  */
-export async function guardarPublicacion(idPublicacion: string): Promise<void> {
-  const usuario = auth.currentUser;
+export async function guardarPublicacion(
+  idPublicacion: string,
+  idUsuario?: string
+): Promise<void> {
+  const uid = idUsuario || auth.currentUser?.uid;
 
-  if (!usuario) {
+  if (!uid) {
     throw new Error('Debes iniciar sesion para guardar publicaciones.');
   }
 
@@ -651,7 +654,7 @@ export async function guardarPublicacion(idPublicacion: string): Promise<void> {
   const referencia = doc(
     db,
     COLECCION_USUARIOS,
-    usuario.uid,
+    uid,
     'guardadas',
     idPublicacion
   );
@@ -666,18 +669,19 @@ export async function guardarPublicacion(idPublicacion: string): Promise<void> {
  * Elimina una publicacion de los guardados del usuario.
  */
 export async function quitarPublicacionGuardada(
-  idPublicacion: string
+  idPublicacion: string,
+  idUsuario?: string
 ): Promise<void> {
-  const usuario = auth.currentUser;
+  const uid = idUsuario || auth.currentUser?.uid;
 
-  if (!usuario) {
+  if (!uid) {
     throw new Error('Debes iniciar sesion para modificar tus guardados.');
   }
 
   const referencia = doc(
     db,
     COLECCION_USUARIOS,
-    usuario.uid,
+    uid,
     'guardadas',
     idPublicacion
   );
@@ -688,21 +692,39 @@ export async function quitarPublicacionGuardada(
 /**
  * Obtiene los IDs de las publicaciones guardadas por el usuario.
  */
-export async function obtenerIdsPublicacionesGuardadas(): Promise<string[]> {
-  const usuario = auth.currentUser;
+export async function obtenerIdsPublicacionesGuardadas(
+  idUsuario?: string
+): Promise<string[]> {
+  const uid = idUsuario || auth.currentUser?.uid;
 
-  if (!usuario) {
+  if (!uid) {
     throw new Error('Debes iniciar sesion para consultar tus guardados.');
   }
 
   const referencia = collection(
     db,
     COLECCION_USUARIOS,
-    usuario.uid,
+    uid,
     'guardadas'
   );
 
   const resultado = await getDocs(referencia);
 
   return resultado.docs.map((documento) => documento.id);
+}
+
+/**
+ * Obtiene la lista completa de publicaciones guardadas por el usuario.
+ */
+export async function obtenerPublicacionesGuardadas(
+  idUsuario?: string
+): Promise<Pet[]> {
+  const ids = await obtenerIdsPublicacionesGuardadas(idUsuario);
+
+  if (ids.length === 0) {
+    return [];
+  }
+
+  const todas = await listarTodasLasAlertas();
+  return todas.filter((pet) => ids.includes(pet.id));
 }

@@ -722,3 +722,70 @@ Antes de dar cualquier entrega por finalizada:
   - `npm test` (node:test): 98/98 PASS.
   - `npm run test:android` (Jest RNTL): 30/30 PASS (5 suites).
 
+#### [2026-11-02] - Auditoría y Refactorización UI/UX de Alta Gama ("App de Miles de Dólares"): Perfil, Carrusel de Fotos y Corrección de Botones Descentrados
+- **Solicitud del Usuario:** Activar skills de frontend design, UX, UI y taste para auditar y corregir detalles que no hacen sentir a la aplicación como algo de "miles de dólares", señalando explícitamente: carrusel de fotos en el detalle, botón descentrado y pantalla de perfil.
+- **Tipo de Cambio:** `REFACTORIZACIÓN` | `OPTIMIZACIÓN` | `CORRECCIÓN_BUG`
+- **Archivos Involucrados:**
+  - `constants/theme.ts`: Modificado (adición de tokens semánticos oficiales para perfil `profileAvatarBorder`, `profileCameraBadge`, `profileOptionIconBg`, `profileLogoutBg`, `profileLogoutBorder`, `profileLogoutText`, `profileFoundBtnBg`, `profileDeleteBtnBg`, `detailPhotoCountBg`, `detailPhotoCountText` y scrims de contraste).
+  - `components/detalle/PetHeroCarousel.tsx`: Modificado (reestructuración de navegación superior simétrica con botón "Volver" a la izquierda y botón "Compartir" a la derecha, inserción de scrims de contraste para fondos claros, soporte de scroll fluido en tiempo real `onScroll` con throttle de 16ms, contador de fotos flotante estilo Airbnb `1/N` y prevención de colisión con el badge de estado).
+  - `components/detalle/PetInfoHeader.tsx`: Modificado (centrado vertical armónico entre nombre de mascota y píldora de recompensa con `alignItems: 'center'`, `Radius.full` y `flexShrink: 0`).
+  - `components/detalle/PetLocationSection.tsx`: Modificado (alineación y resiliencia de la fila de ubicación y badge `Ver en mapa` con `flexShrink: 0`, previniendo distorsiones ante textos largos de GPS).
+  - `app/(tabs)/perfil.tsx`: Modificado (rediseño integral: reemplazo del botón primario invasivo de "Cambiar Foto de perfil" por un badge de cámara circular flotante en el avatar, tarjetas de "Mis Publicaciones" estructuradas con fotos 72x72 y fila de acciones simétrica que erradica el `marginTop: 8` desalineado, y sustitución de los 3 botones apilados por una tarjeta agrupada nativa estilo iOS/Airbnb con íconos vectoriales y chevron, más un botón sutil de cierre de sesión).
+- **Progreso Realizado:**
+  - **Carrusel en Detalle (`PetHeroCarousel.tsx`):** Se eliminó la asimetría donde el botón Volver estaba arriba y Compartir estaba abajo compitiendo con los dots de paginación. Ahora ambos botones flotan en la barra superior con idéntico inset. Se agregaron scrims protectores y un contador de fotos `1/N` nítido.
+  - **Corrección del Botón Descentrado:** Se detectó la causa raíz en `perfil.tsx` donde `botonEncontrada` poseía `marginTop: 8` y diferente padding respecto a `botonEliminar` dentro del mismo contenedor `flexDirection: 'row'`. Se diseñó una fila de acciones inferior dedicada (`tarjetaAccionesFila`) donde ambos botones comparten altura idéntica de 36dp, mismo radio y alineación perfecta. En la ficha de detalle, se eliminó la desalineación entre el título y la recompensa.
+  - **Perfil VIP (`perfil.tsx`):** Se transformó de un aspecto tosco con 3 botones primarios gigantescos a una experiencia premium: avatar de 104px con micro-badge de cámara, lista agrupada de opciones con íconos vectoriales en tonos pastel (`Mis Datos Personales`, `Configuración y Seguridad`, `Centro de Ayuda`) y botón de cerrar sesión secundario con tono destructivo sobrio.
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:** En `perfil.tsx`, existía un botón naranja gigante de 52dp solo para cambiar la foto, las tarjetas de publicación comprimían todo en una fila rompiendo la cuadrícula por un `marginTop: 8` asimétrico, y los ajustes se resolvían con tres botones gigantes apilados de estilos y radios contradictorios. En `PetHeroCarousel.tsx`, el botón de compartir flotaba abajo a la derecha colisionando con los indicadores de página y el badge de estado, sin protección de contraste ante fotos claras.
+  - **Motivo del cambio:** Corregir los defectos de diseño y UX que abarataban la percepción del producto, cumpliendo los principios de diseño de UI/UX Pro Max, Apple Design y Frontend Design.
+#### [2026-11-02] - Corrección Integral de la Pestaña de Publicaciones Guardadas y Sincronización Reactiva con Perfil (RF#2 / RF#3)
+- **Solicitud del Usuario:** Revisar por qué el tab bar sobre "mis publicaciones guardadas" no está funcionando correctamente, señalando que en el perfil sí se ven pero en el apartado (tab bar) no.
+- **Tipo de Cambio:** `CORRECCIÓN_BUG` | `REFACTORIZACIÓN` | `OPTIMIZACIÓN`
+- **Archivos Involucrados:**
+  - `services/mascotasService.ts`: Modificado (actualización de `guardarPublicacion`, `quitarPublicacionGuardada` y `obtenerIdsPublicacionesGuardadas` para admitir `idUsuario?: string` opcional desacoplado del estado síncrono de `auth.currentUser`, y adición del helper `obtenerPublicacionesGuardadas`).
+  - `app/(tabs)/guardados.tsx`: Modificado (rediseño arquitectónico integral: integración reactiva con `useAuth()`, selector de doble pestaña superior `[ Guardadas | Mis Alertas ]` para unificar lo que el usuario ve en Perfil y en Guardados, navegación táctil directa a `/detalle/[id]`, pull-to-refresh `RefreshControl`, insets seguros de Android con `TabBarMetrics` y cumplimiento del 100% de tokens de `constants/theme.ts` sin colores hardcodeados ni `console.log`).
+  - `package.json`: Modificado (inclusión de la nueva suite de pruebas `tests/unit/guardadosServiceAndScreen.test.mjs` en el script `npm test`).
+  - `tests/unit/guardadosServiceAndScreen.test.mjs`: Creado (suite de pruebas automatizadas que valida los contratos de servicio, desacoplamiento de `idUsuario`, consumo de `useAuth`, selector dual de pestañas, navegación y ausencia de `console.log`).
+- **Progreso Realizado:**
+  - **Diagnóstico de Causa Raíz:**
+    1. **Desincronización Semántica:** En `app/(tabs)/perfil.tsx` el usuario visualiza las publicaciones que él mismo creó (`listarAlertasPorUsuario(usuario.uid)` bajo el título "MIS PUBLICACIONES"). Al abrir el 4to ícono del tab bar ("Guardados"), la pantalla original solo consultaba la subcolección `usuarios/{uid}/guardadas` (favoritos marcados con el ícono de marcador), ignorando las alertas creadas por el usuario. El usuario percibía que sus publicaciones no cargaban en ese apartado.
+    2. **Desincronización Asíncrona de Auth:** La pantalla `guardados.tsx` no consumía `useAuth()`, sino que invocaba directamente `auth.currentUser`. Al montar la pantalla mientras Firebase Auth restauraba la sesión desde `AsyncStorage`, `auth.currentUser` retornaba `null`, disparando una excepción no recuperable que dejaba la pantalla vacía o con error permanente en rojo.
+    3. **Ausencia de Interactividad y Violación de Tokens:** La tarjeta original era un simple `<View>` estático que no permitía hacer clic para navegar a `/detalle/[id]`, utilizaba colores hexadecimales fijos (`#FFFFFF`, `#292929`, `#777777`, etc.), emitía `console.error` y no contemplaba el inset inferior de la barra elevada de Android, provocando recortes visuales.
+  - **Solución Arquitectónica Aplicada:**
+    1. **Selector Dual Unificado (`[ Guardadas | Mis Alertas ]`):** En `guardados.tsx` se implementó una barra segmentada moderna con conteo en vivo (`Guardadas (N)` y `Mis Alertas (M)`). Esto resuelve la ambigüedad permitiendo al usuario ver en un solo lugar tanto las publicaciones que guardó como las alertas que publicó y ve en su perfil.
+    2. **Sincronización Reactiva con `useAuth()`:** `guardados.tsx` ahora se suscribe reactivamente al ciclo de vida del usuario autenticado (`const { usuario } = useAuth()`), recargando ambas colecciones en paralelo con `Promise.all` tanto en montaje como en foco (`useFocusEffect`) y pull-to-refresh (`RefreshControl`).
+    3. **Navegación e Interactividad:** Cada tarjeta ahora es un `Pressable` táctil que navega directamente a `/detalle/[id]`, permitiendo consultar el mapa, señas particulares y contacto por WhatsApp. En la pestaña de guardadas, se incluye un botón interactivo para desguardar con feedback instantáneo y protección contra toques concurrentes.
+    4. **Blindaje de Tokens y Safe Areas:** Se erradicaron todos los valores mágicos y colores hardcodeados, migrando a `Colors.card`, `Colors.backgroundLight`, `Colors.accent`, `Colors.primary`, etc., y se calcularon los insets con `useSafeAreaInsets().bottom` y `TabBarMetrics.minBottomPadding` para garantizar visibilidad total sobre la barra de Android.
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:** `app/(tabs)/guardados.tsx` cargaba únicamente IDs de la subcolección `guardadas` sin reactividad ante `useAuth()`, no mostraba las publicaciones creadas por el usuario visibles en Perfil, las tarjetas no permitían abrir el detalle y contenía estilos no estándar con colores hardcodeados.
+  - **Motivo del cambio:** El usuario reportó que en su perfil sí veía sus publicaciones pero en el tab bar de publicaciones guardadas no se mostraban, sumado a la falta de interactividad y fallos por asincronía en Auth.
+  - **Nueva estrategia aplicada:** Integrar un control segmentado que ofrece vista dual de publicaciones guardadas y alertas propias, conectar reactivamente con `useAuth()`, agregar soporte de navegación a `/detalle/[id]` y cumplir estrictamente el Design System y directivas de `AGENTS.md`.
+- **Resultado de Verificación:**
+  - `npx tsc --noEmit`: 0 errores (PASS).
+  - `npm test` (node:test - 100 casos): 100/100 PASS (0 errores).
+  - `npm run test:android` (Jest RNTL - 5 suites, 30 casos): 30/30 PASS (0 errores).
+  - Cero `console.log` / `console.error` en código de producción.
+
+#### [2026-11-02] - Generación de la Guía Editorial y Técnica en PDF para la Defensa del Proyecto (Explicación Integral de Repositorio)
+- **Solicitud del Usuario:** Preparar un documento PDF explicativo y digerible para defender el proyecto/repositorio (cómo fue hecho, con qué herramientas, qué se usó y qué no se usó sin basarse ciegamente en el README, cómo se hizo el CRUD, conexión a Firebase mediante Singleton, NoSQL vs SQL y su aplicación en el proyecto, token de sesión y persistencia, uso de hooks estándar y personalizados, Leaflet vs Google Maps, hardware y WhatsApp) con lenguaje natural y amigable ("para comerse el archivo estando cansado").
+- **Tipo de Cambio:** `NUEVA_FUNCIONALIDAD` | `CONFIGURACIÓN` | `DOCUMENTACIÓN`
+- **Archivos Involucrados:**
+  - `scripts/guia_defensa_template.html`: Creado (plantilla HTML semántica con estilos editoriales A4, portadilla, tablas comparativas, cajas de notas, bloques de código formateados y diseño responsivo para impresión).
+  - `scripts/generar_guia_defensa_pdf.js`: Creado (compilador automatizado con `@playwright/test` Chromium que genera el PDF con numeración de páginas, headers/footers limpios y márgenes balanceados).
+  - `GUIA_DEFENSA_PROYECTO_PATITAS.pdf`: Creado en la raíz del proyecto (documento final de 8 páginas listo para leer, imprimir o defender).
+  - `docs/informes/GUIA_DEFENSA_PROYECTO_PATITAS.pdf`: Creado en la carpeta documental oficial como respaldo técnico.
+  - `AGENTS.md`: Modificado (registro obligatorio en la bitácora de auditoría).
+- **Progreso Realizado:**
+  - Se auditó exhaustivamente el repositorio completo confirmando discrepancias con el README (Zustand, React Hook Form, Zod, FlashList, NativeWind, react-native-maps y carrito.tsx no se usan en el código real; se demostró la justificación arquitectónica KISS/YAGNI).
+  - Se estructuró la guía en 10 capítulos pedagógicos: Resumen Ejecutivo (pitch de 1 min), La Verdad del Repositorio (tabla comparativa), Arquitectura BaaS y Singleton (`ConexionFirebase.ts`), El CRUD en la Práctica (`alertas` y `tickets_soporte`), NoSQL vs SQL (Application-Level JOIN en `services/mascotasService.ts`), Sesión y Tokens (`onAuthStateChanged`, JWT y `AsyncStorage`), Los Hooks (estándar y custom hooks `useAuth` y `useMapState`), El Mapa con Leaflet + WebView, Hardware y WhatsApp (`utils/whatsapp.ts`), y Machete con 8 preguntas típicas de mesa evaluadora.
+  - Se compiló el PDF de 8 páginas con Playwright Chromium en la raíz y en `docs/informes/`.
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:** No existía ningún material consolidado que explicara la realidad del código fuente para la defensa oral del trabajo integrador. El README contenía menciones a tecnologías no utilizadas que podían comprometer la defensa del alumno ante la mesa de examen.
+  - **Motivo del cambio:** El usuario requería un documento PDF claro, directo y sin jerga incomprensible para estudiar y defender el proyecto con total solidez técnica y seguridad ante los docentes.
+  - **Nueva estrategia aplicada:** Auditar archivo por archivo el código fuente real, redactar una explicación en lenguaje natural y generar un PDF editorial de alta fidelidad con Playwright Chromium directamente en el entorno local.
+- **Resultado de Verificación:**
+  - Generación de PDF: 8 páginas (351 KB) en `GUIA_DEFENSA_PROYECTO_PATITAS.pdf` y `docs/informes/GUIA_DEFENSA_PROYECTO_PATITAS.pdf`.
+  - `npx tsc --noEmit`: 0 errores (PASS).
+
+
+

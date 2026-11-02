@@ -23,3 +23,6 @@ android/.idea/
 
 # OS
 .DS_Store
+
+# Launch Studio Video Renders
+launch_studio/out/

@@ -105,6 +105,8 @@ export function PetHeroCarousel({
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           onMomentumScrollEnd={handleScroll}
           keyExtractor={(item, index) => `${item}-${index}`}
           getItemLayout={(_, index) => ({
@@ -133,12 +135,26 @@ export function PetHeroCarousel({
         </View>
       )}
 
-      {/* BOTÓN VOLVER (SUPERIOR IZQUIERDA) */}
+      {/* SCRIM GRADIENT SUPERIOR (PROTECCIÓN DE CONTRASTE PARA BOTONES) */}
+      <View style={styles.scrimSuperior} pointerEvents="none" />
+
+      {/* SCRIM GRADIENT INFERIOR (PROTECCIÓN DE CONTRASTE PARA BADGES) */}
+      <View style={styles.scrimInferior} pointerEvents="none" />
+
+      {/* BARRA SUPERIOR SIMÉTRICA (VOLVER A LA IZQUIERDA, COMPARTIR A LA DERECHA) */}
       <View style={[styles.botonVolverContenedor, { top: topOffset }]}>
         <PetFloatingButton
-          icono="arrow-back"
+          icono="chevron-back"
           onPress={onVolver}
           accessibilityLabel="Volver a la pantalla anterior"
+        />
+      </View>
+
+      <View style={[styles.botonCompartirContenedor, { top: topOffset }]}>
+        <PetFloatingButton
+          icono="share-social-outline"
+          onPress={onCompartir}
+          accessibilityLabel={`Compartir publicación de ${nombre}`}
         />
       </View>
 
@@ -181,6 +197,14 @@ export function PetHeroCarousel({
               />
             ))}
           </View>
+
+          {/* CONTADOR NUMÉRICO DE FOTOS ESTILO AIRBNB (INFERIOR DERECHA) */}
+          <View style={styles.contadorFotosPill}>
+            <Ionicons name="images-outline" size={12} color={Colors.detailPhotoCountText} />
+            <Text style={styles.contadorFotosTexto}>
+              {`${indiceActivo + 1}/${totalFotos}`}
+            </Text>
+          </View>
         </>
       )}
 
@@ -200,15 +224,6 @@ export function PetHeroCarousel({
         >
           {presentacion.etiqueta}
         </Text>
-      </View>
-
-      {/* BOTÓN DE COMPARTIR (INFERIOR DERECHA - REEMPLAZA LA G DE GOOGLE) */}
-      <View style={styles.botonCompartirContenedor}>
-        <PetFloatingButton
-          icono="share-social-outline"
-          onPress={onCompartir}
-          accessibilityLabel={`Compartir publicación de ${nombre}`}
-        />
       </View>
     </View>
   );
@@ -246,9 +261,44 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fonts.bodySemiBold,
     color: Colors.textSecondary,
   },
+  scrimSuperior: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100,
+    backgroundColor: 'rgba(0, 0, 0, 0.18)',
+    zIndex: 5,
+    ...Platform.select({
+      web: {
+        background: 'linear-gradient(to bottom, rgba(43,26,12,0.42) 0%, rgba(43,26,12,0) 100%)',
+      },
+      default: {},
+    }),
+  },
+  scrimInferior: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+    zIndex: 5,
+    ...Platform.select({
+      web: {
+        background: 'linear-gradient(to top, rgba(43,26,12,0.45) 0%, rgba(43,26,12,0) 100%)',
+      },
+      default: {},
+    }),
+  },
   botonVolverContenedor: {
     position: 'absolute',
     left: Spacing.base,
+    zIndex: 10,
+  },
+  botonCompartirContenedor: {
+    position: 'absolute',
+    right: Spacing.base,
     zIndex: 10,
   },
   flechaIzquierda: {
@@ -290,6 +340,37 @@ const styles = StyleSheet.create({
     width: DetailMetrics.dotActiveWidth,
     backgroundColor: Colors.detailDotActive,
   },
+  contadorFotosPill: {
+    position: 'absolute',
+    bottom: Spacing.base,
+    right: Spacing.base,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    backgroundColor: Colors.detailPhotoCountBg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 5,
+    borderRadius: Radius.full,
+    zIndex: 10,
+    ...Platform.select({
+      web: {
+        boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.20)',
+      },
+      default: {
+        shadowColor: Colors.black,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.20,
+        shadowRadius: 3,
+        elevation: 3,
+      },
+    }),
+  },
+  contadorFotosTexto: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.bodyBold,
+    color: Colors.detailPhotoCountText,
+    letterSpacing: 0.5,
+  },
   badgeEstado: {
     position: 'absolute',
     bottom: Spacing.base,
@@ -324,11 +405,5 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.xs,
     fontFamily: Typography.fonts.bodyBold,
     letterSpacing: 0.6,
-  },
-  botonCompartirContenedor: {
-    position: 'absolute',
-    bottom: Spacing.base,
-    right: Spacing.base,
-    zIndex: 10,
   },
 });

@@ -79,11 +79,12 @@ const styles = StyleSheet.create({
   badgeVerMapa: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
     backgroundColor: Colors.accent,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 3,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 5,
     borderRadius: Radius.full,
+    flexShrink: 0,
   },
   badgeVerMapaTexto: {
     fontSize: Typography.sizes.xs,
@@ -96,6 +97,7 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.textSecondary,
     lineHeight: Typography.lineHeights.sm,
+    marginRight: Spacing.xs,
   },
   chipAproximado: {
     flexDirection: 'row',

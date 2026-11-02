@@ -90,12 +90,12 @@ export const Colors = {
   detailWhatsapp: '#25D366', // Verde oficial de WhatsApp (reconocimiento inmediato del CTA)
   detailWhatsappPressed: '#1DA851',
   detailContactDisabled: '#B5A496',
-  detailOverlayButton: 'rgba(255, 255, 255, 0.90)',
-  detailOverlayButtonPressed: 'rgba(255, 255, 255, 0.72)',
-  detailOverlayChip: 'rgba(255, 255, 255, 0.92)',
+  detailOverlayButton: 'rgba(255, 255, 255, 0.92)',
+  detailOverlayButtonPressed: 'rgba(255, 255, 255, 0.75)',
+  detailOverlayChip: 'rgba(255, 255, 255, 0.94)',
   detailDotActive: '#FFFFFF',
   detailDotInactive: 'rgba(255, 255, 255, 0.55)',
-  detailDotsTrack: 'rgba(43, 26, 12, 0.32)',
+  detailDotsTrack: 'rgba(43, 26, 12, 0.40)',
   detailHeroPlaceholder: '#FFE7D2',
   detailHeroPlaceholderIconBg: '#FFC28A',
   detailStatusLost: '#E65100',
@@ -106,6 +106,25 @@ export const Colors = {
   detailRewardBorder: '#FFD3AD',
   detailMapPinShadow: 'rgba(90, 58, 31, 0.35)',
   detailContactBarShadow: 'rgba(90, 58, 31, 0.10)',
+  detailPhotoCountBg: 'rgba(43, 26, 12, 0.60)',
+  detailPhotoCountText: '#FFFFFF',
+
+  // Tokens de Perfil y Ajustes Premium
+  profileAvatarBorder: '#FFD3AD',
+  profileCameraBadge: '#FF8A00',
+  profileCameraBadgeBorder: '#FFFFFF',
+  profileOptionIconBg: '#FFF1E4',
+  profileOptionIconBorder: '#FFE7D2',
+  profileLogoutBg: '#FFF5F5',
+  profileLogoutBorder: '#FED7D7',
+  profileLogoutText: '#E53935',
+  profileDeleteBtnBg: '#FFF5F5',
+  profileDeleteBtnBorder: '#FED7D7',
+  profileFoundBtnBg: '#FFF1E4',
+  profileFoundBtnBorder: '#FFD3AD',
+  profileFoundBtnText: '#E65100',
+  profileBadgeVerifiedBg: '#E8F5E9',
+  profileBadgeVerifiedText: '#2E7D32',
 } as const;
 
 export const Typography = {
