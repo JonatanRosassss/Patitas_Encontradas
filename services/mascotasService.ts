@@ -3,6 +3,7 @@ import {
   collection,
   addDoc,
   doc,
+  setDoc,
   getDoc,
   getDocs,
   updateDoc,
@@ -582,6 +583,7 @@ export async function marcarMascotaComoEncontrada(
 
   // Crear las notificaciones internas.
   // Se reutiliza la misma instancia de Firestore del servicio.
+   // Crear las notificaciones internas.
   const notificacionesRef = collection(db, 'notificaciones');
 
   for (const destinatarioId of destinatarios) {
@@ -597,5 +599,81 @@ export async function marcarMascotaComoEncontrada(
       createdAt: serverTimestamp(),
     });
   }
+}
+// ==========================================
+// PUBLICACIONES GUARDADAS
+// ==========================================
+
+/**
+ * Guarda una publicación en la cuenta del usuario autenticado.
+ */
+export async function guardarPublicacion(idPublicacion: string): Promise<void> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error('Debés iniciar sesión para guardar publicaciones.');
+  }
+
+  if (!idPublicacion) {
+    throw new Error('No se recibió el ID de la publicación.');
+  }
+
+  const referencia = doc(
+    db,
+    COLECCION_USUARIOS,
+    usuario.uid,
+    'guardadas',
+    idPublicacion
+  );
+
+  await setDoc(referencia, {
+    publicacionId: idPublicacion,
+    guardadaEn: serverTimestamp(),
+  });
+}
+
+/**
+ * Elimina una publicación de los guardados del usuario.
+ */
+export async function quitarPublicacionGuardada(
+  idPublicacion: string
+): Promise<void> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error('Debés iniciar sesión para modificar tus guardados.');
+  }
+
+  const referencia = doc(
+    db,
+    COLECCION_USUARIOS,
+    usuario.uid,
+    'guardadas',
+    idPublicacion
+  );
+
+  await deleteDoc(referencia);
+}
+
+/**
+ * Obtiene los IDs de las publicaciones guardadas por el usuario.
+ */
+export async function obtenerIdsPublicacionesGuardadas(): Promise<string[]> {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error('Debés iniciar sesión para consultar tus guardados.');
+  }
+
+  const referencia = collection(
+    db,
+    COLECCION_USUARIOS,
+    usuario.uid,
+    'guardadas'
+  );
+
+  const resultado = await getDocs(referencia);
+
+  return resultado.docs.map((documento) => documento.id);
 }
 
