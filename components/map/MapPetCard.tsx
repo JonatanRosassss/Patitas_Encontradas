@@ -65,7 +65,7 @@ export function MapPetCard({
         <Image source={pet.foto} style={styles.photo} resizeMode="cover" />
         <View style={styles.detailsContainer}>
           <View style={styles.badgeRow}>
-            <View
+            <View 
               style={[
                 styles.badge,
                 {

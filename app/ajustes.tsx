@@ -1,15 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Switch, Pressable, ScrollView, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+
 import { Colors, Spacing, Typography, Radius } from '../constants/theme';
 import { useAuth } from '@/services/AuthContext';
+import { db } from '@/services/firebase';
+import { registrarPushToken } from '@/services/notificaciones';
 import { CambiarContraseniaModal } from '@/components/ajustes/CambiarContraseniaModal';
 
 export default function AjustesScreen() {
   const { usuario, cerrarSesion } = useAuth();
   const [notificaciones, setNotificaciones] = useState<boolean>(true);
   const [mostrarModalContrasenia, setMostrarModalContrasenia] = useState<boolean>(false);
+
+  // 1. Cargar preferencia de notificaciones del usuario desde Firestore
+  useEffect(() => {
+    async function cargarPreferencia() {
+      if (!usuario?.uid) return;
+      try {
+        const docRef = doc(db, 'usuarios', usuario.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const datos = docSnap.data();
+          setNotificaciones(datos.notificacionesActivas ?? true);
+        }
+      } catch (error) {
+        console.error('Error al cargar preferencias:', error);
+      }
+    }
+    cargarPreferencia();
+  }, [usuario?.uid]);
+
+  // 2. Manejar el cambio del Switch de notificaciones
+  const cambiarNotificaciones = async (valor: boolean) => {
+    setNotificaciones(valor);
+    if (!usuario?.uid) return;
+
+    try {
+      if (valor) {
+        // Activar: Obtener token y guardar en Firestore
+        const token = await registrarPushToken(usuario.uid);
+        await updateDoc(doc(db, 'usuarios', usuario.uid), {
+          notificacionesActivas: true,
+          pushToken: token,
+        });
+      } else {
+        // Desactivar: Limpiar token en Firestore
+        await updateDoc(doc(db, 'usuarios', usuario.uid), {
+          notificacionesActivas: false,
+          pushToken: null,
+        });
+      }
+    } catch (error) {
+      console.error('Error al actualizar notificaciones:', error);
+    }
+  };
 
   const manejarCerrarSesion = () => {
     const ejecutarCierre = async () => {
@@ -55,7 +102,7 @@ export default function AjustesScreen() {
           <Text style={styles.opcionTexto}>Recibir alertas de mascotas</Text>
           <Switch 
             value={notificaciones} 
-            onValueChange={setNotificaciones} 
+            onValueChange={cambiarNotificaciones} 
             trackColor={{ true: Colors.primary }}
           />
         </View>
@@ -73,26 +120,19 @@ export default function AjustesScreen() {
           style={styles.opcionBoton} 
           onPress={() => router.push('/reporte_error?tab=FAQS')}
         >
-          <Text style={styles.opcionTexto}>Centro de Ayuda y Preguntas Frecuentes</Text>
-        </Pressable>
-        <Pressable 
-          style={styles.opcionBoton} 
-          onPress={() => router.push('/reporte_error?tab=TICKET')}
-        >
-          <Text style={styles.opcionTexto}>Generar Ticket de Soporte / Error</Text>
+          <Text style={styles.opcionTexto}>Soporte y ayuda</Text>
         </Pressable>
 
-        {/* Cierre de sesión persistente */}
-        <Pressable style={styles.opcionBoton} onPress={manejarCerrarSesion}>
-          <Text style={[styles.opcionTexto, { color: Colors.error }]}>Cerrar sesión</Text>
+        {/* Botón para Cerrar Sesión */}
+        <Pressable style={styles.botonCerrar} onPress={manejarCerrarSesion}>
+          <Text style={styles.textoCerrar}>Cerrar sesión</Text>
         </Pressable>
       </ScrollView>
 
-      {/* Modal interactivo de cambio de contraseña */}
-      <CambiarContraseniaModal
+      {/* Modal para cambiar contraseña */}
+      <CambiarContraseniaModal 
         visible={mostrarModalContrasenia}
-        alCerrar={() => setMostrarModalContrasenia(false)}
-        emailUsuario={usuario?.email}
+        onClose={() => setMostrarModalContrasenia(false)}
       />
     </SafeAreaView>
   );
@@ -101,57 +141,57 @@ export default function AjustesScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.backgroundLight,
+    backgroundColor: '#F2F2F7',
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundLight,
-    paddingHorizontal: Spacing.lg,
+    padding: Spacing.md || 16,
   },
   botonVolver: {
-    alignSelf: 'flex-start',
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    backgroundColor: Colors.white,
-    borderRadius: Radius.sm,
-    marginTop: Spacing.base,
-    marginBottom: Spacing.sm,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    paddingVertical: 8,
+    marginBottom: 12,
   },
   textoBotonVolver: {
-    fontSize: Typography.sizes.sm,
-    fontFamily: Typography.fonts.bodyBold,
-    color: Colors.primary,
+    fontSize: 16,
+    color: Colors.primary || '#FF8A00',
+    fontWeight: '600',
   },
   seccionTitulo: {
-    fontSize: Typography.sizes.md,
-    fontFamily: Typography.fonts.titleBold,
-    color: Colors.primary,
-    marginTop: Spacing.base,
-    marginBottom: Spacing.sm,
+    fontSize: Typography.subtitle?.fontSize || 14,
+    fontWeight: 'bold',
+    color: '#8E8E93',
+    marginTop: 20,
+    marginBottom: 8,
+    textTransform: 'uppercase',
   },
   opcionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: Colors.white,
-    padding: Spacing.base,
-    borderRadius: Radius.sm,
-    marginBottom: Spacing.sm,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: Radius.md || 10,
   },
   opcionBoton: {
-    backgroundColor: Colors.white,
-    padding: Spacing.base,
-    borderRadius: Radius.sm,
-    marginBottom: Spacing.sm,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: Radius.md || 10,
+    marginBottom: 8,
   },
   opcionTexto: {
-    fontSize: Typography.sizes.sm,
-    fontFamily: Typography.fonts.bodyBold,
-    color: Colors.text,
+    fontSize: 16,
+    color: '#1C1C1E',
+  },
+  botonCerrar: {
+    backgroundColor: '#FF3B30',
+    padding: 16,
+    borderRadius: Radius.md || 10,
+    marginTop: 32,
+    alignItems: 'center',
+  },
+  textoCerrar: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
