@@ -34,17 +34,14 @@ export default function RootLayout() {
   }}
 />
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="bienvenida" options={{ headerShown: false }} />
       <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
       <Stack.Screen name="(auth)/register" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="detalle/[id]"
         options={{
-          headerShown: true,
-          title: 'Detalle',
-          headerTintColor: Colors.primary,
-          headerStyle: { backgroundColor: Colors.card },
-          headerTitleStyle: { fontFamily: Typography.fonts.titleBold, color: Colors.text },
+          headerShown: false,
         }}
       />
       </Stack>

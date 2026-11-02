@@ -1,9 +1,16 @@
+import React from 'react';
+import { View, StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
-import { Platform, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography } from '../../constants/theme';
+import { Colors, Typography, TabBarMetrics } from '../../constants/theme';
 
 export default function TabLayout() {
+  // Expo 57 dibuja edge-to-edge en Android: la barra de 3 botones / gestos se superpone
+  // a la app. Sumamos el inset inferior real para que la tab bar quede SIEMPRE por encima.
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Math.max(insets.bottom, TabBarMetrics.minBottomPadding);
+
   return (
     <Tabs
       screenOptions={{
@@ -14,9 +21,19 @@ export default function TabLayout() {
           backgroundColor: Colors.tabBackground,
           borderTopColor: Colors.borderLight,
           borderTopWidth: 1,
-         height: Platform.select({ ios: 90, web: 72, default: 72 }),
-paddingBottom: Platform.select({ ios: 28, web: 8, default: 8 }),
-paddingTop: 8,
+          height: TabBarMetrics.contentHeight + bottomPadding,
+          paddingBottom: bottomPadding,
+          paddingTop: TabBarMetrics.paddingTop,
+          ...Platform.select({
+            web: { boxShadow: '0px -2px 10px rgba(90, 58, 31, 0.06)' },
+            default: {
+              shadowColor: Colors.shadow,
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.06,
+              shadowRadius: 8,
+              elevation: 12,
+            },
+          }),
         },
         tabBarLabelStyle: {
           fontSize: Typography.sizes.xs,
@@ -24,6 +41,7 @@ paddingTop: 8,
         },
       }}
     >
+      {/* 1. INICIO (HOME) */}
       <Tabs.Screen
         name="index"
         options={{
@@ -31,12 +49,14 @@ paddingTop: 8,
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'home' : 'home-outline'}
-              size={size}
+              size={size || 22}
               color={color}
             />
           ),
         }}
       />
+
+      {/* 2. MAPA */}
       <Tabs.Screen
         name="mapa"
         options={{
@@ -44,59 +64,45 @@ paddingTop: 8,
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'map' : 'map-outline'}
-              size={size}
+              size={size || 22}
               color={color}
             />
           ),
         }}
       />
-     <Tabs.Screen
-  name="publicar-alerta"
-  options={{
-    title: 'Publicar',
-    tabBarLabel: () => null,
-    tabBarIcon: ({ focused }) => (
-      <View
-        style={{
-          width: 48,
-          height: 48,
-          borderRadius: 24,
-          backgroundColor: Colors.primary,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: -20,
-          borderWidth: focused ? 3 : 0,
-          borderColor: '#FFFFFF',
-          elevation: 5,
-          shadowColor: '#000000',
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          shadowOffset: { width: 0, height: 2 },
+
+      {/* 3. BOTÓN DESTACADO AL MEDIO: PUBLICAR / REPORTAR */}
+      <Tabs.Screen
+        name="publicar-alerta"
+        options={{
+          title: 'Reportar',
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.botonCrearContenedor}>
+              <View style={[styles.botonCrearCirculo, focused && styles.botonCrearActivo]}>
+                <Ionicons name="add" size={30} color={Colors.white} />
+              </View>
+            </View>
+          ),
+          tabBarLabel: () => null,
         }}
-      >
-        <Ionicons
-          name="add"
-          size={30}
-          color="#FFFFFF"
-        />
-      </View>
-    ),
-  }}
-/>
-      {/* 4. PUBLICACIONES GUARDADAS */}
-<Tabs.Screen
-  name="guardados"
-  options={{
-    title: 'Guardados',
-    tabBarIcon: ({ color, size, focused }) => (
-      <Ionicons
-        name={focused ? 'bookmark' : 'bookmark-outline'}
-        size={size || 22}
-        color={color}
       />
-    ),
-  }}
-/>
+
+      {/* 4. PUBLICACIONES GUARDADAS */}
+      <Tabs.Screen
+        name="guardados"
+        options={{
+          title: 'Guardados',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? 'bookmark' : 'bookmark-outline'}
+              size={size || 22}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* 5. PERFIL / AJUSTES */}
       <Tabs.Screen
         name="perfil"
         options={{
@@ -104,12 +110,13 @@ paddingTop: 8,
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'person' : 'person-outline'}
-              size={size}
+              size={size || 22}
               color={color}
             />
           ),
         }}
       />
+
       {/* Soporte queda oculto de la barra inferior (href: null), accesible únicamente desde Ajustes en Perfil */}
       <Tabs.Screen
         name="reporte_error"
@@ -122,3 +129,29 @@ paddingTop: 8,
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  botonCrearContenedor: {
+    top: -12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  botonCrearCirculo: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  botonCrearActivo: {
+    backgroundColor: Colors.primary,
+    opacity: 0.9,
+    transform: [{ scale: 1.05 }],
+  },
+});

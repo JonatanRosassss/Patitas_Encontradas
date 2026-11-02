@@ -70,7 +70,7 @@ describe('Editar publicación', () => {
   });
 
   test('propaga el error si Firebase falla al editar', async () => {
-    (updateDoc as jest.Mock).mockRejectedValueOnce(
+    (updateDoc as any).mockRejectedValueOnce(
       new Error('Error de conexión')
     );
 
@@ -102,7 +102,7 @@ describe('Eliminar publicación', () => {
   });
 
   test('propaga el error si Firebase falla al eliminar', async () => {
-    (deleteDoc as jest.Mock).mockRejectedValueOnce(
+    (deleteDoc as any).mockRejectedValueOnce(
       new Error('No se pudo eliminar')
     );
 

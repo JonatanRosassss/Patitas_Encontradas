@@ -1,5 +1,31 @@
 {
-  "plugins": [
-    "expo-router"
-  ]
+  "expo": {
+    "name": "Patitas Encontradas",
+    "slug": "Patitas_Encontradas",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/patitas_icon.jpeg",
+    "scheme": "patitasencontradas",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/patitas_icon.jpeg",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-status-bar"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.patitasencontradas.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/patitas_icon.jpeg",
+        "backgroundColor": "#FFFFFF"
+      }
+    }
+  }
 }

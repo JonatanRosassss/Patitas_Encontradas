@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Image,
   StyleSheet,
@@ -9,14 +8,12 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
 import {
   Colors,
   Typography,
   Spacing,
   Radius,
 } from '@/constants/theme';
-
 import {
   guardarPublicacion,
   quitarPublicacionGuardada,
@@ -47,33 +44,36 @@ export function PetCard({
   onPress,
 }: PetCardProps) {
   const [mostrarToast, setMostrarToast] = useState(false);
+  const [mensajeToast, setMensajeToast] = useState('');
   const [imagenValida, setImagenValida] = useState(true);
   const [guardada, setGuardada] = useState(false);
   const [guardando, setGuardando] = useState(false);
-  const [mensajeToast, setMensajeToast] = useState('');
+
+  useEffect(() => {
+    setImagenValida(true);
+  }, [imagen]);
 
   // Consultar si la publicación está guardada
   useEffect(() => {
-    let activo = true;
+    let montado = true;
 
-    const cargarEstadoGuardado = async () => {
+    async function verificarGuardado() {
       if (!id) return;
 
       try {
-        const idsGuardados = await obtenerIdsPublicacionesGuardadas();
-
-        if (activo) {
-          setGuardada(idsGuardados.includes(id));
+        const guardadas = await obtenerIdsPublicacionesGuardadas();
+        if (montado) {
+          setGuardada(guardadas.includes(id));
         }
       } catch {
-        // El usuario puede no haber iniciado sesión.
+        // Si no está autenticado o falla la consulta, no marcamos como guardada
       }
-    };
+    }
 
-    cargarEstadoGuardado();
+    verificarGuardado();
 
     return () => {
-      activo = false;
+      montado = false;
     };
   }, [id]);
 
@@ -120,24 +120,29 @@ export function PetCard({
   const fallbackImage =
     'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500';
 
+  const esArchivoLocalEnWeb =
+    Platform.OS === 'web' && typeof imagen === 'string' && imagen.startsWith('file://');
+
+  const uriImagenFinal =
+    imagenValida && imagen && !esArchivoLocalEnWeb
+      ? imagen
+      : fallbackImage;
+
   return (
     <View style={styles.petCard}>
-
-      {/* Notificación */}
       {mostrarToast && (
-        <View style={styles.toast} pointerEvents="none">
+        <View style={[styles.toast, { pointerEvents: 'none' }]}>
           <Ionicons
             name="checkmark-circle"
             size={18}
             color="#FFFFFF"
           />
           <Text style={styles.toastText}>
-            {mensajeToast}
+            {mensajeToast || 'Publicación guardada'}
           </Text>
         </View>
       )}
 
-      {/* Contenido principal de la tarjeta */}
       <Pressable
         style={({ pressed }) => [
           styles.petContent,
@@ -147,15 +152,12 @@ export function PetCard({
         accessibilityRole="button"
         accessibilityLabel={`Ficha de ${nombre}, ${estado}`}
       >
-
         {/* Imagen de la mascota */}
         <View style={styles.imageContainer}>
           <Image
-            source={{
-              uri: imagenValida && imagen
-                ? imagen
-                : fallbackImage,
-            }}
+            testID="pet-card-image"
+            accessibilityRole="image"
+            source={{ uri: uriImagenFinal }}
             style={styles.petImage}
             resizeMode="cover"
             onError={() => setImagenValida(false)}
@@ -164,43 +166,44 @@ export function PetCard({
 
         {/* Información principal */}
         <View style={styles.petInfo}>
-
-          {/* Estado y recompensa */}
           <View style={styles.petTopRow}>
-            <View
-              style={[
-                styles.petStatus,
-                {
-                  backgroundColor: isPerdido
-                    ? Colors.statusPerdidoBg
-                    : Colors.statusEncontradoBg,
-                },
-              ]}
-            >
-              <Text
+            <View style={styles.badgesGroup}>
+              <View
                 style={[
-                  styles.petStatusText,
+                  styles.petStatus,
                   {
-                    color: isPerdido
-                      ? Colors.statusPerdido
-                      : Colors.statusEncontradoText,
+                    backgroundColor: isPerdido
+                      ? Colors.statusPerdidoBg
+                      : Colors.statusEncontradoBg,
                   },
                 ]}
               >
-                {isPerdido ? 'Perdido' : 'Encontrado'}
-              </Text>
-            </View>
-
-            {recompensa ? (
-              <View style={styles.recompensaBadge}>
-                <Text style={styles.recompensaText}>
-                  Recompensa
+                <Text
+                  style={[
+                    styles.petStatusText,
+                    {
+                      color: isPerdido
+                        ? Colors.statusPerdido
+                        : Colors.statusEncontradoText,
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {isPerdido ? 'Perdido' : 'Encontrado'}
                 </Text>
               </View>
-            ) : null}
+
+              {recompensa ? (
+                <View style={styles.recompensaBadge}>
+                  <Ionicons name="gift-outline" size={11} color={Colors.text} />
+                  <Text style={styles.recompensaText} numberOfLines={1}>
+                    Recompensa
+                  </Text>
+                </View>
+              ) : null}
+            </View>
           </View>
 
-          {/* Nombre */}
           <Text
             style={styles.petName}
             numberOfLines={1}
@@ -208,7 +211,6 @@ export function PetCard({
             {nombre}
           </Text>
 
-          {/* Tipo de mascota */}
           <View style={styles.tagRow}>
             <Ionicons
               name={
@@ -216,7 +218,7 @@ export function PetCard({
                   ? 'logo-octocat'
                   : 'paw'
               }
-              size={15}
+              size={13}
               color={Colors.primary}
             />
             <Text style={styles.infoText}>
@@ -224,29 +226,27 @@ export function PetCard({
             </Text>
           </View>
 
-          {/* Ubicación */}
           {ubicacion ? (
             <View style={styles.metaRow}>
               <Ionicons
                 name="location-outline"
-                size={15}
+                size={13}
                 color={Colors.textSecondary}
               />
               <Text
                 style={styles.metaText}
-                numberOfLines={2}
+                numberOfLines={1}
               >
                 {ubicacion}
               </Text>
             </View>
           ) : null}
 
-          {/* Tiempo */}
           {tiempo ? (
             <View style={styles.metaRow}>
               <Ionicons
                 name="time-outline"
-                size={15}
+                size={13}
                 color={Colors.textMuted}
               />
               <Text
@@ -257,11 +257,10 @@ export function PetCard({
               </Text>
             </View>
           ) : null}
-
         </View>
       </Pressable>
 
-      {/* Botón guardar independiente */}
+      {/* Botón guardar independiente de la tarjeta */}
       <Pressable
         style={({ pressed }) => [
           styles.saveButton,
@@ -280,31 +279,26 @@ export function PetCard({
       >
         <Ionicons
           name={guardada ? 'bookmark' : 'bookmark-outline'}
-          size={19}
+          size={18}
           color={guardada ? '#F28C28' : Colors.white}
         />
       </Pressable>
-
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-
-  // Tarjeta completa
   petCard: {
     width: '100%',
-    minWidth: 0,
-    minHeight: 120,
     backgroundColor: Colors.card,
     flexDirection: 'row',
-    alignItems: 'center',
     borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: Colors.border,
     padding: Spacing.sm + Spacing.xs,
+    minHeight: 120,
+    alignItems: 'center',
     position: 'relative',
-
     ...Platform.select({
       web: {
         boxShadow: '0px 2px 6px rgba(90, 58, 31, 0.08)',
@@ -319,23 +313,21 @@ const styles = StyleSheet.create({
     }),
   },
 
-  // Contenedor de imagen e información
   petContent: {
     flex: 1,
-    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
+    minWidth: 0,
   },
 
   petCardPressed: {
     opacity: 0.92,
+    transform: [{ scale: 0.99 }],
   },
 
-  // Imagen
   imageContainer: {
     width: 95,
     height: 95,
-    flexShrink: 0,
     borderRadius: Radius.md,
     overflow: 'hidden',
     backgroundColor: Colors.accent,
@@ -347,7 +339,6 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
-  // Información
   petInfo: {
     flex: 1,
     minWidth: 0,
@@ -357,13 +348,19 @@ const styles = StyleSheet.create({
 
   petTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    flexWrap: 'wrap',
-    gap: Spacing.xs,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: Spacing.sm,
     marginBottom: Spacing.half,
   },
-
+  badgesGroup: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
   petStatus: {
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.half,
@@ -376,6 +373,9 @@ const styles = StyleSheet.create({
   },
 
   recompensaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
     backgroundColor: Colors.secondary,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.half,
@@ -386,6 +386,27 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.xs,
     fontFamily: Typography.fonts.bodyBold,
     color: Colors.text,
+  },
+
+  saveButton: {
+    width: 32,
+    height: 32,
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: Spacing.xs,
+    zIndex: 2,
+  },
+
+  saveButtonGuardado: {
+    backgroundColor: '#FFF0DF',
+    borderWidth: 1,
+    borderColor: '#F28C28',
+  },
+
+  saveButtonPressed: {
+    opacity: 0.75,
   },
 
   petName: {
@@ -411,49 +432,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    minWidth: 0,
   },
 
   metaText: {
-    flex: 1,
-    minWidth: 0,
     fontSize: Typography.sizes.xs,
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.textSecondary,
+    flex: 1,
   },
 
   metaMutedText: {
-    flex: 1,
-    minWidth: 0,
     fontSize: Typography.sizes.xs,
     fontFamily: Typography.fonts.bodyRegular,
     color: Colors.textMuted,
+    flex: 1,
   },
 
-  // Botón guardar
-  saveButton: {
-    width: 36,
-    height: 36,
-    flexShrink: 0,
-    borderRadius: Radius.sm,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: Spacing.sm,
-    zIndex: 2,
-  },
-
-  saveButtonGuardado: {
-    backgroundColor: '#FFF0DF',
-    borderWidth: 1,
-    borderColor: '#F28C28',
-  },
-
-  saveButtonPressed: {
-    opacity: 0.75,
-  },
-
-  // Toast
   toast: {
     position: 'absolute',
     top: Spacing.sm,
@@ -473,5 +467,4 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.xs,
     fontFamily: Typography.fonts.bodyBold,
   },
-
 });

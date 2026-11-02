@@ -1,7 +1,9 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { Coordinates, MapFilterIndex, MapPet } from '../types/map';
+import { MASCOTAS_MOCK } from '../data/mapMockData';
 
 import { isValidCoordinate } from '../utils/geoValidation';
 import { MapContainerRef } from '../components/map/MapContainer';
@@ -20,14 +22,33 @@ export interface UseMapStateReturn {
   handleLocate: () => Promise<void>;
   handleZoomIn: () => void;
   handleZoomOut: () => void;
-  mapContainerRef: React.RefObject<MapContainerRef>;
+  mapContainerRef: React.RefObject<MapContainerRef | null>;
   cargandoPuntos: boolean;
+  puntosCargados: boolean;
   recargarPuntos: () => Promise<void>;
 }
 
-export function useMapState(initialPets: MapPet[] = []): UseMapStateReturn {
+export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateReturn {
+  const {
+    alertaId: alertaIdParam,
+    lat: latParam,
+    lng: lngParam,
+    zoom: zoomParam,
+  } = useLocalSearchParams<{
+    alertaId?: string | string[];
+    lat?: string | string[];
+    lng?: string | string[];
+    zoom?: string | string[];
+  }>();
+  const alertaId = Array.isArray(alertaIdParam) ? alertaIdParam[0] : alertaIdParam;
+  const latParamVal = Array.isArray(latParam) ? latParam[0] : latParam;
+  const lngParamVal = Array.isArray(lngParam) ? lngParam[0] : lngParam;
+  const zoomParamVal = Array.isArray(zoomParam) ? zoomParam[0] : zoomParam;
+
+  const alertaProcesada = useRef<string | null>(null);
   const [pets, setPets] = useState<MapPet[]>(initialPets);
   const [cargandoPuntos, setCargandoPuntos] = useState(false);
+  const [puntosCargados, setPuntosCargados] = useState(false);
   const [filtro, setFiltro] = useState<MapFilterIndex>(0);
   const [selectedPet, setSelectedPet] = useState<MapPet | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,20 +58,22 @@ export function useMapState(initialPets: MapPet[] = []): UseMapStateReturn {
   const mapContainerRef = useRef<MapContainerRef>(null);
 
   const recargarPuntos = useCallback(async () => {
-  try {
-  setCargandoPuntos(true);
-
-  const alertasFirebase = await listarAlertasParaMapa();
-
-  // El mapa utiliza publicaciones reales de Firebase.
-  // Si no hay publicaciones con coordenadas válidas, queda vacío.
-  setPets(alertasFirebase);
-} catch (error) {
-  console.error('Error al cargar las alertas del mapa:', error);
-  setPets([]);
-} finally {
-  setCargandoPuntos(false);
-}
+    try {
+      setCargandoPuntos(true);
+      const alertasFirebase = await listarAlertasParaMapa();
+      if (alertasFirebase && alertasFirebase.length > 0) {
+        setPets(alertasFirebase);
+      } else {
+        // Fallback a los puntos iniciales si no hay alertas en Firestore
+        setPets(initialPets);
+      }
+    } catch {
+      // Manejo resiliente offline o restricciones temporales de Firestore
+      setPets(initialPets);
+    } finally {
+      setCargandoPuntos(false);
+      setPuntosCargados(true);
+    }
   }, [initialPets]);
 
   useEffect(() => {
@@ -84,6 +107,72 @@ export function useMapState(initialPets: MapPet[] = []): UseMapStateReturn {
       return true;
     });
   }, [pets, filtro, searchQuery]);
+
+  // Centrar y hacer zoom in animado cuando vienen coordenadas explícitas por navegación
+  useEffect(() => {
+    if (latParamVal && lngParamVal) {
+      const latNum = parseFloat(latParamVal);
+      const lngNum = parseFloat(lngParamVal);
+      const zoomNum = zoomParamVal ? parseInt(zoomParamVal, 10) : 16;
+      if (isValidCoordinate(latNum, lngNum)) {
+        const timer = setTimeout(() => {
+          mapContainerRef.current?.centerTo(latNum, lngNum, zoomNum);
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [latParamVal, lngParamVal, zoomParamVal]);
+
+  useEffect(() => {
+    if (!alertaId) return;
+    alertaProcesada.current = null;
+    setFiltro(0);
+    setSearchQuery('');
+    setSelectedPet(null);
+  }, [alertaId]);
+
+  useEffect(() => {
+    if (
+      !alertaId ||
+      !puntosCargados ||
+      cargandoPuntos ||
+      filtro !== 0 ||
+      searchQuery !== '' ||
+      alertaProcesada.current === alertaId
+    ) {
+      return;
+    }
+
+    alertaProcesada.current = alertaId;
+    const alerta = filteredPets.find((pet) => pet.id === alertaId);
+    if (!alerta) {
+      // Si la alerta no está en el listado filtrado pero vinieron coordenadas por query param,
+      // no mostramos error porque el mapa ya voló y se centró en la zona.
+      if (!latParamVal || !lngParamVal) {
+        Alert.alert(
+          'Alerta no disponible en el mapa',
+          'No se encontró una ubicación válida para esta mascota.'
+        );
+      }
+      return;
+    }
+
+    setSelectedPet(alerta);
+    mapContainerRef.current?.centerTo(
+      alerta.coordenadas.latitude,
+      alerta.coordenadas.longitude,
+      16
+    );
+  }, [
+    alertaId,
+    cargandoPuntos,
+    filtro,
+    filteredPets,
+    latParamVal,
+    lngParamVal,
+    puntosCargados,
+    searchQuery,
+  ]);
 
   const handleLocate = useCallback(async () => {
     if (isLocating) return;
@@ -191,6 +280,7 @@ export function useMapState(initialPets: MapPet[] = []): UseMapStateReturn {
     handleZoomOut,
     mapContainerRef,
     cargandoPuntos,
+    puntosCargados,
     recargarPuntos,
   };
 }

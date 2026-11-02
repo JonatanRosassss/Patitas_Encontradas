@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { obtenerAuth, obtenerFirestore } from '../../services/ConexionFirebase';
@@ -68,17 +68,27 @@ export default function PantallaRegistro() {
     try {
       const auth = obtenerAuth();
       const db = obtenerFirestore();
+      const nombreLimpio = nombre.trim();
+      const correoLimpio = correo.trim();
+      const telefonoLimpio = telefono.trim();
 
       // 1. Conectar y crear usuario con Firebase Authentication
       const resultado = await createUserWithEmailAndPassword(
         auth,
-        correo.trim(),
+        correoLimpio,
         contrasenia
       );
 
       const usuario = resultado.user;
 
-      // 2. Guardar token de sesión e ID
+      // 2. Asignar displayName en Firebase Auth para disponibilidad inmediata
+      try {
+        await updateProfile(usuario, { displayName: nombreLimpio });
+      } catch {
+        // Continuar incluso si falla actualización opcional de Auth profile
+      }
+
+      // 3. Guardar token de sesión y caché local de perfil
       const token = await usuario.getIdToken();
       await AsyncStorage.setItem(
         'user_session',
@@ -89,19 +99,38 @@ export default function PantallaRegistro() {
         })
       );
 
-      // 3. Guardar información adicional en Firestore
-      await setDoc(doc(db, 'usuarios', usuario.uid), {
-        nombre: nombre.trim(),
-        correo: correo.trim(),
-        telefono: telefono.trim(),
-        uid: usuario.uid,
-        fechaRegistro: new Date(),
-      });
+      await AsyncStorage.setItem(
+        `perfil_usuario_${usuario.uid}`,
+        JSON.stringify({
+          id: usuario.uid,
+          nombre: nombreLimpio,
+          email: correoLimpio,
+          telefono: telefonoLimpio,
+          fechaCreacion: new Date().toLocaleDateString(),
+        })
+      );
 
-      // 4. Confirmación y navegación
+      // 4. Guardar información adicional en Firestore (con manejo resiliente)
+      try {
+        await setDoc(
+          doc(db, 'usuarios', usuario.uid),
+          {
+            nombre: nombreLimpio,
+            correo: correoLimpio,
+            telefono: telefonoLimpio,
+            uid: usuario.uid,
+            fechaRegistro: new Date(),
+          },
+          { merge: true }
+        );
+      } catch {
+        // Si las reglas de Firestore demoran o fallan, el perfil ya quedó en Auth y AsyncStorage
+      }
+
+      // 5. Confirmación y navegación
       alertar(
         '¡Cuenta creada!',
-        `Bienvenida/o ${nombre.trim()}. Ya podés iniciar sesión.`,
+        `Bienvenida/o ${nombreLimpio}. Ya podés iniciar sesión.`,
         () => enrutador.replace('/(auth)/login')
       );
 
@@ -152,6 +181,16 @@ export default function PantallaRegistro() {
     >
       <ScrollView contentContainerStyle={estilos.scrollContenido} keyboardShouldPersistTaps="handled">
         <View style={estilos.contenido}>
+          
+          {/* Botón Volver / Atrás */}
+          <TouchableOpacity
+            style={estilos.botonVolver}
+            onPress={() => enrutador.back()}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          </TouchableOpacity>
+
           <Text style={estilos.titulo}>Crear Cuenta</Text>
           <Text style={estilos.subtitulo}>
             Sumate a la comunidad para ayudar a que más mascotas vuelvan a casa.
@@ -298,6 +337,17 @@ const estilos = StyleSheet.create({
   },
   contenido: {
     paddingHorizontal: Spacing.two,
+  },
+  botonVolver: {
+    width: 42,
+    height: 42,
+    borderRadius: Radius.full || 21,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.two,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   titulo: {
     fontSize: Typography.sizes.xxxl,

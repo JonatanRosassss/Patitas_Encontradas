@@ -150,6 +150,20 @@ test('detail screen: app/detalle/[id].tsx connects to Firestore and redirects to
     content.includes('ActivityIndicator'),
     'Detail screen must implement loading indicator'
   );
+  assert.ok(
+    content.includes('ExpoLinking.createURL'),
+    'Detail sharing must include an app link for the alert'
+  );
+  assert.ok(
+    content.includes('`/mapa?alertaId=') &&
+      content.includes('Ver en el mapa de la app') &&
+      !content.includes('openstreetmap.org'),
+    'Detail sharing must link to the in-app map without an external map link'
+  );
+  assert.ok(
+    content.includes('isValidCoordinate'),
+    'Detail sharing must only include the map link when alert coordinates are valid'
+  );
 
   // Design Tokens: uses Colors and Typography from theme
   assert.ok(
@@ -161,5 +175,25 @@ test('detail screen: app/detalle/[id].tsx connects to Firestore and redirects to
   assert.ok(
     !content.includes('console.log'),
     'app/detalle/[id].tsx must NOT contain console.log'
+  );
+});
+
+test('map screen: deep link selects the alert after map points finish loading', () => {
+  const mapStatePath = path.join(projectRoot, 'hooks', 'useMapState.ts');
+  assert.ok(fs.existsSync(mapStatePath), 'hooks/useMapState.ts must exist');
+
+  const content = fs.readFileSync(mapStatePath, 'utf8');
+  assert.ok(
+    content.includes('useLocalSearchParams') && content.includes('alertaId'),
+    'Map screen must read the alert ID from the deep link'
+  );
+  assert.ok(
+    content.includes('puntosCargados') &&
+      content.includes('filteredPets.find((pet) => pet.id === alertaId)'),
+    'Map screen must wait for loaded points and find the requested alert'
+  );
+  assert.ok(
+    content.includes('setSelectedPet(alerta)'),
+    'Map screen must select the requested alert marker'
   );
 });

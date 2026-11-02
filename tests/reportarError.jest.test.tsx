@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
@@ -29,7 +28,7 @@ describe('Reporte de errores - TicketForm', () => {
   });
 
   it('muestra el formulario de reporte', () => {
-    const { getByText } = render(<TicketForm />);
+    const { getByText } = render(<TicketForm />) as any;
 
     expect(getByText('Generar Ticket de Soporte')).toBeTruthy();
     expect(getByText('Motivo del reporte')).toBeTruthy();
@@ -39,7 +38,7 @@ describe('Reporte de errores - TicketForm', () => {
   it('valida los campos obligatorios al intentar enviar vacío', () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 
-    const { getByLabelText, getByText } = render(<TicketForm />);
+    const { getByLabelText, getByText } = render(<TicketForm />) as any;
 
     fireEvent.press(getByLabelText('Enviar Ticket a Soporte'));
 
@@ -53,11 +52,11 @@ describe('Reporte de errores - TicketForm', () => {
   });
 
   it('envía el ticket con los datos válidos', async () => {
-    (enviarTicketSoporte as jest.Mock).mockResolvedValue('ticket123');
+    (enviarTicketSoporte as any).mockResolvedValue('ticket123');
 
     const { getByPlaceholderText, getByLabelText } = render(
       <TicketForm />,
-    );
+    ) as any;
 
     fireEvent.changeText(
       getByPlaceholderText('Ej: No se cargan las fotos de avistamientos'),
@@ -93,13 +92,13 @@ describe('Reporte de errores - TicketForm', () => {
       .spyOn(Alert, 'alert')
       .mockImplementation(() => {});
 
-    (enviarTicketSoporte as jest.Mock).mockRejectedValue(
+    (enviarTicketSoporte as any).mockRejectedValue(
       new Error('Error de conexión'),
     );
 
     const { getByPlaceholderText, getByLabelText } = render(
       <TicketForm />,
-    );
+    ) as any;
 
     fireEvent.changeText(
       getByPlaceholderText('Ej: No se cargan las fotos de avistamientos'),
