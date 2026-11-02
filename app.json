@@ -18,7 +18,8 @@
       "expo-status-bar"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.patitasencontradas.app"
     },
     "android": {
       "package": "com.patitasencontradas.app",
