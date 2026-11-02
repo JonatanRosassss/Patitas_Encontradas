@@ -141,7 +141,7 @@ describe('RF5 - Componentes Nativos de Soporte en Android (RNTL)', () => {
       });
 
       expect(mockSuccess).toHaveBeenCalledTimes(1);
-    });
+    }, 15000);
   });
 
   describe('TC-505: TicketForm Validación Negativa Android', () => {

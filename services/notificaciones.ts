@@ -12,7 +12,6 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import * as Notifications from "expo-notifications";
-// @ts-ignore
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 
@@ -230,12 +229,10 @@ export async function notificarMascotaEncontrada(
 export async function registrarPushToken(usuarioId?: string) {
   // En Web ignoramos el registro de tokens push de celular de forma limpia
   if (Platform.OS === "web") {
-    console.log("Las notificaciones push nativas solo están disponibles en celulares.");
     return null;
   }
 
   if (!Device.isDevice) {
-    console.log("Las notificaciones push solo funcionan en dispositivos físicos.");
     return null;
   }
 
@@ -248,7 +245,6 @@ export async function registrarPushToken(usuarioId?: string) {
   }
 
   if (statusFinal !== "granted") {
-    console.log("No se obtuvieron permisos para notificaciones.");
     return null;
   }
 
