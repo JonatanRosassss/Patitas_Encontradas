@@ -11,11 +11,9 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import { Platform } from "react-native";
 
 import { db, auth } from "./firebase";
+import { obtenerExpoPushTokenSeguro } from "./pushNotificationsAdapter";
 
 export type TipoNotificacion =
   | "cerca"
@@ -224,32 +222,11 @@ export async function notificarMascotaEncontrada(
 }
 
 /**
- * Registra y obtiene el token de Expo Notifications para notificaciones push.
+ * Registra y obtiene el token de Expo Notifications para notificaciones push
+ * de forma desacoplada y resiliente ante Expo Go, Web y emuladores.
  */
-export async function registrarPushToken(usuarioId?: string) {
-  // En Web ignoramos el registro de tokens push de celular de forma limpia
-  if (Platform.OS === "web") {
-    return null;
-  }
-
-  if (!Device.isDevice) {
-    return null;
-  }
-
-  const { status: statusExistente } = await Notifications.getPermissionsAsync();
-  let statusFinal = statusExistente;
-
-  if (statusExistente !== "granted") {
-    const { status } = await Notifications.requestPermissionsAsync();
-    statusFinal = status;
-  }
-
-  if (statusFinal !== "granted") {
-    return null;
-  }
-
-  const respuestaToken = await Notifications.getExpoPushTokenAsync();
-  const token = respuestaToken.data;
+export async function registrarPushToken(usuarioId?: string): Promise<string | null> {
+  const token = await obtenerExpoPushTokenSeguro();
 
   if (usuarioId && token) {
     const userRef = doc(db, "usuarios", usuarioId);

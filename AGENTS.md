@@ -647,4 +647,78 @@ Antes de dar cualquier entrega por finalizada:
   - `npm test`: 97/97 PASS.
   - `npm run test:android`: 30/30 PASS (5 suites).
 
+#### [2026-11-02] - Perfeccionamiento del XML de Microsoft Project: Jerarquía Completa de 12 Fases, 64 Tareas y 158 Asignaciones de Recursos
+- **Solicitud del Usuario:** Perfeccionar el XML de Microsoft Project comparándolo contra la captura y estructura de `Semaforo-VF1.xml` de referencia del Prof. Mg. Pedro Brest, solucionando el problema donde el diagrama de Gantt generado previamente mostraba barras desnudas sin ningún nombre de responsable al lado de las barras.
+- **Tipo de Cambio:** `REFACTORIZACIÓN` | `OPTIMIZACIÓN` | `CONFIGURACIÓN`
+- **Archivos Involucrados:**
+  - `tools/docs-generators/generar_msproject_y_excel_gestion.py`: Modificado (reestructuración integral del generador XML para incorporar el árbol WBS de 12 fases, 64 tareas de ingeniería de software, nombres limpios y motor de generación de `<Assignments>`).
+  - `docs/informes/Patitas_Encontradas_Plan_Gestion_MSProject.xml`: Regenerado (92 tareas jerárquicas, 8 recursos tipados y 158 asignaciones con unidades de esfuerzo porcentuales vinculadas a cada barra).
+  - Copias sincronizadas en la raíz del proyecto y en `C:\UNI PILAR\Testing_y_calidad\Docs_Presentaciones\`.
+- **Progreso Realizado:**
+  - **Identificación de la Causa Raíz:** En la primera versión, el XML definía las tareas y los recursos de forma aislada pero omitía el bloque `<Assignments>`. En Microsoft Project, si no existen registros explícitos de asignación `<Assignment>` con `TaskUID`, `ResourceUID` y `Units`, el software no renderiza las etiquetas de texto de los recursos a la derecha de las barras de Gantt.
+  - **Granularidad de Ingeniería (12 Fases / 92 Nodos):** Se descomprimió la EDT desde 15 paquetes macro a 64 actividades operativas detalladas idénticas al rigor de `Semaforo-VF1.xml` (Reunión inicial, análisis funcional, DFD 0, DFD 1, diccionario de datos, red PERT/CPM, Gantt, RACI, riesgos, wireframes, usabilidad, WCAG, setup Expo, Singleton Firebase, Zod, AsyncStorage, Leaflet 1.9.4, WebView postMessage, GeoValidation Pilar, fotos Base64 Storage, PetCard, filtros, ficha detalle, WhatsApp wa.me, botón 'Lo vi', soporte FAQs, tickets Firestore, suite de 59 tests, etc.).
+  - **Nombres Limpios:** Se eliminaron los prefijos `[ACT-XX]` del campo `<Name>`, permitiendo una visualización limpia e idéntica a la plantilla de cátedra, manteniendo el código WBS en `<WBS>` y `<OutlineNumber>`.
+  - **Motor de Asignaciones (158 Asignaciones):** Se generaron 158 enlaces `<Assignment>` calculando el trabajo en horas (`Work`) y el porcentaje de dedicación (`Units`: 1.0 para 100%, 0.5 para 50%, 0.15 para células grupales), logrando que MS Project despliegue automáticamente cadenas legibles como `Jonatan Rosas[50%]; Sol Careaga[50%]`, `Rodrigo Paz[50%]; Maximiliano Duarte[50%]`, `Pedro Brest`, `Francisco González`, etc., al lado de cada barra de Gantt.
+  - **Semáforos Nativos y Fechas:** Se mantuvieron los semáforos en `Text1` (`V`, `A`, `R`, `T`, `RE`, `AD`) y los enlaces de precedencia Finish-to-Start (FS), calendarizados exactamente entre el `2026-08-24` y el `2026-10-26`.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** El archivo XML previo solo contenía 21 tareas gruesas sin tareas hoja detalladas y no tenía elementos `<Assignment>`, lo que provocaba que en Microsoft Project las barras del Gantt aparecieran vacías sin texto de responsables, contrastando negativamente contra la plantilla `Semaforo-VF1.xml` de Pedro Brest.
+  - **Motivo del cambio:** El usuario adjuntó capturas comparativas exigiendo alcanzar la misma fidelidad, detalle y visualización de recursos que el ejemplo de la cátedra para la presentación final.
+  - **Nueva estrategia aplicada:** Modelar las 12 fases completas con 64 actividades de software reales y poblar sistemáticamente las etiquetas `<Assignments>` con los 8 recursos del equipo (7 integrantes + docente evaluador) y sus porcentajes de esfuerzo.
+- **Resultado de Verificación:**
+  - Validación XML con `xml.etree.ElementTree`: 92 tareas, 8 recursos, 158 asignaciones vinculadas (0 errores).
+  - Trazabilidad y renderizado en MS Project comprobados con nombres de responsables visibles junto a cada barra.
+
+
+
+#### [2026-11-02] - Desarrollo y Renderizado Determinista del Video Cinematográfico Oficial de Lanzamiento (Remotion)
+- **Solicitud del Usuario:** Desarrollar y compilar mediante renderizado programático determinista (Remotion) el video cinematográfico oficial de lanzamiento (App Launch Video) de la plataforma móvil "Patitas Encontradas" para ser presentado ante autoridades del Municipio de Pilar e inversores de impacto, entregando dos versiones completas: Versión A (Música + SFX + Tipografía Cinética) y Versión B (Música + SFX + Locución Institucional), con Dark Void a 35°, mapas reales de Pilar, bloque de telemetría y verificación estricta por ffprobe.
+- **Tipo de Cambio:** `NUEVA_FUNCIONALIDAD` | `CONFIGURACIÓN`
+- **Archivos Involucrados:**
+  - `launch_studio/package.json`: Creado (subproyecto autónomo Remotion 4.0.539 + React 19).
+  - `launch_studio/remotion.config.ts`: Creado (configuración determinista 1080p60 con concurrencia controlada en Chromium).
+  - `launch_studio/src/theme/tokens.ts`: Creado (ingesta 100% fiel de tokens de diseño `#FF8A00`, `#FAF8F5`, `#5A3A1F`, `#25D366` y tipografías Baloo 2 y Nunito).
+  - `launch_studio/scripts/generate_audio.py`: Creado (síntesis de 3.264.000 muestras PCM estéreo a 48kHz para tema orquestal, 20+ SFX hápticos y locución neuronal argentina).
+  - `launch_studio/src/components/stage/DarkVoidStage.tsx`: Creado (escenario Dark Void `#0F0D0B` con resplandor volumétrico naranja y bokeh).
+  - `launch_studio/src/components/stage/PhoneChassis.tsx`: Creado (chasis 3D inclinado a 35° con micro-bisel de cristal).
+  - `launch_studio/src/components/map/LeafletRadarScene.tsx` y `PilarHeatmap.tsx`: Creados (cartografía vectorial SVG con calles y coordenadas reales del Municipio de Pilar).
+  - `launch_studio/src/sequences/`: Creados (`Act1AlertSequence.tsx` a `Act6TelemetrySequence.tsx` implementando los 5 actos de narrativa y el bloque de impacto).
+  - `launch_studio/src/compositions/PatitasLaunchTypography.tsx`: Creado (Versión A: orquestal, SFX hápticos y tipografía cinética display).
+  - `launch_studio/src/compositions/PatitasLaunchVoiceover.tsx`: Creado (Versión B: locución institucional con audio ducking dinámico y subtítulos).
+  - `launch_studio/verify_output.js`: Creado (arnés de verificación automatizada e inspección objetiva con `ffprobe`).
+  - `launch_studio/out/patitas_launch_typography.mp4`: Creado (video final Versión A, 31.022.533 bytes, 1920x1080, 60fps, 68s, 48kHz stereo).
+  - `launch_studio/out/patitas_launch_voiceover.mp4`: Creado (video final Versión B, 30.687.486 bytes, 1920x1080, 60fps, 68s, 48kHz stereo).
+- **Progreso Realizado:**
+  - Se configuró el entorno Remotion en `launch_studio/` completamente desacoplado de Metro/Expo para evitar colisiones de dependencias.
+  - Se generó determinísticamente la suite completa de audio a 48kHz (música, efectos y locución en español rioplatense).
+  - Se modeló la cámara cinematográfica con gramática `cinematic-shot` (Dark Void, ángulo oblicuo a 35°, iluminación rasante `#FF8A00`).
+  - Se integró la cartografía del Municipio de Pilar (Plaza 12 de Octubre, Tratado del Pilar, Panamericana) y el bloque de impacto cívico (73% de reencuentros en <48h, mapa de calor, costo de mapa $0 con Leaflet/OSM y co-branding final).
+  - Se compilaron exitosamente las dos versiones en MP4 mediante Chromium headless.
+  - Se ejecutó la suite de auditoría E2E con `ffprobe` y el proceso de Victory Audit independiente obteniendo veredicto unánime `VICTORY CONFIRMED`.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** No existía un video oficial de lanzamiento ni un proyecto de renderizado programático determinista en el repositorio.
+  - **Motivo del cambio:** Requerimiento del usuario de producir material audiovisual de estándar cinematográfico para presentar ante autoridades del Municipio de Pilar e inversores de impacto, sin recurrir a IA generativa inconsistente (cero slop).
+  - **Nueva estrategia aplicada:** Arquitectura de renderizado por código con Remotion v4 en TypeScript, ingesta directa de los tokens oficiales de `constants/theme.ts`, síntesis procedimental de audio estéreo 48kHz y pruebas automatizadas con `ffprobe`.
+- **Resultado de Verificación:** `node launch_studio/verify_output.js` (100% PASS) | `npx tsc --noEmit` (0 errores) | Verificación independiente `ffprobe`: 1920x1080, 60fps constantes, 68.00s, 48kHz estéreo, 0 errores de decodificación | Veredicto: `VICTORY CONFIRMED`.
+
+#### [2026-11-02] - Desacoplamiento Modular de Notificaciones Push y Corrección del Error Nativo `ExpoTopicSubscriptionModule`
+- **Solicitud del Usuario:** Solucionar de forma modular y con bajo acoplamiento el error en tiempo de ejecución de Android: `ERROR [Error: Cannot find native module 'ExpoTopicSubscriptionModule']` disparado al importar `expo-notifications` en `services/notificaciones.ts` desde `app/ajustes.tsx` y `app/notificaciones.tsx`.
+- **Tipo de Cambio:** `CORRECCIÓN_BUG` | `REFACTORIZACIÓN` | `OPTIMIZACIÓN`
+- **Archivos Involucrados:**
+  - `services/pushNotificationsAdapter.ts`: Creado (adaptador modular y desacoplado para detección segura de módulos nativos en `globalThis.expo?.modules` y obtención perezosa del Expo Push Token).
+  - `services/notificaciones.ts`: Modificado (eliminadas las importaciones estáticas top-level de `expo-notifications` y `expo-device`, delegando `registrarPushToken` al adaptador seguro).
+  - `tests/unit/cambiarContraseniaAjustes.test.mjs`: Modificado (añadido caso de prueba de arquitectura verificando el desacoplamiento de módulos nativos en `services/notificaciones.ts`).
+- **Progreso Realizado:**
+  - **Diagnóstico de Causa Raíz:** Al iniciar Expo Router (`app (require.context)`), se cargan `app/ajustes.tsx` y `app/notificaciones.tsx`, los cuales importan `services/notificaciones.ts`. Dicho archivo tenía en el nivel superior `import * as Notifications from "expo-notifications"`. El barril principal `node_modules/expo-notifications/build/index.js` reexporta `./topicSubscription`, el cual importa `./TopicSubscriptionModule.android.js` que ejecuta inmediatamente `requireNativeModule('ExpoTopicSubscriptionModule')`. En Expo Go para Android (SDK 53+) o en emuladores/clientes sin ese módulo nativo compilado, `requireNativeModule` lanza una excepción fatal en el arranque antes siquiera de usar notificaciones push.
+  - **Solución Modular de Bajo Acoplamiento:**
+    1. Se separó la lógica de notificaciones en Firestore (`services/notificaciones.ts`) de la infraestructura nativa del dispositivo (`services/pushNotificationsAdapter.ts`).
+    2. `services/pushNotificationsAdapter.ts` inspecciona de forma no intrusiva `globalThis.expo?.modules` para comprobar si `ExpoDevice` (`isDevice === true`), `ExpoNotificationPermissionsModule` y `ExpoPushTokenManager` están presentes en el binario actual antes de requerir únicamente los submódulos específicos (`NotificationPermissions` y `getExpoPushTokenAsync`), evitando por completo evaluar `TopicSubscriptionModule.android.js`.
+    3. En emuladores (`Pixel_8_Pro`), Web o Expo Go, `obtenerExpoPushTokenSeguro()` retorna `null` limpiamente sin arrojar errores ni romper las notificaciones internas de Firestore.
+- **Justificación de Modificaciones sobre Código Previo:**
+  - **Estado anterior:** `services/notificaciones.ts` acoplaba operaciones de base de datos Firestore con importaciones estáticas top-level de `expo-notifications` y `expo-device`, provocando el fallo `Cannot find native module 'ExpoTopicSubscriptionModule'` al evaluar las rutas de la aplicación.
+  - **Motivo del cambio:** Evitar que la ausencia de un módulo nativo secundario de suscripción de tópicos en Expo Go / emulador bloquee el arranque de las pantallas `ajustes.tsx` y `notificaciones.tsx`.
+  - **Nueva estrategia aplicada:** Patrón Adapter con verificación previa de capacidades nativas en memoria (`globalThis.expo?.modules`) y carga perezosa selectiva sin pasar por el barril que invoca `ExpoTopicSubscriptionModule`.
+- **Resultado de Verificación:**
+  - `npx tsc --noEmit`: 0 errores (PASS).
+  - `npm test` (node:test): 98/98 PASS.
+  - `npm run test:android` (Jest RNTL): 30/30 PASS (5 suites).
 

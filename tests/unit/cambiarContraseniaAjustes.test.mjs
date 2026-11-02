@@ -104,3 +104,43 @@ test('pantalla: app/ajustes.tsx conecta el botón con CambiarContraseniaModal y 
   // Cero console.log
   assert.ok(!content.includes('console.log'), 'No debe contener console.log');
 });
+
+// ============================================================================
+// 5. DESACOPLAMIENTO DE NOTIFICACIONES PUSH (services/notificaciones.ts & pushNotificationsAdapter.ts)
+// ============================================================================
+test('arquitectura: services/notificaciones.ts está desacoplado de módulos nativos en el arranque y delega en pushNotificationsAdapter.ts', () => {
+  const notifPath = path.join(projectRoot, 'services', 'notificaciones.ts');
+  const adapterPath = path.join(projectRoot, 'services', 'pushNotificationsAdapter.ts');
+
+  assert.ok(fs.existsSync(notifPath), 'services/notificaciones.ts debe existir');
+  assert.ok(fs.existsSync(adapterPath), 'services/pushNotificationsAdapter.ts debe existir');
+
+  const notifContent = fs.readFileSync(notifPath, 'utf8');
+  const adapterContent = fs.readFileSync(adapterPath, 'utf8');
+
+  // Prohibido importar el barril completo expo-notifications o expo-device en top-level de notificaciones.ts
+  assert.ok(
+    !notifContent.includes('from "expo-notifications"') && !notifContent.includes("from 'expo-notifications'"),
+    'services/notificaciones.ts no debe importar el barril expo-notifications en top-level (evita fallo ExpoTopicSubscriptionModule)'
+  );
+  assert.ok(
+    !notifContent.includes('from "expo-device"') && !notifContent.includes("from 'expo-device'"),
+    'services/notificaciones.ts no debe importar expo-device en top-level'
+  );
+  assert.ok(
+    notifContent.includes('obtenerExpoPushTokenSeguro'),
+    'services/notificaciones.ts debe delegar en obtenerExpoPushTokenSeguro'
+  );
+
+  // El adaptador debe validar módulos nativos de forma segura y no tener console.log
+  assert.ok(
+    adapterContent.includes('soportaPushNativoEnDispositivo'),
+    'pushNotificationsAdapter.ts debe exportar soportaPushNativoEnDispositivo'
+  );
+  assert.ok(
+    adapterContent.includes('ExpoNotificationPermissionsModule') && adapterContent.includes('ExpoPushTokenManager'),
+    'pushNotificationsAdapter.ts debe verificar disponibilidad de módulos nativos antes de requerirlos'
+  );
+  assert.ok(!adapterContent.includes('console.log'), 'pushNotificationsAdapter.ts no debe contener console.log');
+});
+
