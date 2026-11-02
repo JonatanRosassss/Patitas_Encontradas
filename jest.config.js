@@ -2,7 +2,13 @@
 module.exports = {
   preset: 'jest-expo/android',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-  testMatch: ['<rootDir>/tests/components/**/*.test.tsx', '<rootDir>/tests/components/**/*.test.ts'],
+  clearMocks: true,
+  testMatch: [
+    '<rootDir>/tests/components/**/*.test.tsx',
+    '<rootDir>/tests/components/**/*.test.ts',
+    '<rootDir>/tests/**/*.jest.test.ts',
+    '<rootDir>/tests/**/*.jest.test.tsx',
+  ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^react-native/setup-env$': '<rootDir>/node_modules/react-native/Libraries/Core/InitializeCore.js',

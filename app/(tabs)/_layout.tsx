@@ -87,7 +87,22 @@ export default function TabLayout() {
         }}
       />
 
-      {/* 4. PERFIL / AJUSTES */}
+      {/* 4. PUBLICACIONES GUARDADAS */}
+      <Tabs.Screen
+        name="guardados"
+        options={{
+          title: 'Guardados',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? 'bookmark' : 'bookmark-outline'}
+              size={size || 22}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* 5. PERFIL / AJUSTES */}
       <Tabs.Screen
         name="perfil"
         options={{
