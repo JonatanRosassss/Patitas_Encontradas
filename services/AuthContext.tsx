@@ -346,7 +346,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (urlPersistente.startsWith('http') && urlPersistente.length < 2000) {
       try {
         await updateProfile(usuarioActual, { photoURL: urlPersistente });
-        setUsuario({ ...usuarioActual, photoURL: urlPersistente } as User);
+        setUsuario(
+          Object.assign(
+            Object.create(Object.getPrototypeOf(usuarioActual)),
+            usuarioActual,
+            { photoURL: urlPersistente }
+          ) as User
+        );
       } catch {
         // Ignorar límite de longitud en Auth
       }
@@ -387,7 +393,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     try {
       await updateProfile(usuarioActual, { displayName: nombreLimpio });
-      setUsuario({ ...usuarioActual, displayName: nombreLimpio } as User);
+      setUsuario(
+        Object.assign(
+          Object.create(Object.getPrototypeOf(usuarioActual)),
+          usuarioActual,
+          { displayName: nombreLimpio }
+        ) as User
+      );
     } catch {
       // Continuar
     }
@@ -411,9 +423,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const cerrarSesion = async () => {
+    const uidActual = auth.currentUser?.uid ?? usuario?.uid;
     try {
       await signOut(auth);
       await AsyncStorage.removeItem('user_session');
+      if (uidActual) {
+        await AsyncStorage.removeItem(`${PREFIJO_CACHE_PERFIL}${uidActual}`);
+      }
       setUsuario(null);
       setPerfilUsuario(null);
       setSesionLocal(null);
@@ -425,7 +441,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const recargarSesion = async () => {
     if (auth.currentUser) {
       await auth.currentUser.reload();
-      setUsuario({ ...auth.currentUser } as User);
+      setUsuario(
+        Object.assign(
+          Object.create(Object.getPrototypeOf(auth.currentUser)),
+          auth.currentUser
+        ) as User
+      );
       await sincronizarPerfilUsuario(auth.currentUser);
     }
   };

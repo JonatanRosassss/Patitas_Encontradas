@@ -4,6 +4,7 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   onSnapshot,
   query,
   serverTimestamp,
@@ -33,6 +34,8 @@ export interface Notificacion {
 }
 
 const notificacionesRef = collection(db, "notificaciones");
+const LIMITE_BATCH_NOTIFICACIONES = 450;
+const LIMITE_FANOUT_DESTINATARIOS = 50;
 
 /**
  * Escucha las notificaciones de un usuario en tiempo real desde Firestore.
@@ -43,6 +46,11 @@ export function escucharNotificaciones(
   alOcurrirError?: (error: unknown) => void
 ) {
   if (!usuarioId) return () => {};
+
+  const uidActual = auth.currentUser?.uid;
+  if (uidActual && uidActual !== usuarioId) {
+    return () => {};
+  }
 
   const q = query(
     collection(db, "notificaciones"),
@@ -82,17 +90,21 @@ export async function marcarComoLeida(notificacionId: string): Promise<void> {
 export async function marcarTodasComoLeidas(usuarioId: string): Promise<void> {
   if (!usuarioId) return;
 
+  const uidActual = auth.currentUser?.uid;
+  if (uidActual && uidActual !== usuarioId) {
+    throw new Error("No tenés permisos para modificar notificaciones de otro usuario.");
+  }
+
   const q = query(
     collection(db, "notificaciones"),
     where("destinatarioId", "==", usuarioId),
     where("leida", "==", false)
   );
 
-  const snapshot = await getDoc(doc(db, "usuarios", usuarioId)); // trigger query below
-  const querySnap = await (await import("firebase/firestore")).getDocs(q);
+  const querySnap = await getDocs(q);
   const batch = writeBatch(db);
 
-  querySnap.docs.forEach((docSnap) => {
+  querySnap.docs.slice(0, LIMITE_BATCH_NOTIFICACIONES).forEach((docSnap) => {
     batch.update(docSnap.ref, { leida: true });
   });
 
@@ -113,8 +125,13 @@ export async function crearNotificacion(datos: {
     throw new Error("El destinatario es obligatorio.");
   }
 
+  const tituloSeguro = String(datos.titulo || "").trim().slice(0, 120);
+  const mensajeSeguro = String(datos.mensaje || "").trim().slice(0, 500);
+
   const resultado = await addDoc(notificacionesRef, {
     ...datos,
+    titulo: tituloSeguro,
+    mensaje: mensajeSeguro,
     leida: false,
     createdAt: serverTimestamp(),
   });
@@ -196,7 +213,7 @@ export async function notificarMascotaEncontrada(
         (uid) => typeof uid === "string" && uid !== usuario.uid
       )
     ),
-  ];
+  ].slice(0, LIMITE_FANOUT_DESTINATARIOS);
 
   const batch = writeBatch(db);
 
@@ -227,9 +244,11 @@ export async function notificarMascotaEncontrada(
  */
 export async function registrarPushToken(usuarioId?: string): Promise<string | null> {
   const token = await obtenerExpoPushTokenSeguro();
+  const uidActual = auth.currentUser?.uid;
+  const uidDestino = usuarioId || uidActual;
 
-  if (usuarioId && token) {
-    const userRef = doc(db, "usuarios", usuarioId);
+  if (uidDestino && token && (!uidActual || uidDestino === uidActual)) {
+    const userRef = doc(db, "usuarios", uidDestino);
     await updateDoc(userRef, {
       pushToken: token,
       notificacionesActivas: true,

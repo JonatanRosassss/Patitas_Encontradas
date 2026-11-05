@@ -20,6 +20,7 @@ import {
   listarAlertasPorUsuario,
 } from '@/services/mascotasService';
 import { useAuth } from '@/services/AuthContext';
+import { useAlertasStore } from '@/store/useAlertasStore';
 import { obtenerImagenPrincipal, obtenerPresentacionEstado } from '@/utils/detalleMascota';
 import type { Pet } from '@/types/Pet';
 import { Colors, Radius, Spacing, TabBarMetrics, Typography } from '@/constants/theme';
@@ -30,6 +31,7 @@ export default function GuardadosScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { usuario, cargando: cargandoAuth } = useAuth();
+  const quitarGuardadoLocal = useAlertasStore((state) => state.quitarGuardadoLocal);
 
   const [tabActiva, setTabActiva] = useState<TabGuardados>('GUARDADAS');
   const [guardadas, setGuardadas] = useState<Pet[]>([]);
@@ -66,6 +68,10 @@ export default function GuardadosScreen() {
 
         setGuardadas(itemsGuardados);
         setMisPublicaciones(itemsPublicados);
+        useAlertasStore.setState({
+          idsGuardadas: itemsGuardados.map((item) => item.id),
+          guardadasCargadas: true,
+        });
       } catch {
         setError('No se pudieron sincronizar las publicaciones. Verificá tu conexión.');
       } finally {
@@ -76,13 +82,9 @@ export default function GuardadosScreen() {
     [usuario?.uid]
   );
 
-  useEffect(() => {
-    cargarDatos();
-  }, [cargarDatos]);
-
   useFocusEffect(
     useCallback(() => {
-      cargarDatos();
+      void cargarDatos();
     }, [cargarDatos])
   );
 
@@ -92,6 +94,7 @@ export default function GuardadosScreen() {
     try {
       setDesguardandoId(id);
       await quitarPublicacionGuardada(id, usuario.uid);
+      quitarGuardadoLocal(id);
       setGuardadas((actuales) => actuales.filter((pet) => pet.id !== id));
       setError('');
     } catch {

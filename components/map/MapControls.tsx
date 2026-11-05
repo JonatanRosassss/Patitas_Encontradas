@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors, Spacing } from '../../constants/theme';
-import { Radius } from '../../theme/tokens';
+import { Colors, Spacing, Radius } from '../../constants/theme';
 
 export interface MapControlsProps {
   onLocate: () => void;

@@ -8,16 +8,22 @@ import {
   ActivityIndicator,
   View,
   Image,
+  Alert,
+  TouchableOpacity,
 } from 'react-native';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 import { useFonts, Baloo2_700Bold, Baloo2_500Medium, Baloo2_400Regular } from '@expo-google-fonts/baloo-2';
 import { Nunito_400Regular, Nunito_700Bold, Nunito_300Light } from '@expo-google-fonts/nunito';
 import { Button } from '../../components/ui/Button';
-import { loginSchema } from '@/schemas/authScheama';
+import { loginSchema, resetPasswordSchema } from '@/schemas/authSchema';
+import { useAuth } from '@/services/AuthContext';
 
 interface ForgetPasswordProps {}
 
 export default function ForgetPassword({ }: ForgetPasswordProps) {
+  const { enviarCorreoRestablecimiento } = useAuth();
   const [fontsLoaded] = useFonts({
     Baloo2_700Bold,
     Baloo2_400Regular,
@@ -28,6 +34,7 @@ export default function ForgetPassword({ }: ForgetPasswordProps) {
   });
 
   const [email, setEmail] = useState('');
+  const [enviando, setEnviando] = useState(false);
 
   if (!fontsLoaded) {
     return (
@@ -37,13 +44,43 @@ export default function ForgetPassword({ }: ForgetPasswordProps) {
     );
   }
 
-  const handleValidation = () => {
-    const resultado = loginSchema.safeParse({ email });
-    if (!resultado.success) {
-      // no paso
+  const alertar = (titulo: string, mensaje: string, alAceptar?: () => void) => {
+    if (Platform.OS === 'web') {
+      window.alert(`${titulo}\n${mensaje}`);
+      alAceptar?.();
+    } else {
+      Alert.alert(titulo, mensaje, alAceptar ? [{ text: 'OK', onPress: alAceptar }] : undefined);
+    }
+  };
+
+  const handleValidation = async () => {
+    // Validación con schema de correo (compatible con loginSchema.shape.email y resetPasswordSchema)
+    const validacionPreliminar = loginSchema.safeParse({ email, contrasenia: 'validacion_temporal' });
+    const resultado = resetPasswordSchema.safeParse({ email });
+    if (!resultado.success || !validacionPreliminar.success) {
+      const mensajeError =
+        resultado.error?.errors[0]?.message || 'Ingresá un correo electrónico válido.';
+      alertar('Atención', mensajeError);
       return;
     }
-    // paso
+
+    try {
+      setEnviando(true);
+      await enviarCorreoRestablecimiento(email.trim());
+      alertar(
+        'Correo enviado',
+        'Te enviamos un enlace a tu correo electrónico para restablecer tu contraseña.',
+        () => router.back()
+      );
+    } catch (error: unknown) {
+      const mensaje =
+        error instanceof Error
+          ? error.message
+          : 'No se pudo enviar el correo de recuperación.';
+      alertar('Atención', mensaje);
+    } finally {
+      setEnviando(false);
+    }
   };
 
   return (
@@ -51,11 +88,20 @@ export default function ForgetPassword({ }: ForgetPasswordProps) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
+      <TouchableOpacity
+        style={{ alignSelf: 'flex-start', paddingVertical: Spacing.two }}
+        onPress={() => router.back()}
+        accessibilityRole="button"
+        accessibilityLabel="Volver al inicio de sesión"
+      >
+        <Ionicons name="arrow-back" size={24} color={Colors.text} />
+      </TouchableOpacity>
+
       <View style={styles.contenedorTitulo}>
         <Image
           source={require('@/assets/logo_patitas_crop.png')}
           style={styles.logo}
-          resizeMode='contain'
+          resizeMode="contain"
         />
 
         <Text style={styles.tituloNegro}>
@@ -66,8 +112,10 @@ export default function ForgetPassword({ }: ForgetPasswordProps) {
       </View>
 
       <View style={styles.contenedorInicio}>
-        <Text style={styles.textoSemiTitulo}>Olvidaste tu Contrasenia?</Text>
-        <Text style={styles.textoAbajo}> Ingresa tu correo electronico y se te enviara un codigo de recuperacion</Text>
+        <Text style={styles.textoSemiTitulo}>¿Olvidaste tu Contraseña?</Text>
+        <Text style={styles.textoAbajo}>
+          Ingresá tu correo electrónico y te enviaremos un enlace de recuperación
+        </Text>
       </View>
 
       <Text style={styles.textoCorreo}> CORREO: </Text>
@@ -82,12 +130,16 @@ export default function ForgetPassword({ }: ForgetPasswordProps) {
         onChangeText={setEmail}
       />
 
-      <Button
-        label="Enviar codigo de verificacion"
-        onClick={handleValidation}
-        color="orange"
-        colorText="white"
-      />
+      {enviando ? (
+        <ActivityIndicator size="small" color={Colors.primary} style={{ marginVertical: Spacing.three }} />
+      ) : (
+        <Button
+          label="Enviar codigo de verificacion"
+          onClick={handleValidation}
+          color="orange"
+          colorText="white"
+        />
+      )}
     </KeyboardAvoidingView>
   );
 }

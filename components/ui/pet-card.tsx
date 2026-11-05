@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Image,
   StyleSheet,
@@ -14,11 +14,7 @@ import {
   Spacing,
   Radius,
 } from '@/constants/theme';
-import {
-  guardarPublicacion,
-  quitarPublicacionGuardada,
-  obtenerIdsPublicacionesGuardadas,
-} from '@/services/mascotasService';
+import { useAlertasStore } from '@/store/useAlertasStore';
 
 export interface PetCardProps {
   id?: string;
@@ -46,50 +42,51 @@ export function PetCard({
   const [mostrarToast, setMostrarToast] = useState(false);
   const [mensajeToast, setMensajeToast] = useState('');
   const [imagenValida, setImagenValida] = useState(true);
-  const [guardada, setGuardada] = useState(false);
   const [guardando, setGuardando] = useState(false);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const idsGuardadas = useAlertasStore((state) => state.idsGuardadas);
+  const sincronizarIdsGuardadas = useAlertasStore((state) => state.sincronizarIdsGuardadas);
+  const alternarGuardadoStore = useAlertasStore((state) => state.alternarGuardadoStore);
+
+  const guardada = Boolean(id && idsGuardadas.includes(id));
 
   useEffect(() => {
     setImagenValida(true);
   }, [imagen]);
 
-  // Consultar si la publicación está guardada
+  // Limpiar timer pendiente al desmontar el componente
   useEffect(() => {
-    let montado = true;
-
-    async function verificarGuardado() {
-      if (!id) return;
-
-      try {
-        const guardadas = await obtenerIdsPublicacionesGuardadas();
-        if (montado) {
-          setGuardada(guardadas.includes(id));
-        }
-      } catch {
-        // Si no está autenticado o falla la consulta, no marcamos como guardada
-      }
-    }
-
-    verificarGuardado();
-
     return () => {
-      montado = false;
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
     };
-  }, [id]);
+  }, []);
+
+  // Sincronización deduplicada mediante Zustand store (evita N+1 queries en el feed)
+  useEffect(() => {
+    if (!id) return;
+    void sincronizarIdsGuardadas();
+  }, [id, sincronizarIdsGuardadas]);
 
   const isPerdido = estado.toUpperCase() === 'PERDIDO';
 
-  // Mostrar notificación temporal
+  // Mostrar notificación temporal con limpieza segura
   const mostrarMensaje = (mensaje: string, duracion = 2000) => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
     setMensajeToast(mensaje);
     setMostrarToast(true);
 
-    setTimeout(() => {
+    toastTimerRef.current = setTimeout(() => {
       setMostrarToast(false);
+      toastTimerRef.current = null;
     }, duracion);
   };
 
-  // Guardar o quitar publicación
+  // Guardar o quitar publicación sincronizando el store global
   const manejarGuardado = async () => {
     if (guardando) return;
 
@@ -100,15 +97,11 @@ export function PetCard({
 
     try {
       setGuardando(true);
-
-      if (guardada) {
-        await quitarPublicacionGuardada(id);
-        setGuardada(false);
-        mostrarMensaje('Publicación eliminada de tus guardados');
-      } else {
-        await guardarPublicacion(id);
-        setGuardada(true);
+      const quedoGuardada = await alternarGuardadoStore(id);
+      if (quedoGuardada) {
         mostrarMensaje('Publicación guardada');
+      } else {
+        mostrarMensaje('Publicación eliminada de tus guardados');
       }
     } catch (error) {
       mostrarMensaje(
@@ -140,7 +133,7 @@ export function PetCard({
           <Ionicons
             name="checkmark-circle"
             size={18}
-            color="#FFFFFF"
+            color={Colors.white}
           />
           <Text style={styles.toastText}>
             {mensajeToast || 'Publicación guardada'}
@@ -282,7 +275,7 @@ export function PetCard({
         <Ionicons
           name={guardada ? 'bookmark' : 'bookmark-outline'}
           size={18}
-          color={guardada ? '#F28C28' : Colors.white}
+          color={guardada ? Colors.primary : Colors.white}
         />
       </Pressable>
     </View>
@@ -402,9 +395,9 @@ const styles = StyleSheet.create({
   },
 
   saveButtonGuardado: {
-    backgroundColor: '#FFF0DF',
+    backgroundColor: Colors.accent,
     borderWidth: 1,
-    borderColor: '#F28C28',
+    borderColor: Colors.primary,
   },
 
   saveButtonPressed: {

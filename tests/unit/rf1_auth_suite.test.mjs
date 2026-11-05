@@ -223,7 +223,7 @@ test('TC-103: Inicio de sesión exitoso con credenciales válidas (profesor@pati
   // Validación mediante esquema Zod
   const schemaResult = loginSchema.safeParse({
     email: emailValido,
-    constrasenia: claveValida,
+    contrasenia: claveValida,
   });
   assert.equal(schemaResult.success, true, 'Credenciales deben validar satisfactoriamente contra Zod');
 
@@ -301,7 +301,7 @@ test('TC-105: Validación de esquema Zod en authSchema.ts (usuariocorreo_invalid
   // 1. Probar correo inválido: 'usuariocorreo_invalido'
   const resultadoEmailInvalido = loginSchema.safeParse({
     email: 'usuariocorreo_invalido',
-    constrasenia: 'Patitas2026!',
+    contrasenia: 'Patitas2026!',
   });
 
   assert.equal(resultadoEmailInvalido.success, false, 'Correo sin formato válido debe fallar');
@@ -311,17 +311,17 @@ test('TC-105: Validación de esquema Zod en authSchema.ts (usuariocorreo_invalid
   // 2. Probar clave menor a 6 caracteres: '123'
   const resultadoClaveCorta = loginSchema.safeParse({
     email: 'vecino@unpilar.edu.ar',
-    constrasenia: '123',
+    contrasenia: '123',
   });
 
   assert.equal(resultadoClaveCorta.success, false, 'Clave menor a 6 caracteres debe fallar');
-  const mensajeClave = resultadoClaveCorta.error.errors.find((e) => e.path.includes('constrasenia'))?.message;
+  const mensajeClave = resultadoClaveCorta.error.errors.find((e) => e.path.includes('contrasenia'))?.message;
   assert.equal(mensajeClave, 'La contrasenia debe tener minimo 6 caracteres');
 
   // 3. Probar ambos errores simultáneos
   const resultadoAmbosErrores = loginSchema.safeParse({
     email: 'usuariocorreo_invalido',
-    constrasenia: '123',
+    contrasenia: '123',
   });
   assert.equal(resultadoAmbosErrores.success, false);
   assert.equal(resultadoAmbosErrores.error.errors.length, 2);
@@ -329,7 +329,7 @@ test('TC-105: Validación de esquema Zod en authSchema.ts (usuariocorreo_invalid
   // 4. Probar campo correo vacío
   const resultadoVacio = loginSchema.safeParse({
     email: '',
-    constrasenia: 'Patitas2026!',
+    contrasenia: 'Patitas2026!',
   });
   assert.equal(resultadoVacio.success, false);
   const errorVacio = resultadoVacio.error.errors.find((e) => e.path.includes('email'))?.message;
@@ -338,7 +338,7 @@ test('TC-105: Validación de esquema Zod en authSchema.ts (usuariocorreo_invalid
   // 5. Probar datos válidos
   const resultadoValido = loginSchema.safeParse({
     email: 'juan.perez@unpilar.edu.ar',
-    constrasenia: 'Patitas2026!',
+    contrasenia: 'Patitas2026!',
   });
   assert.equal(resultadoValido.success, true);
 });

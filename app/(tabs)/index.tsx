@@ -22,10 +22,13 @@ import GuiaDeUso, { type RectanguloGuia } from '@/components/GuiaDeUso';
 import { listarTodasLasAlertas, formatearTiempoRelativo } from '@/services/mascotasService';
 import { obtenerImagenPrincipal } from '@/utils/detalleMascota';
 import { useAuth } from '@/services/AuthContext';
+import { useAlertasStore } from '@/store/useAlertasStore';
 import type { Pet } from '@/types/Pet';
+import type { Href } from 'expo-router';
 
 export default function HomeScreen() {
   const { usuario, perfilUsuario } = useAuth();
+  const sincronizarIdsGuardadas = useAlertasStore((state) => state.sincronizarIdsGuardadas);
   const [mascotas, setMascotas] = useState<Pet[]>([]);
   const [cargandoMascotas, setCargandoMascotas] = useState<boolean>(true);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
@@ -89,27 +92,28 @@ export default function HomeScreen() {
     }
   }
 
-  // Carga reactiva de alertas desde Firestore
+  // Carga reactiva de alertas desde Firestore y sincronización del store Zustand
   const cargarAlertasFirestore = useCallback(async () => {
     try {
       setCargandoMascotas(true);
       setErrorCarga(null);
-      const alertas = await listarTodasLasAlertas();
-      setMascotas(alertas || []);
+      const [, alertas] = await Promise.all([
+        sincronizarIdsGuardadas(usuario?.uid, true),
+        (async () => await listarTodasLasAlertas())(),
+      ]);
+      const lista = alertas || [];
+      setMascotas(lista);
+      useAlertasStore.setState({ alertas: lista });
     } catch {
       setErrorCarga('No se pudieron sincronizar las publicaciones. Verificá tu conexión a internet.');
     } finally {
       setCargandoMascotas(false);
     }
-  }, []);
-
-  useEffect(() => {
-    cargarAlertasFirestore();
-  }, [cargarAlertasFirestore]);
+  }, [sincronizarIdsGuardadas, usuario?.uid]);
 
   useFocusEffect(
     useCallback(() => {
-      cargarAlertasFirestore();
+      void cargarAlertasFirestore();
     }, [cargarAlertasFirestore])
   );
 
@@ -121,7 +125,7 @@ export default function HomeScreen() {
     if (mascotaSeleccionada) {
       setMascotaSeleccionada(null);
     }
-    router.push(`/detalle/${idMascota}` as any);
+    router.push(`/detalle/${idMascota}` as Href);
   }
 
   // Filtro por estado

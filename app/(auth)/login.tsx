@@ -17,7 +17,7 @@ import { useFonts, Baloo2_700Bold } from '@expo-google-fonts/baloo-2';
 import { Nunito_400Regular, Nunito_700Bold, Nunito_300Light } from '@expo-google-fonts/nunito';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../../components/ui/Button';
-import { loginSchema } from '@/schemas/authScheama';
+import { loginSchema } from '@/schemas/authSchema';
 import { router } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -58,7 +58,6 @@ export default function LoginScreen({ }: LoginScreenProps) {
     const resultado = loginSchema.safeParse({
       email,
       contrasenia,
-      constrasenia: contrasenia,
     });
 
     if (!resultado.success) {
@@ -93,18 +92,25 @@ export default function LoginScreen({ }: LoginScreenProps) {
 
       // 3. Navegar a las pestañas principales
       router.replace('/(tabs)');
-    } catch (error: any) {
-      console.warn('Error al iniciar sesión:', error?.message || error);
+    } catch (error: unknown) {
+      const codigoError =
+        error && typeof error === 'object' && 'code' in error
+          ? String((error as { code?: unknown }).code)
+          : '';
 
       let mensajeError = 'Correo o contraseña incorrectos.';
 
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      if (
+        codigoError === 'auth/user-not-found' ||
+        codigoError === 'auth/wrong-password' ||
+        codigoError === 'auth/invalid-credential'
+      ) {
         mensajeError = 'Correo o contraseña incorrectos.';
-      } else if (error.code === 'auth/invalid-email') {
+      } else if (codigoError === 'auth/invalid-email') {
         mensajeError = 'El formato del correo electrónico no es válido.';
-      } else if (error.code === 'auth/too-many-requests') {
+      } else if (codigoError === 'auth/too-many-requests') {
         mensajeError = 'Demasiados intentos fallidos. Intenta más tarde.';
-      } else if (error.code === 'auth/network-request-failed') {
+      } else if (codigoError === 'auth/network-request-failed') {
         mensajeError = 'Error de conexión. Revisa tu conexión a internet.';
       }
 
@@ -122,18 +128,8 @@ export default function LoginScreen({ }: LoginScreenProps) {
     router.push('/(auth)/forgetPassword');
   };
 
-  const handleSocialLogin = (proveedor: 'Google' | 'Apple' | 'Facebook') => {
-    Alert.alert(
-      `Acceso con ${proveedor}`,
-      `Inicio de sesión exitoso utilizando tu cuenta de ${proveedor}.`,
-      [
-        {
-          text: 'Continuar',
-          onPress: () => router.replace('/(tabs)'),
-        },
-      ]
-    );
-  };
+  // Botones sociales visibles como elementos de UI sin lógica de bypass
+  const handleSocialLogin = (_proveedor: 'Google' | 'Apple' | 'Facebook') => {};
 
   const handleContinueGoogle = () => {
     handleSocialLogin('Google');

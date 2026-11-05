@@ -78,3 +78,48 @@ test('guardados: verificación de la pantalla app/(tabs)/guardados.tsx', async (
     'GuardadosScreen no debe contener llamadas a console.log o console.error'
   );
 });
+
+test('zustand: store global useAlertasStore sincroniza alertas y guardados entre pantallas', async () => {
+  const storePath = path.resolve('store/useAlertasStore.ts');
+  const typesPath = path.resolve('types/AlertasStore.ts');
+  const petCardPath = path.resolve('components/ui/pet-card.tsx');
+  const indexPath = path.resolve('app/(tabs)/index.tsx');
+  const guardadosPath = path.resolve('app/(tabs)/guardados.tsx');
+  const perfilPath = path.resolve('app/(tabs)/perfil.tsx');
+  const mapHookPath = path.resolve('hooks/useMapState.ts');
+
+  assert.ok(fs.existsSync(storePath), 'store/useAlertasStore.ts debe existir');
+  assert.ok(fs.existsSync(typesPath), 'types/AlertasStore.ts debe existir');
+
+  const storeCode = fs.readFileSync(storePath, 'utf8');
+  const petCardCode = fs.readFileSync(petCardPath, 'utf8');
+  const indexCode = fs.readFileSync(indexPath, 'utf8');
+  const guardadosCode = fs.readFileSync(guardadosPath, 'utf8');
+  const perfilCode = fs.readFileSync(perfilPath, 'utf8');
+  const mapHookCode = fs.readFileSync(mapHookPath, 'utf8');
+
+  assert.ok(
+    storeCode.includes("from 'zustand'"),
+    'useAlertasStore debe utilizar la librería zustand'
+  );
+  assert.ok(
+    storeCode.includes('sincronizarIdsGuardadas') &&
+      storeCode.includes('alternarGuardadoStore') &&
+      storeCode.includes('quitarGuardadoLocal') &&
+      storeCode.includes('actualizarEstadoLocal') &&
+      storeCode.includes('eliminarAlertaLocal'),
+    'useAlertasStore debe exponer las acciones reactivas de alertas y guardados'
+  );
+  assert.ok(
+    petCardCode.includes('useAlertasStore'),
+    'PetCard debe consumir useAlertasStore para evitar consultas N+1 por tarjeta'
+  );
+  assert.ok(
+    indexCode.includes('useAlertasStore') &&
+      guardadosCode.includes('useAlertasStore') &&
+      perfilCode.includes('useAlertasStore') &&
+      mapHookCode.includes('useAlertasStore'),
+    'Home, Guardados, Perfil y Mapa deben estar suscritos a useAlertasStore'
+  );
+});
+

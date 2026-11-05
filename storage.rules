@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// Reglas de Seguridad de Firebase Storage para Patitas Encontradas
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function esImagenValida() {
+      return request.resource != null
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|jpg|png|webp)');
+    }
+
+    // Fotos de alertas de mascotas: lectura pública, escritura/eliminación restringida
+    match /mascotas/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if estaAutenticado() && esImagenValida();
+      allow delete: if estaAutenticado();
+    }
+
+    // Avatares de perfil de usuario: solo el propio titular puede escribir su avatar
+    match /usuarios/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if estaAutenticado()
+        && request.auth.uid == userId
+        && esImagenValida();
+      allow delete: if estaAutenticado() && request.auth.uid == userId;
+    }
+
+    // Denegar por defecto cualquier otra ruta en el bucket
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

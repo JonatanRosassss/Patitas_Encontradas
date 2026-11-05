@@ -1,7 +1,7 @@
 {
   "modulo": "Módulo 3 (RF-3: Consultar mapa interactivo y feed de alertas)",
   "proyecto": "Patitas Encontradas",
-  "fechaEjecucion": "2026-11-02T17:08:50.709Z",
+  "fechaEjecucion": "2026-11-05T06:36:06.581Z",
   "herramienta": "Node.js Test Runner (node --test)",
   "archivoTest": "tests/rf3_mapa_feed_suite.test.mjs",
   "resumen": {
@@ -19,7 +19,7 @@
       "postcondiciones": "Alertas desplegadas en mapa con pines coloreados y lista de feed correctamente ordenada.",
       "evidencia": {
         "testName": "TC-301: Visualización de alertas ACTIVAS en Mapa Interactivo y Feed ordenadas por proximidad y fecha",
-        "duracionMs": 3.55,
+        "duracionMs": 8.07,
         "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
       },
       "herramienta": "Node.js Test Runner (node --test)"
@@ -32,7 +32,7 @@
       "postcondiciones": "Markers del mapa y listado de alertas sincronizados reactivamente con los filtros activos.",
       "evidencia": {
         "testName": "TC-302: Filtrado rápido por estado de alerta (Perdidos / Encontrados) y por especie (PERRO)",
-        "duracionMs": 2.18,
+        "duracionMs": 3.25,
         "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
       },
       "herramienta": "Node.js Test Runner (node --test)"
@@ -45,7 +45,7 @@
       "postcondiciones": "Filtro de búsqueda retorna los registros concordantes independientemente del formato de entrada.",
       "evidencia": {
         "testName": "TC-303: Funcional / Valor Límite — Búsqueda textual combinada insensible a mayúsculas, minúsculas y espacios laterales",
-        "duracionMs": 0.14,
+        "duracionMs": 0.2,
         "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
       },
       "herramienta": "Node.js Test Runner (node --test)"
@@ -58,7 +58,7 @@
       "postcondiciones": "Pantalla de feed muestra Empty State amigable y mapa despeja los marcadores de la capa Leaflet.",
       "evidencia": {
         "testName": "TC-304: Consulta en radio geográfico o filtro sin publicaciones coincidentes (Vista vacía)",
-        "duracionMs": 0.41,
+        "duracionMs": 30.91,
         "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
       },
       "herramienta": "Node.js Test Runner (node --test)"
@@ -71,7 +71,7 @@
       "postcondiciones": "Tarjeta emergente abierta con datos íntegros y navegación a detalle garantizada.",
       "evidencia": {
         "testName": "TC-305: Interacción con marcador en el mapa y apertura de tarjeta emergente (MapPetCard) ante evento MARKER_CLICK sobre el pin de Toby, y navegación a /detalle/[id]",
-        "duracionMs": 0.86,
+        "duracionMs": 5.88,
         "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
       },
       "herramienta": "Node.js Test Runner (node --test)"
@@ -84,7 +84,7 @@
       "postcondiciones": "Leaflet WebView protegido contra colapsos por NaN o coordenadas corruptas.",
       "evidencia": {
         "testName": "TC-306: Valor Límite / Resiliencia — Resiliencia del mapa ante registros corruptos en base de datos con coordenadas inválidas",
-        "duracionMs": 0.63,
+        "duracionMs": 1.18,
         "archivo": "tests/rf3_mapa_feed_suite.test.mjs"
       },
       "herramienta": "Node.js Test Runner (node --test)"

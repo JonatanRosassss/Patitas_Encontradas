@@ -8,6 +8,7 @@
     "build": "node scripts/build_all.js",
     "build:typography": "remotion render src/index.ts PatitasLaunchTypography out/patitas_launch_typography.mp4",
     "build:voiceover": "remotion render src/index.ts PatitasLaunchVoiceover out/patitas_launch_voiceover.mp4",
+    "build:fast": "remotion render src/index.ts PatitasFastDynamicLaunch out/patitas_fast_dynamic_launch_v3.mp4",
     "verify": "node verify_output.js"
   },
   "dependencies": {

@@ -5,7 +5,14 @@ import { WebView } from 'react-native-webview';
 import { Colors, Radius, DetailMetrics } from '@/constants/theme';
 import type { PetLocationMapProps } from '@/types/Detalle';
 
+import { sanitizarColorCss } from '@/utils/security';
+
 function generarHtmlMapa(lat: number, lng: number, zoom: number, colorPin: string): string {
+  const safeLat = Number.isFinite(Number(lat)) ? Number(lat) : -34.4587;
+  const safeLng = Number.isFinite(Number(lng)) ? Number(lng) : -58.9142;
+  const safeZoom = Number.isFinite(Number(zoom)) ? Number(zoom) : 15;
+  const safeColorPin = sanitizarColorCss(colorPin, Colors.primary);
+
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -32,7 +39,7 @@ function generarHtmlMapa(lat: number, lng: number, zoom: number, colorPin: strin
       width: 28px;
       height: 28px;
       border-radius: 50% 50% 50% 0;
-      background-color: ${colorPin};
+      background-color: ${safeColorPin};
       transform: rotate(-45deg);
       border: 3px solid ${Colors.white};
       box-shadow: 0 4px 10px rgba(90, 58, 31, 0.35);
@@ -54,8 +61,8 @@ function generarHtmlMapa(lat: number, lng: number, zoom: number, colorPin: strin
   <script>
     try {
       var map = L.map('map', {
-        center: [${lat}, ${lng}],
-        zoom: ${zoom},
+        center: [${safeLat}, ${safeLng}],
+        zoom: ${safeZoom},
         zoomControl: false,
         attributionControl: false,
         dragging: false,
@@ -77,7 +84,7 @@ function generarHtmlMapa(lat: number, lng: number, zoom: number, colorPin: strin
         iconAnchor: [18, 32]
       });
 
-      L.marker([${lat}, ${lng}], { icon: pinIcon }).addTo(map);
+      L.marker([${safeLat}, ${safeLng}], { icon: pinIcon }).addTo(map);
     } catch (e) {
       // Ignorar errores de Leaflet en carga sin conexión
     }

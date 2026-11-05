@@ -28,6 +28,7 @@ import {
 } from '@/services/geocodingService';
 import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 import { useAuth } from '@/services/AuthContext';
+import { useAlertasStore } from '@/store/useAlertasStore';
 
 export default function PublicarAlertaScreen() {
   const router = useRouter();
@@ -87,8 +88,16 @@ export default function PublicarAlertaScreen() {
     );
   }
 
-  // Función para seleccionar fotos desde la galería
+  // Función para seleccionar fotos desde la galería (máximo 5 fotos)
   const handleSeleccionarFotos = async () => {
+    if (imagenes.length >= 5) {
+      Alert.alert(
+        'Límite alcanzado',
+        'Podés adjuntar hasta un máximo de 5 fotos por publicación.'
+      );
+      return;
+    }
+
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== 'granted') {
@@ -102,6 +111,7 @@ export default function PublicarAlertaScreen() {
     const resultado = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsMultipleSelection: true,
+      selectionLimit: Math.max(1, 5 - imagenes.length),
       quality: 0.6,
       base64: true,
     });
@@ -114,7 +124,7 @@ export default function PublicarAlertaScreen() {
         }
         return asset.uri;
       });
-      setImagenes((prev) => [...prev, ...uris]);
+      setImagenes((prev) => [...prev, ...uris].slice(0, 5));
     }
   };
 
@@ -310,12 +320,33 @@ export default function PublicarAlertaScreen() {
       // 2. Invocar servicio centralizado de alertas (guarda en colección canónica 'alertas' y sube fotos)
       await crearAlertaMascota(payload, imagenes);
 
-      Alert.alert('¡Alerta Publicada!', 'Tu publicación se ha registrado con éxito en Patitas Encontradas.', [
-        { text: 'OK', onPress: handleVolver },
-      ]);
+      // 3. Limpiar el formulario del tab persistente y sincronizar el store global
+      setNombre('');
+      setRaza('');
+      setUbicacion('');
+      setRecompensa('');
+      setDescripcion('');
+      setImagenes([]);
+      setCoordenadas(null);
+      setSugerencias([]);
+      void useAlertasStore.getState().sincronizarAlertas().catch(() => {});
+      void useAlertasStore.getState().sincronizarAlertasMapa().catch(() => {});
+
+      if (Platform.OS === 'web') {
+        window.alert('¡Alerta Publicada!: Tu publicación se ha registrado con éxito en Patitas Encontradas.');
+        handleVolver();
+      } else {
+        Alert.alert('¡Alerta Publicada!', 'Tu publicación se ha registrado con éxito en Patitas Encontradas.', [
+          { text: 'OK', onPress: handleVolver },
+        ]);
+      }
     } catch (error: unknown) {
       const mensajeError = error instanceof Error ? error.message : 'Ocurrió un error inesperado al guardar la alerta.';
-      Alert.alert('Error al publicar', mensajeError);
+      if (Platform.OS === 'web') {
+        window.alert(`Error al publicar: ${mensajeError}`);
+      } else {
+        Alert.alert('Error al publicar', mensajeError);
+      }
     } finally {
       setGuardando(false);
     }
@@ -380,6 +411,7 @@ export default function PublicarAlertaScreen() {
             style={styles.input}
             placeholder="Ej: Firulais"
             placeholderTextColor={Colors.textMuted}
+            maxLength={80}
             value={nombre}
             onChangeText={setNombre}
           />
@@ -417,6 +449,7 @@ export default function PublicarAlertaScreen() {
             style={styles.input}
             placeholder="Ej: Labrador / Mestizo"
             placeholderTextColor={Colors.textMuted}
+            maxLength={60}
             value={raza}
             onChangeText={setRaza}
           />
@@ -429,6 +462,7 @@ export default function PublicarAlertaScreen() {
             style={styles.input}
             placeholder="Ej: Rivadavia y Bolivar, o Barrio Champagnat"
             placeholderTextColor={Colors.textMuted}
+            maxLength={200}
             value={ubicacion}
             onChangeText={(txt) => {
               setUbicacion(txt);
@@ -526,6 +560,7 @@ export default function PublicarAlertaScreen() {
             style={styles.input}
             placeholder="Ej: $5000 / No especificada"
             placeholderTextColor={Colors.textMuted}
+            maxLength={60}
             value={recompensa}
             onChangeText={setRecompensa}
           />
@@ -537,6 +572,7 @@ export default function PublicarAlertaScreen() {
             style={[styles.input, styles.textArea]}
             placeholder="Señas particulares, color de collar, etc."
             placeholderTextColor={Colors.textMuted}
+            maxLength={2000}
             value={descripcion}
             onChangeText={setDescripcion}
             multiline

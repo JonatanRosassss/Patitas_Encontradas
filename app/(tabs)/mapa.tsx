@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text, StatusBar, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Typography, Spacing } from '../../constants/theme';
-import { Radius } from '../../theme/tokens';
+import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 import { MAP_FILTERS } from '../../data/mapMockData';
 import { useMapState } from '../../hooks/useMapState';
 import { MapContainer } from '../../components/map/MapContainer';

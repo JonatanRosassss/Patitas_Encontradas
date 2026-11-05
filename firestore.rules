@@ -1,0 +1,426 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model - Patitas Encontradas
+// ===============================================================
+//
+// Collection: usuarios/{userId}
+// Document ID: Firebase Auth UID
+// Fields:
+//   - uid: string (required, immutable, must match userId)
+//   - nombre: string (required, 1..100 chars)
+//   - correo: string (optional/required, <= 120 chars)
+//   - email: string (optional alias, <= 120 chars)
+//   - telefono: string (optional, <= 30 chars)
+//   - avatarUrl: string (optional, <= 1500000 chars to support Storage URL or base64 fallback)
+//   - fotoPerfil: string (optional legacy alias, <= 1500000 chars)
+//   - zonaBarrio: string (optional, <= 120 chars)
+//   - creadoEn: timestamp | string (optional)
+//   - fechaRegistro: timestamp | string (optional)
+//   - fechaCreacion: timestamp | string (optional)
+//   - actualizadoEn: timestamp | string (optional)
+//   - pushToken: string | null (optional, <= 500 chars)
+//   - notificacionesActivas: bool (optional)
+//
+// Subcollection: usuarios/{userId}/guardadas/{alertaId}
+// Document ID: Alerta ID
+// Fields:
+//   - idAlerta: string (optional, <= 128 chars)
+//   - publicacionId: string (optional, <= 128 chars)
+//   - fechaGuardado: timestamp | number | string (optional)
+//   - guardadaEn: timestamp | number | string (optional)
+//
+// Collection: alertas/{alertaId}
+// Document ID: Auto-generated Firestore ID
+// Fields:
+//   - nombre: string (required, 2..80 chars)
+//   - especie: string (required, 'PERRO' | 'GATO' | 'OTRO' | 'Perro' | 'Gato' | 'Otro')
+//   - raza: string (optional, <= 80 chars)
+//   - color: string (optional, <= 80 chars)
+//   - sexo: string (optional, <= 30 chars)
+//   - estado: string (required, 'PERDIDO' | 'ENCONTRADO' | 'VISTO')
+//   - descripcion: string (required, 0..2000 chars)
+//   - ubicacion: string | map (required, string 4..200 chars or valid MapPoint)
+//   - coordenadas: map (optional, { latitude: number, longitude: number })
+//   - contacto: string (optional, <= 120 chars)
+//   - fechaReporte: timestamp | string | number (optional/required)
+//   - fechaModificacion: timestamp | string | number (optional)
+//   - updatedAt: timestamp | string | number (optional)
+//   - creadoPor: string (required, immutable, must match request.auth.uid)
+//   - fotos: list<string> (optional, max 5 items)
+//   - recompensa: number | string | null (optional, if number >= 0, if string <= 100 chars)
+//   - resuelto: bool (optional)
+//   - fechaResolucion: timestamp | string (optional)
+//   - usuariosInteresados: list<string> (optional, max 200 items)
+//   - reportesAvistamiento: number (optional, >= 0)
+//
+// Collection: notificaciones/{notifId}
+// Document ID: Auto-generated Firestore ID
+// Fields:
+//   - destinatarioId: string (required, <= 128 chars)
+//   - alertaId: string | null (optional, <= 128 chars)
+//   - publicacionId: string | null (optional, <= 128 chars)
+//   - mascotaNombre: string (optional, <= 100 chars)
+//   - tipo: string (optional, <= 50 chars)
+//   - titulo: string (optional, <= 150 chars)
+//   - mensaje: string (required, 1..500 chars)
+//   - leida: bool (required, must be false on create)
+//   - fecha: timestamp | string (optional)
+//   - createdAt: timestamp | string (optional)
+//
+// Collection: tickets_soporte/{ticketId}
+// Document ID: Auto-generated Firestore ID
+// Fields:
+//   - usuarioId: string | null (required, null if anonymous or matching request.auth.uid)
+//   - emailContacto: string (required, 3..120 chars)
+//   - nombreContacto: string (required, 1..80 chars)
+//   - tipoProblema: string (required, 'ERROR_TECNICO' | 'PROBLEMA_MAPA' | 'REPORTE_FALSO' | 'CONSULTA_GENERAL' | 'OTRO')
+//   - titulo: string (required, 5..150 chars)
+//   - descripcion: string (required, 15..2000 chars)
+//   - estado: string (required, 'ABIERTO' | 'EN_REVISION' | 'RESUELTO', must be 'ABIERTO' on create)
+//   - fechaCreacion: string (required, <= 64 chars)
+//   - creadoEnServidor: timestamp (optional)
+//   - dispositivo: string (optional, <= 100 chars)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isValidOptionalString(data, field, minLen, maxLen) {
+      return !(field in data) ||
+             data[field] == null ||
+             (data[field] is string &&
+              data[field].size() >= minLen &&
+              data[field].size() <= maxLen);
+    }
+
+    function isValidOptionalBool(data, field) {
+      return !(field in data) || data[field] == null || data[field] is bool;
+    }
+
+    function isValidOptionalDateOrString(data, field) {
+      return !(field in data) ||
+             data[field] == null ||
+             data[field] is timestamp ||
+             data[field] is number ||
+             (data[field] is string && data[field].size() <= 64);
+    }
+
+    // ===============================================================
+    // Domain Validators (Used in both create and update)
+    // ===============================================================
+
+    function isValidUsuario(data, userId) {
+      let allowedFields = [
+        'uid',
+        'nombre',
+        'correo',
+        'email',
+        'telefono',
+        'avatarUrl',
+        'fotoPerfil',
+        'zonaBarrio',
+        'creadoEn',
+        'fechaRegistro',
+        'fechaCreacion',
+        'actualizadoEn',
+        'pushToken',
+        'notificacionesActivas'
+      ];
+      return hasOnlyAllowedFields(allowedFields) &&
+             (!('uid' in data) || data.uid == userId) &&
+             (!('nombre' in data) || isValidString(data.nombre, 1, 100)) &&
+             isValidOptionalString(data, 'correo', 0, 120) &&
+             isValidOptionalString(data, 'email', 0, 120) &&
+             isValidOptionalString(data, 'telefono', 0, 30) &&
+             isValidOptionalString(data, 'avatarUrl', 0, 1500000) &&
+             isValidOptionalString(data, 'fotoPerfil', 0, 1500000) &&
+             isValidOptionalString(data, 'zonaBarrio', 0, 120) &&
+             isValidOptionalDateOrString(data, 'creadoEn') &&
+             isValidOptionalDateOrString(data, 'fechaRegistro') &&
+             isValidOptionalDateOrString(data, 'fechaCreacion') &&
+             isValidOptionalDateOrString(data, 'actualizadoEn') &&
+             isValidOptionalString(data, 'pushToken', 0, 500) &&
+             isValidOptionalBool(data, 'notificacionesActivas');
+    }
+
+    function isValidGuardada(data) {
+      let allowedFields = [
+        'idAlerta',
+        'publicacionId',
+        'fechaGuardado',
+        'guardadaEn'
+      ];
+      return hasOnlyAllowedFields(allowedFields) &&
+             isValidOptionalString(data, 'idAlerta', 1, 128) &&
+             isValidOptionalString(data, 'publicacionId', 1, 128) &&
+             isValidOptionalDateOrString(data, 'fechaGuardado') &&
+             isValidOptionalDateOrString(data, 'guardadaEn');
+    }
+
+    function isValidCoordinates(data) {
+      return !('coordenadas' in data) ||
+             data.coordenadas == null ||
+             (data.coordenadas is map &&
+              data.coordenadas.keys().hasOnly(['latitude', 'longitude']) &&
+              data.coordenadas.latitude is number &&
+              data.coordenadas.latitude >= -90 &&
+              data.coordenadas.latitude <= 90 &&
+              data.coordenadas.longitude is number &&
+              data.coordenadas.longitude >= -180 &&
+              data.coordenadas.longitude <= 180);
+    }
+
+    function isValidUbicacion(ubicacion) {
+      return isValidString(ubicacion, 4, 200) ||
+             (ubicacion is map &&
+              ubicacion.size() <= 10 &&
+              (!('direccion' in ubicacion) || isValidString(ubicacion.direccion, 1, 200)));
+    }
+
+    function isValidRecompensa(data) {
+      return !('recompensa' in data) ||
+             data.recompensa == null ||
+             (data.recompensa is number && data.recompensa >= 0) ||
+             (data.recompensa is string && data.recompensa.size() <= 100);
+    }
+
+    function isValidAlerta(data) {
+      let allowedFields = [
+        'nombre',
+        'nombreMascota',
+        'especie',
+        'raza',
+        'color',
+        'sexo',
+        'estado',
+        'descripcion',
+        'ubicacion',
+        'coordenadas',
+        'contacto',
+        'fechaReporte',
+        'fechaModificacion',
+        'updatedAt',
+        'creadoPor',
+        'fotos',
+        'recompensa',
+        'resuelto',
+        'fechaResolucion',
+        'usuariosInteresados',
+        'reportesAvistamiento'
+      ];
+      return hasOnlyAllowedFields(allowedFields) &&
+             hasRequiredFields(['nombre', 'especie', 'estado', 'descripcion', 'ubicacion', 'creadoPor']) &&
+             isValidString(data.nombre, 2, 80) &&
+             isValidOptionalString(data, 'nombreMascota', 1, 80) &&
+             data.especie in ['PERRO', 'GATO', 'OTRO', 'Perro', 'Gato', 'Otro'] &&
+             isValidOptionalString(data, 'raza', 0, 80) &&
+             isValidOptionalString(data, 'color', 0, 80) &&
+             isValidOptionalString(data, 'sexo', 0, 30) &&
+             data.estado in ['PERDIDO', 'ENCONTRADO', 'VISTO'] &&
+             isValidString(data.descripcion, 0, 2000) &&
+             isValidUbicacion(data.ubicacion) &&
+             isValidCoordinates(data) &&
+             isValidOptionalString(data, 'contacto', 0, 120) &&
+             isValidOptionalDateOrString(data, 'fechaReporte') &&
+             isValidOptionalDateOrString(data, 'fechaModificacion') &&
+             isValidOptionalDateOrString(data, 'updatedAt') &&
+             isValidString(data.creadoPor, 1, 128) &&
+             (!('fotos' in data) || (data.fotos is list && data.fotos.size() <= 5)) &&
+             isValidRecompensa(data) &&
+             isValidOptionalBool(data, 'resuelto') &&
+             isValidOptionalDateOrString(data, 'fechaResolucion') &&
+             (!('usuariosInteresados' in data) || (data.usuariosInteresados is list && data.usuariosInteresados.size() <= 200)) &&
+             (!('reportesAvistamiento' in data) || (data.reportesAvistamiento is number && data.reportesAvistamiento >= 0));
+    }
+
+    function isValidNotificacionCreate(data) {
+      let allowedFields = [
+        'destinatarioId',
+        'alertaId',
+        'publicacionId',
+        'mascotaNombre',
+        'tipo',
+        'titulo',
+        'mensaje',
+        'leida',
+        'fecha',
+        'createdAt'
+      ];
+      return hasOnlyAllowedFields(allowedFields) &&
+             isValidString(data.destinatarioId, 1, 128) &&
+             (('alertaId' in data && isValidString(data.alertaId, 1, 128)) ||
+              ('publicacionId' in data && isValidString(data.publicacionId, 1, 128))) &&
+             isValidOptionalString(data, 'mascotaNombre', 0, 100) &&
+             isValidOptionalString(data, 'tipo', 0, 50) &&
+             isValidOptionalString(data, 'titulo', 0, 150) &&
+             isValidString(data.mensaje, 1, 500) &&
+             data.leida is bool &&
+             data.leida == false &&
+             isValidOptionalDateOrString(data, 'fecha') &&
+             isValidOptionalDateOrString(data, 'createdAt');
+    }
+
+    function isValidTicketSoporteCreate(data) {
+      let allowedFields = [
+        'usuarioId',
+        'emailContacto',
+        'nombreContacto',
+        'tipoProblema',
+        'titulo',
+        'descripcion',
+        'estado',
+        'fechaCreacion',
+        'creadoEnServidor',
+        'dispositivo'
+      ];
+      return hasOnlyAllowedFields(allowedFields) &&
+             hasRequiredFields([
+               'usuarioId',
+               'emailContacto',
+               'nombreContacto',
+               'tipoProblema',
+               'titulo',
+               'descripcion',
+               'estado',
+               'fechaCreacion'
+             ]) &&
+             (data.usuarioId == null || (isAuthenticated() && data.usuarioId == request.auth.uid)) &&
+             isValidString(data.emailContacto, 3, 120) &&
+             isValidString(data.nombreContacto, 1, 80) &&
+             data.tipoProblema in [
+               'ERROR_TECNICO',
+               'PROBLEMA_MAPA',
+               'REPORTE_FALSO',
+               'CONSULTA_GENERAL',
+               'OTRO'
+             ] &&
+             isValidString(data.titulo, 5, 150) &&
+             isValidString(data.descripcion, 15, 2000) &&
+             data.estado == 'ABIERTO' &&
+             isValidString(data.fechaCreacion, 1, 64) &&
+             isValidOptionalDateOrString(data, 'creadoEnServidor') &&
+             isValidOptionalString(data, 'dispositivo', 0, 100);
+    }
+
+    // ===============================================================
+    // 1. Collection: usuarios/{userId}
+    // ===============================================================
+    match /usuarios/{userId} {
+      // Single user profile lookup is allowed so pet detail screen (app/detalle/[id].tsx)
+      // can display the author's name and WhatsApp contact button.
+      allow get: if true;
+
+      // Strictly deny listing/enumerating all users to prevent scraping.
+      allow list: if false;
+
+      allow create: if isOwner(userId) &&
+                       isValidUsuario(request.resource.data, userId) &&
+                       hasRequiredFields(['uid', 'nombre', 'correo']);
+
+      allow update: if isOwner(userId) &&
+                       isValidUsuario(request.resource.data, userId) &&
+                       (!('uid' in resource.data) || request.resource.data.uid == resource.data.uid);
+
+      allow delete: if isOwner(userId);
+
+      // ===============================================================
+      // 2. Subcollection: usuarios/{userId}/guardadas/{alertaId}
+      // ===============================================================
+      match /guardadas/{alertaId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidGuardada(request.resource.data);
+      }
+    }
+
+    // ===============================================================
+    // 3. Collection: alertas/{alertaId}
+    // ===============================================================
+    match /alertas/{alertaId} {
+      // Publicly readable so neighbors and guests can browse the feed and map.
+      allow get, list: if true;
+
+      allow create: if isAuthenticated() &&
+                       request.resource.data.creadoPor == request.auth.uid &&
+                       isValidAlerta(request.resource.data);
+
+      allow update: if isAuthenticated() && (
+        // (a) Owner update: owner cannot transfer ownership / spoof creadoPor, and schema stays valid
+        (resource.data.creadoPor == request.auth.uid &&
+         request.resource.data.creadoPor == resource.data.creadoPor &&
+         isValidAlerta(request.resource.data)) ||
+        // (b) Non-owner sighting subscription (registrarInteraccionPublicacion / registrarInteresEnMascota)
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usuariosInteresados']) &&
+         request.resource.data.usuariosInteresados is list &&
+         request.resource.data.usuariosInteresados.size() <= 200 &&
+         request.auth.uid in request.resource.data.usuariosInteresados)
+      );
+
+      allow delete: if isAuthenticated() &&
+                       resource.data.creadoPor == request.auth.uid;
+    }
+
+    // ===============================================================
+    // 4. Collection: notificaciones/{notifId}
+    // ===============================================================
+    match /notificaciones/{notifId} {
+      allow get, list: if isAuthenticated() &&
+                          resource.data.destinatarioId == request.auth.uid;
+
+      allow create: if isAuthenticated() &&
+                       isValidNotificacionCreate(request.resource.data);
+
+      allow update: if isAuthenticated() &&
+                       resource.data.destinatarioId == request.auth.uid &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['leida']) &&
+                       request.resource.data.leida is bool;
+
+      allow delete: if isAuthenticated() &&
+                       resource.data.destinatarioId == request.auth.uid;
+    }
+
+    // ===============================================================
+    // 5. Collection: tickets_soporte/{ticketId}
+    // ===============================================================
+    match /tickets_soporte/{ticketId} {
+      allow create: if isValidTicketSoporteCreate(request.resource.data);
+
+      allow get, list: if isAuthenticated() &&
+                          resource.data.usuarioId == request.auth.uid;
+
+      allow update, delete: if false;
+    }
+
+    // ===============================================================
+    // 6. Default Deny-All Rule
+    // ===============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

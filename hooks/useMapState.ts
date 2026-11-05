@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { Coordinates, MapFilterIndex, MapPet } from '../types/map';
 import { MASCOTAS_MOCK } from '../data/mapMockData';
@@ -8,6 +8,7 @@ import { MASCOTAS_MOCK } from '../data/mapMockData';
 import { isValidCoordinate } from '../utils/geoValidation';
 import { MapContainerRef } from '../components/map/MapContainer';
 import { listarAlertasParaMapa } from '../services/mascotasService';
+import { useAlertasStore } from '../store/useAlertasStore';
 
 export interface UseMapStateReturn {
   filtro: MapFilterIndex;
@@ -63,6 +64,7 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
       const alertasFirebase = await listarAlertasParaMapa();
       if (alertasFirebase && alertasFirebase.length > 0) {
         setPets(alertasFirebase);
+        useAlertasStore.setState({ alertasMapa: alertasFirebase });
       } else {
         // Fallback a los puntos iniciales si no hay alertas en Firestore
         setPets(initialPets);
@@ -76,9 +78,11 @@ export function useMapState(initialPets: MapPet[] = MASCOTAS_MOCK): UseMapStateR
     }
   }, [initialPets]);
 
-  useEffect(() => {
-    recargarPuntos();
-  }, [recargarPuntos]);
+  useFocusEffect(
+    useCallback(() => {
+      void recargarPuntos();
+    }, [recargarPuntos])
+  );
 
   const filteredPets = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();

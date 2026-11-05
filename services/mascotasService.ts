@@ -140,8 +140,49 @@ function docAPet(id: string, data: any): Pet {
 // GESTI├ôN DE ARCHIVOS / STORAGE
 // ==========================================
 
+const LIMITE_MAX_FOTOS_ALERTA = 5;
+const LIMITE_MAX_BYTES_IMAGEN = 5 * 1024 * 1024; // 5 MB
+const LIMITE_MAX_BASE64_FIRESTORE = 1048576; // 1 MB
+const LIMITE_MAX_FANOUT_NOTIFICACIONES = 50;
+const REGEX_MIME_IMAGEN = /^image\/(jpeg|jpg|png|webp)$/i;
+
+function sanitizarCampoTexto(valor: unknown, maxLongitud: number): string {
+  if (typeof valor !== 'string') return '';
+  return valor
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+    .replace(/<\s*\/?\s*(script|iframe|object|embed|svg|style)\b[^>]*>/gi, '')
+    .replace(/javascript\s*:/gi, '')
+    .trim()
+    .slice(0, maxLongitud);
+}
+
 /**
- * Convierte un Blob a Data URL base64 para entornos web donde las pol├¡ticas
+ * Verifica que el usuario autenticado sea el propietario legítimo de la alerta
+ * antes de permitir su edición o eliminación (Defensa contra BOLA / IDOR).
+ */
+async function verificarPropiedadAlerta(idAlerta: string): Promise<void> {
+  const usuario = auth.currentUser;
+  if (!usuario) {
+    throw new Error('Debes iniciar sesión para modificar o eliminar una publicación.');
+  }
+  if (!idAlerta || typeof idAlerta !== 'string') {
+    throw new Error('Identificador de publicación inválido.');
+  }
+
+  const docRef = doc(db, COLECCION_ALERTAS, idAlerta);
+  const docSnap = await getDoc(docRef);
+  if (!docSnap.exists()) {
+    throw new Error('La publicación no existe.');
+  }
+
+  const data = docSnap.data();
+  if (data?.creadoPor && data.creadoPor !== usuario.uid) {
+    throw new Error('Solo el dueño de la publicación puede modificarla o eliminarla.');
+  }
+}
+
+/**
+ * Convierte un Blob a Data URL base64 para entornos web donde las políticas
  * de CORS de Firebase Storage restrinjan las llamadas XMLHttpRequest.
  */
 async function blobADataUrl(blob: Blob): Promise<string> {
@@ -160,25 +201,34 @@ async function blobADataUrl(blob: Blob): Promise<string> {
 }
 
 /**
- * Sube una imagen local a Firebase Storage y retorna su URL p├║blica de descarga.
- * Soporta Data URLs base64 nativos con uploadString para m├íxima resiliencia en React Native.
+ * Sube una imagen local a Firebase Storage y retorna su URL pública de descarga.
+ * Soporta Data URLs base64 nativos con uploadString para máxima resiliencia en React Native.
  */
 export async function subirImagenMascota(uriLocal: string): Promise<string> {
   if (!uriLocal || uriLocal.includes('RmlsZSBub3QgZm91bmQ=')) {
-    throw new Error('Imagen inv├ílida');
+    throw new Error('Imagen inválida');
   }
 
-  // Si ya es una URL remota de Storage o HTTP, retornarla
+  // Si ya es una URL remota HTTPS válida, retornarla
   if ((uriLocal.startsWith('http://') || uriLocal.startsWith('https://')) && !uriLocal.startsWith('blob:')) {
     return uriLocal;
   }
 
-  // Si es un Data URL base64 v├ílido (data:image/...;base64,...)
+  // Si es un Data URL base64 válido (data:image/...;base64,...)
   if (uriLocal.startsWith('data:')) {
     const match = uriLocal.match(/^data:([^;]+);base64,(.+)$/);
     if (match) {
-      const mimeType = match[1] || 'image/jpeg';
+      const mimeType = (match[1] || 'image/jpeg').trim();
       const base64Content = match[2];
+
+      if (!REGEX_MIME_IMAGEN.test(mimeType)) {
+        throw new Error('Formato de imagen no permitido. Solo se admiten JPG, PNG o WEBP.');
+      }
+
+      const bytesEstimados = Math.ceil((base64Content.length * 3) / 4);
+      if (bytesEstimados > LIMITE_MAX_BYTES_IMAGEN) {
+        throw new Error('La imagen supera el tamaño máximo permitido de 5 MB.');
+      }
 
       try {
         const nombreArchivo = `mascotas/${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
@@ -187,11 +237,17 @@ export async function subirImagenMascota(uriLocal: string): Promise<string> {
         const downloadUrl = await getDownloadURL(referencia);
         if (downloadUrl) return downloadUrl;
       } catch {
-        // Fallback resiliente: Si Storage falla, el data URL base64 es 100% renderizable
-        return uriLocal;
+        // Fallback resiliente solo si no excede el límite seguro de documento en Firestore
+        if (uriLocal.length <= LIMITE_MAX_BASE64_FIRESTORE) {
+          return uriLocal;
+        }
+        throw new Error('No se pudo subir la imagen al servidor.');
       }
     }
-    return uriLocal;
+    if (uriLocal.length <= LIMITE_MAX_BASE64_FIRESTORE) {
+      return uriLocal;
+    }
+    throw new Error('La imagen codificada excede el límite permitido.');
   }
 
   // Para URIs locales de archivo (file://, content://, blob:)
@@ -203,7 +259,15 @@ export async function subirImagenMascota(uriLocal: string): Promise<string> {
     throw new Error('Archivo local no disponible');
   }
 
-  if (Platform.OS === 'web' && blob.size < 800 * 1024) {
+  if (blob.size > LIMITE_MAX_BYTES_IMAGEN) {
+    throw new Error('La imagen supera el tamaño máximo permitido de 5 MB.');
+  }
+
+  if (blob.type && blob.type !== 'application/octet-stream' && !REGEX_MIME_IMAGEN.test(blob.type)) {
+    throw new Error('Formato de archivo no permitido. Solo se admiten imágenes JPG, PNG o WEBP.');
+  }
+
+  if (Platform.OS === 'web' && blob.size < 650 * 1024) {
     try {
       return await blobADataUrl(blob);
     } catch {
@@ -231,20 +295,24 @@ export async function crearAlertaMascota(
 ): Promise<string> {
   const usuario = auth.currentUser;
   if (!usuario) {
-    throw new Error('Debes iniciar sesi├│n para publicar una alerta.');
+    throw new Error('Debes iniciar sesión para publicar una alerta.');
   }
+
+  const fotosRecortadas = Array.isArray(fotosLocales)
+    ? fotosLocales.slice(0, LIMITE_MAX_FOTOS_ALERTA)
+    : [];
 
   // 1. Subir fotos a Firebase Storage en paralelo con manejo resiliente
   const resultadosFotos = await Promise.all(
-    fotosLocales.map(async (uri) => {
+    fotosRecortadas.map(async (uri) => {
       if (!uri || uri.includes('RmlsZSBub3QgZm91bmQ=')) {
         return null;
       }
       try {
         return await subirImagenMascota(uri);
       } catch {
-        // Si el archivo local fall├│ pero es un data URL genuino, conservarlo
-        if (uri.startsWith('data:image/')) {
+        // Si el archivo local falló pero es un data URL genuino dentro del límite, conservarlo
+        if (uri.startsWith('data:image/') && uri.length <= LIMITE_MAX_BASE64_FIRESTORE) {
           return uri;
         }
         return null;
@@ -256,7 +324,7 @@ export async function crearAlertaMascota(
     (url): url is string => Boolean(url && !url.includes('RmlsZSBub3QgZm91bmQ='))
   );
 
-  // 2. Si vienen coordenadas, validar que sean num├⌐ricas y finitas
+  // 2. Si vienen coordenadas, validar que sean numéricas y finitas
   let coordenadasValidas = datos.coordenadas;
   if (
     coordenadasValidas &&
@@ -268,9 +336,19 @@ export async function crearAlertaMascota(
     coordenadasValidas = undefined;
   }
 
+  const datosSanitizados = {
+    ...datos,
+    nombre: sanitizarCampoTexto(datos.nombre, 80),
+    descripcion: sanitizarCampoTexto(datos.descripcion, 2000),
+    ubicacion:
+      typeof datos.ubicacion === 'string'
+        ? sanitizarCampoTexto(datos.ubicacion, 200)
+        : datos.ubicacion,
+  };
+
   // 3. Construir el payload sin campos undefined
   const payload = limpiarUndefined({
-    ...datos,
+    ...datosSanitizados,
     ...(coordenadasValidas ? { coordenadas: coordenadasValidas } : {}),
     fotos: urlsFotos,
     creadoPor: usuario.uid,
@@ -294,20 +372,41 @@ export async function modificarAlertaMascota(
   cambios: ActualizarAlertaMascota,
   nuevasFotosLocales?: string[]
 ): Promise<void> {
+  await verificarPropiedadAlerta(idAlerta);
+
   const docRef = doc(db, COLECCION_ALERTAS, idAlerta);
 
-  // 1. Si se proporcionan nuevas fotos locales, subirlas
+  // 1. Si se proporcionan nuevas fotos locales, subirlas respetando el tope máximo
   let fotosActualizadas = cambios.fotos;
   if (nuevasFotosLocales && nuevasFotosLocales.length > 0) {
+    const fotosLimitadas = nuevasFotosLocales.slice(0, LIMITE_MAX_FOTOS_ALERTA);
     const urlsNuevas = await Promise.all(
-      nuevasFotosLocales.map((uri) => (uri.startsWith('http') ? uri : subirImagenMascota(uri)))
+      fotosLimitadas.map((uri) => (uri.startsWith('http') ? uri : subirImagenMascota(uri)))
     );
-    fotosActualizadas = [...(cambios.fotos ?? []), ...urlsNuevas];
+    fotosActualizadas = [...(cambios.fotos ?? []), ...urlsNuevas].slice(
+      0,
+      LIMITE_MAX_FOTOS_ALERTA
+    );
   }
 
-  // 2. Limpiar undefined para no romper Firestore
+  // 2. Filtrar campos inmutables (creadoPor, fechaReporte, id) y sanitizar textos
+  const cambiosSeguros: Record<string, unknown> = { ...cambios };
+  delete cambiosSeguros.id;
+  delete cambiosSeguros.creadoPor;
+  delete cambiosSeguros.fechaReporte;
+
+  if (typeof cambiosSeguros.nombre === 'string') {
+    cambiosSeguros.nombre = sanitizarCampoTexto(cambiosSeguros.nombre, 80);
+  }
+  if (typeof cambiosSeguros.descripcion === 'string') {
+    cambiosSeguros.descripcion = sanitizarCampoTexto(cambiosSeguros.descripcion, 2000);
+  }
+  if (typeof cambiosSeguros.ubicacion === 'string') {
+    cambiosSeguros.ubicacion = sanitizarCampoTexto(cambiosSeguros.ubicacion, 200);
+  }
+
   const payload = limpiarUndefined({
-    ...cambios,
+    ...cambiosSeguros,
     ...(fotosActualizadas ? { fotos: fotosActualizadas } : {}),
     fechaModificacion: serverTimestamp(),
   });
@@ -316,9 +415,10 @@ export async function modificarAlertaMascota(
 }
 
 /**
- * Elimina una alerta por su ID.
+ * Elimina una alerta por su ID previa verificación de titularidad.
  */
 export async function eliminarAlertaMascota(idAlerta: string): Promise<void> {
+  await verificarPropiedadAlerta(idAlerta);
   const docRef = doc(db, COLECCION_ALERTAS, idAlerta);
   await deleteDoc(docRef);
 }
@@ -603,9 +703,9 @@ export async function marcarMascotaComoEncontrada(
         (uid) => typeof uid === 'string' && uid !== usuario.uid
       )
     ),
-  ];
+  ].slice(0, LIMITE_MAX_FANOUT_NOTIFICACIONES);
 
-  // Actualizar el estado de la publicaci├│n.
+  // Actualizar el estado de la publicación.
   await updateDoc(alertaRef, {
     estado: 'ENCONTRADO',
     fechaModificacion: serverTimestamp(),
@@ -618,8 +718,8 @@ export async function marcarMascotaComoEncontrada(
     await addDoc(notificacionesRef, {
       destinatarioId,
       tipo: 'estado',
-      titulo: '┬íMascota encontrada!',
-      mensaje: `┬íBuenas noticias! ${
+      titulo: '¡Mascota encontrada!',
+      mensaje: `¡Buenas noticias! ${
         alerta.nombre || 'La mascota'
       } fue marcada como encontrada.`,
       publicacionId: idAlerta,
@@ -634,6 +734,18 @@ export async function marcarMascotaComoEncontrada(
 // PUBLICACIONES GUARDADAS
 // ==========================================
 
+function resolverUidSeguroGuardados(idUsuario?: string, mensajeError?: string): string {
+  const uidActual = auth.currentUser?.uid;
+  if (idUsuario && uidActual && idUsuario !== uidActual) {
+    throw new Error('No tenés permisos para operar sobre los guardados de otro usuario.');
+  }
+  const uid = idUsuario || uidActual;
+  if (!uid) {
+    throw new Error(mensajeError || 'Debes iniciar sesion para gestionar tus guardados.');
+  }
+  return uid;
+}
+
 /**
  * Guarda una publicacion en la cuenta del usuario autenticado.
  */
@@ -641,11 +753,10 @@ export async function guardarPublicacion(
   idPublicacion: string,
   idUsuario?: string
 ): Promise<void> {
-  const uid = idUsuario || auth.currentUser?.uid;
-
-  if (!uid) {
-    throw new Error('Debes iniciar sesion para guardar publicaciones.');
-  }
+  const uid = resolverUidSeguroGuardados(
+    idUsuario,
+    'Debes iniciar sesion para guardar publicaciones.'
+  );
 
   if (!idPublicacion) {
     throw new Error('No se recibio el ID de la publicacion.');
@@ -672,11 +783,10 @@ export async function quitarPublicacionGuardada(
   idPublicacion: string,
   idUsuario?: string
 ): Promise<void> {
-  const uid = idUsuario || auth.currentUser?.uid;
-
-  if (!uid) {
-    throw new Error('Debes iniciar sesion para modificar tus guardados.');
-  }
+  const uid = resolverUidSeguroGuardados(
+    idUsuario,
+    'Debes iniciar sesion para modificar tus guardados.'
+  );
 
   const referencia = doc(
     db,
@@ -695,11 +805,10 @@ export async function quitarPublicacionGuardada(
 export async function obtenerIdsPublicacionesGuardadas(
   idUsuario?: string
 ): Promise<string[]> {
-  const uid = idUsuario || auth.currentUser?.uid;
-
-  if (!uid) {
-    throw new Error('Debes iniciar sesion para consultar tus guardados.');
-  }
+  const uid = resolverUidSeguroGuardados(
+    idUsuario,
+    'Debes iniciar sesion para consultar tus guardados.'
+  );
 
   const referencia = collection(
     db,

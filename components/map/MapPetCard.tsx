@@ -7,10 +7,9 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing } from '../../constants/theme';
-import { Radius } from '../../theme/tokens';
+import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 import { MapPet } from '../../types/map';
 
 export interface MapPetCardProps {
@@ -32,7 +31,7 @@ export function MapPetCard({
     if (onViewDetail) {
       onViewDetail(pet.id);
     } else {
-      router.push(`/detalle/${pet.id}` as any);
+      router.push(`/detalle/${pet.id}` as Href);
     }
   };
 

@@ -201,6 +201,7 @@ export function TicketForm({ onSuccess }: TicketFormProps) {
           ]}
           placeholder="Ej: Juan Pérez"
           placeholderTextColor={Colors.textMuted}
+          maxLength={80}
           value={nombre}
           onChangeText={(texto) => {
             setNombre(texto);
@@ -230,6 +231,7 @@ export function TicketForm({ onSuccess }: TicketFormProps) {
           placeholderTextColor={Colors.textMuted}
           keyboardType="email-address"
           autoCapitalize="none"
+          maxLength={120}
           value={email}
           onChangeText={(texto) => {
             setEmail(texto);
@@ -260,6 +262,7 @@ export function TicketForm({ onSuccess }: TicketFormProps) {
           ]}
           placeholder="Ej: No se cargan las fotos de avistamientos"
           placeholderTextColor={Colors.textMuted}
+          maxLength={150}
           value={titulo}
           onChangeText={(texto) => {
             setTitulo(texto);
@@ -292,6 +295,7 @@ export function TicketForm({ onSuccess }: TicketFormProps) {
           placeholderTextColor={Colors.textMuted}
           multiline
           numberOfLines={4}
+          maxLength={2000}
           value={descripcion}
           onChangeText={(texto) => {
             setDescripcion(texto);

@@ -9,6 +9,7 @@ import { useAuth } from '@/services/AuthContext';
 import { db } from '@/services/firebase';
 import { registrarPushToken } from '@/services/notificaciones';
 import { CambiarContraseniaModal } from '@/components/ajustes/CambiarContraseniaModal';
+import { useAlertasStore } from '@/store/useAlertasStore';
 
 export default function AjustesScreen() {
   const { usuario, cerrarSesion } = useAuth();
@@ -26,11 +27,11 @@ export default function AjustesScreen() {
           const datos = docSnap.data();
           setNotificaciones(datos.notificacionesActivas ?? true);
         }
-      } catch (error) {
-        console.error('Error al cargar preferencias:', error);
+      } catch {
+        // Fallback silencioso a notificaciones activas por defecto
       }
     }
-    cargarPreferencia();
+    void cargarPreferencia();
   }, [usuario?.uid]);
 
   // 2. Manejar el cambio del Switch de notificaciones
@@ -53,14 +54,16 @@ export default function AjustesScreen() {
           pushToken: null,
         });
       }
-    } catch (error) {
-      console.error('Error al actualizar notificaciones:', error);
+    } catch {
+      // Revertir estado visual si falla la actualización
+      setNotificaciones(!valor);
     }
   };
 
   const manejarCerrarSesion = () => {
     const ejecutarCierre = async () => {
       try {
+        useAlertasStore.getState().limpiarStore();
         await cerrarSesion();
         router.replace('/(auth)/login');
       } catch {
@@ -142,57 +145,62 @@ export default function AjustesScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: Colors.backgroundLight,
   },
   container: {
     flex: 1,
-    padding: Spacing.md || 16,
+    padding: Spacing.md,
   },
   botonVolver: {
-    paddingVertical: 8,
-    marginBottom: 12,
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   textoBotonVolver: {
-    fontSize: 16,
-    color: Colors.primary || '#FF8A00',
-    fontWeight: '600',
+    fontSize: Typography.sizes.md,
+    color: Colors.primary,
+    fontFamily: Typography.fonts.bodySemiBold,
   },
   seccionTitulo: {
     fontSize: Typography.sizes.sm,
-    fontWeight: 'bold',
-    color: '#8E8E93',
-    marginTop: 20,
-    marginBottom: 8,
+    fontFamily: Typography.fonts.bodyBold,
+    color: Colors.textSecondary,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
     textTransform: 'uppercase',
   },
   opcionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: Radius.md || 10,
+    backgroundColor: Colors.card,
+    padding: Spacing.base,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   opcionBoton: {
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: Radius.md || 10,
-    marginBottom: 8,
+    backgroundColor: Colors.card,
+    padding: Spacing.base,
+    borderRadius: Radius.md,
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   opcionTexto: {
-    fontSize: 16,
-    color: '#1C1C1E',
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyRegular,
+    color: Colors.text,
   },
   botonCerrar: {
-    backgroundColor: '#FF3B30',
-    padding: 16,
-    borderRadius: Radius.md || 10,
-    marginTop: 32,
+    backgroundColor: Colors.error,
+    padding: Spacing.base,
+    borderRadius: Radius.md,
+    marginTop: Spacing.xxl,
     alignItems: 'center',
   },
   textoCerrar: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: Colors.white,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.bodyBold,
   },
 });

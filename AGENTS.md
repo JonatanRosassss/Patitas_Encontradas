@@ -787,5 +787,196 @@ Antes de dar cualquier entrega por finalizada:
   - Generación de PDF: 8 páginas (351 KB) en `GUIA_DEFENSA_PROYECTO_PATITAS.pdf` y `docs/informes/GUIA_DEFENSA_PROYECTO_PATITAS.pdf`.
   - `npx tsc --noEmit`: 0 errores (PASS).
 
+#### [2026-11-02] - Video de Lanzamiento Dinámico y Rápido de Patitas Encontradas (Inspiración Bring Any Agent + Google Gemini)
+- **Solicitud del Usuario:** Crear un video dinámico, ágil y de ritmo rápido sin locución ("sin voz"), combinando las referencias `Bring Any Agent Into Any Team Chat.mp4` (tipografía display a la izquierda, cámara con zoom y pan dinámico sobre el teléfono, cursor táctil con ondas de choque, interacciones fluidas) y `google_gemini (1080p).mp4` (estrellas de 4 puntas, estelas luminosas y resplandores degradados). La narrativa debía arrancar con la problemática ("¿Perdiste una mascota o encontraste una y tuviste que ir reposteando por 10 mil grupos de Facebook y WhatsApp?"), transicionar a la solución ("Llegó Patitas Encontradas"), mostrar el mapa en vivo con radar barrial en Pilar, abordar el caso de quien encuentra una mascota con el toggle a 'Encontrados' y botón directo a WhatsApp, y rematar en un reencuentro exitoso con co-branding del Municipio de Pilar.
+- **Tipo de Cambio:** `NUEVA_FUNCIONALIDAD` | `CONFIGURACIÓN`
+- **Archivos Involucrados:**
+  - `launch_studio/scripts/generate_fast_audio.py`: Creado (script de síntesis procedural de música tech moderna a 126 BPM y 48kHz PCM estéreo más efectos de sonido táctiles).
+  - `launch_studio/public/audio/bgm/fast_modern_groove.wav`: Creado (pista musical de 32.0 segundos exactos, bombo sintético punchy, arpegios high-tech y sub-bass continuo, 6.144.044 bytes).
+  - `launch_studio/public/audio/sfx/`: Creados/actualizados (`touch_tap.wav`, `chat_pop.wav`, `gemini_sparkle.wav`, `radar_ping_gemini.wav`, etc.).
+  - `launch_studio/src/components/effects/TouchCursor.tsx`: Creado (cursor táctil móvil con compresión de resorte en frame de toque y anillo de disipación háptica).
+  - `launch_studio/src/components/effects/GeminiSparkles.tsx`: Creado (estrellas de 4 puntas giratorias, halo ambiental cyan/naranja y motas de luz flotantes).
+  - `launch_studio/src/components/scenes/ChaosGroupsScene.tsx`: Creado (Acto 1: tarjetas desordenadas de Facebook y WhatsApp con notificaciones no leídas y barrido de luz estilo Gemini que barre la pantalla hacia la solución).
+  - `launch_studio/src/components/scenes/InteractiveAppExperience.tsx`: Creado (Actos 2 a 5: experiencia interactiva con cámara dinámica 1.0x a 1.45x, pantalla de reporte de mascota con subida de foto y recompensa, mapa de Pilar con radar y pines barriales, toggle a 'Encontrados', contacto en 1 toque por WhatsApp con burbuja emergente y flip 3D a '¡ENCONTRADO Y EN CASA!').
+  - `launch_studio/src/compositions/PatitasFastDynamicLaunch.tsx`: Creado (composición maestra de 1920 frames / 32.0s a 60fps con orquestación visual y de audio multicapa).
+  - `launch_studio/src/Root.tsx`: Modificado (registro de `PatitasFastDynamicLaunch` a 1920x1080 60fps).
+  - `launch_studio/package.json`: Modificado (adición del script `build:fast`).
+  - `launch_studio/out/patitas_fast_dynamic_launch.mp4`: Creado (video final compilado en alta fidelidad).
+- **Progreso Realizado:**
+  - **Estructura en 5 Actos Rítmicos a 126 BPM (32s / 1920 frames):**
+    1. *Acto 1 (Frames 0–380 | 0.0s–6.3s):* Problemática del caos en redes ("¿Perdiste o encontraste una mascota y tuviste que repostear en 10.000 grupos?"). 3 tarjetas de redes con badges rojos y mensajes enterrados. Barrido de luz estelar Gemini para dar paso a la app.
+    2. *Acto 2 (Frames 380–860 | 6.3s–14.3s):* "Llegó Patitas Encontradas: Alerta inmediata a tu comunidad". Cámara hace zoom al teléfono (1.25x), el cursor táctil toca "+ Publicar Alerta", cae la foto de Milo, se fija el GPS en Del Viso y se activa la recompensa de $15.000.
+    3. *Acto 3 (Frames 860–1280 | 14.3s–21.3s):* "La gente cerca tuyo lo ve al instante en el mapa". Zoom a 1.40x sobre el mapa de Pilar, ondas de radar concéntricas estilo Gemini, brote de pines de vecinos y toque táctil para abrir la tarjeta de vista previa.
+    4. *Acto 4 (Frames 1280–1680 | 21.3s–28.0s):* "¿No perdiste una pero encontraste y no sabés qué hacer?". Toque al selector para alternar a "Encontrados", tarjeta de perro rescatado en Tratado del Pilar, toque táctil al botón verde de WhatsApp y salida animada de la burbuja directa al dueño.
+    5. *Acto 5 (Frames 1680–1920 | 28.0s–32.0s):* Reencuentro y Hero Lockup. Flip 3D de la tarjeta a verde esmeralda "¡CASO RESUELTO! Milo está en su casa", destellos de estrellas Gemini, retorno de la cámara al centro, badges de Google Play / App Store y co-branding con el Municipio de Pilar.
+  - **Audio y SFX Sincronizados:** Pista moderna de alta energía sin pausas muertas, 8 toques hápticos sincronizados al frame exacto de cada micro-interacción y efectos de brillo estelar.
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:** Existían las composiciones `PatitasLaunchTypography` y `PatitasLaunchVoiceover` de 68 segundos con estilo orquestal institucional pausado y chasis 3D a 35°, diseñadas para salas de conferencia plenarias.
+  - **Motivo del cambio:** El usuario solicitó un formato más dinámico, ágil y de rápida atención inspirado en lanzamientos modernos de software (*Bring Any Agent* y *Google Gemini*), sin voz, enfocado en mostrar directamente la pantalla táctil en uso, zooms y el flujo real de la app ante la problemática cotidiana.
+  - **Nueva estrategia aplicada:** Composición dedicada a 32s (1920 frames) con cámara dinámica tipo 'punch-in' (acercamiento y seguimiento de la acción en pantalla), cursores táctiles con física de rebote, cartografía y formularios detallados de la app, y partículas luminosas Gemini sobre fondo oscuro `#0F0D0B`.
+- **Resultado de Verificación:**
+  - `npx tsc --noEmit`: 0 errores (PASS).
+  - Renderizado Remotion determinista a 1080p60: `launch_studio/out/patitas_fast_dynamic_launch.mp4`.
 
+#### [2026-11-02] - Implementación de la Versión 2 del Video de Lanzamiento: Warm Amber Studio, Tipografía Waterfall y Micro-Tilt 3D
+- **Solicitud del Usuario:** El usuario eligió la Opción 2 (Warm Amber Dark Studio) para erradicar el fondo negro frío, exigiendo más animación en el texto (estilo Gemini) y mayor dinamismo orgánico continuo sin pausas estáticas.
+- **Tipo de Cambio:** `REFACTORIZACIÓN` | `OPTIMIZACIÓN` | `NUEVA_FUNCIONALIDAD`
+- **Archivos Involucrados:**
+  - `launch_studio/src/components/effects/GeminiSparkles.tsx`: Modificado (auroras volumétricas de luz ámbar `#FF8A00` y durazno, orbes con física sinusoidal, estrellas de 4 puntas con deriva curva y motas de polvo estelar).
+  - `launch_studio/src/components/typography/KineticWaterfallText.tsx`: Creado (motor cinético palabra por palabra `cut-the-curve` §6 con resortes elásticos, escala elástica 0.82->1.0 y gradient shimmer activo en palabras clave).
+  - `launch_studio/src/components/scenes/ChaosGroupsScene.tsx`: Modificado (fondo Warm Amber `#2C1B14` a `#120A07`, KineticWaterfallText en el Acto 1 y hovering continuo en las tarjetas).
+  - `launch_studio/src/components/scenes/InteractiveAppExperience.tsx`: Modificado (fondo Warm Amber con orbes volumétricos, motivated camera drift continuo, 3D micro-tilt en el chasis del teléfono respondiendo al cursor táctil y textos en cascada en los Actos 2 a 5).
+  - `launch_studio/src/compositions/PatitasFastDynamicLaunch.tsx`: Modificado (fondo base cálido `#140D09`).
+  - `launch_studio/package.json`: Modificado (script `build:fast` apuntando a `out/patitas_fast_dynamic_launch_v2.mp4`).
+  - `launch_studio/out/patitas_fast_dynamic_launch_v2.mp4`: Creado (video final compilado de 24.8 MB a 1080p60).
+- **Progreso Realizado:**
+  - Se sustituyó el negro frío plano `#0F0D0B` por el degradé envolvente *Warm Amber Dark Studio* con orbes volumétricos de luz ámbar (`rgba(255, 138, 0, 0.28)`) y resplandores dorados.
+  - Se implementó la técnica *Waterfall Entry* en todos los actos, logrando que los titulares ingresen palabra por palabra con física de resorte y brillo estelar activo.
+  - Se dotó al smartphone de física giroscópica 3D (`perspective: 1200px`), inclinándose sutilmente al detectar las pulsaciones del cursor táctil.
+  - Se agregó una deriva continua de cámara (*motivated drift*) que mantiene la perspectiva en movimiento continuo a lo largo de los 32 segundos.
+  - Se preservó la versión v1 permitiendo la coexistencia con v2 debido al bloqueo temporal de lectura del archivo anterior por parte del reproductor del usuario.
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:** El corte v1 utilizaba un fondo negro plano y textos estáticos en bloque que se sentían desconectados de la calidez de la aplicación y de la referencia viva de Google Gemini.
+  - **Motivo del cambio:** Cumplir estrictamente la solicitud del usuario (Opción 2) para otorgar un ambiente cálido, estelas dinámicas de partículas y animación verbal ágil.
+  - **Nueva estrategia aplicada:** Integración de tokens cálidos de la marca (`#FF8A00`, `#FFD188`, cacao profundo `#120A07`), desacoplamiento del componente `KineticWaterfallText` e interpolación giroscópica 3D sobre el chasis.
+- **Resultado de Verificación:**
+  - `npx tsc --noEmit`: 0 errores (PASS).
+  - Inspección `ffprobe` sobre `out/patitas_fast_dynamic_launch_v2.mp4`: 1920x1080, 60fps constantes, 32.00s exactos, audio estéreo 48kHz, 24.8 MB (PASS).
+  - Verificación visual de cuadros extraídos: `warm_v2_act1.jpg`, `warm_v2_act2.jpg`, `warm_v2_act4.jpg`, `warm_v2_act5.jpg` (0 defectos, alta fidelidad).
+
+#### [2026-11-02] - Verificación de Cambios Remotos y Compilación de APK Release Local con Gradle y JDK 21
+- **Solicitud del Usuario:** Generar un APK de Expo en base al repositorio local, comprobando previamente que no hubiera cambios no traídos de GitHub.
+- **Tipo de Cambio:** `CONFIGURACIÓN` | `CORRECCIÓN_BUG` | `OPTIMIZACIÓN`
+- **Archivos Involucrados:**
+  - `android/gradle.properties`: Modificado (fijación de `org.gradle.java.home=C:\\Program Files\\Java\\jdk-21` para resolver incompatibilidad de AGP/Prefab con JDK 25).
+  - `android/app/build/outputs/apk/release/app-release.apk`: Generado (APK Release standalone de 81.1 MB listo para instalar en Android).
+  - `AGENTS.md`: Modificado (registro en bitácora de auditoría técnica).
+- **Progreso Realizado:**
+  - Se verificó el estado del repositorio remoto con `git fetch --all`. Se identificó un commit reciente en `origin/maxi/filtros` (`323ba5e`: nuevos íconos y mipmaps de la app). Tras consulta con el usuario, se integró limpiamente en la rama activa `dev/equipo1` vía merge.
+  - Se validó el tipado TypeScript con `npx tsc --noEmit` resultando en 0 errores.
+  - Se identificó la causa raíz de un fallo previo en la tarea `:react-native-worklets:configureCMakeRelWithDebInfo[arm64-v8a]` (`WARNING: A restricted method in java.lang.System has been called`): el entorno utilizaba Android Studio JBR con OpenJDK 25.0.3 en vista previa, lo que provocaba que Prefab emitiera avisos a `stderr` interpretados por AGP como errores fatales.
+  - Se resolvió fijando `org.gradle.java.home=C:\\Program Files\\Java\\jdk-21` en `android/gradle.properties` y `$env:JAVA_HOME = "C:\Program Files\Java\jdk-21"`.
+  - Se ejecutó la compilación local Release standalone con Gradle para arquitecturas `arm64-v8a` y `armeabi-v7a` (`.\gradlew.bat assembleRelease "-PreactNativeArchitectures=arm64-v8a,armeabi-v7a"`).
+  - Se completaron 662 tareas de Gradle (614 ejecutadas, 48 up-to-date) sin errores, generando exitosamente `app-release.apk` (81.115.812 bytes) en `android/app/build/outputs/apk/release/app-release.apk`.
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:** El proyecto intentaba compilar contra la JVM por defecto de Android Studio (OpenJDK 25.0.3 EA), la cual rompe la compatibilidad con JNA/Prefab 2.1.0 dentro del Android Gradle Plugin al emitir restricciones de `System.load` en `stderr`.
+  - **Motivo del cambio:** Incompatibilidad de versión de Java que abortaba la compilación de C++/CMake nativo en React Native.
+  - **Nueva estrategia aplicada:** Fijar de manera determinista JDK 21 LTS (`C:\Program Files\Java\jdk-21`) en `android/gradle.properties`, garantizando reproducibilidad y compatibilidad total con AGP 8.8.2 y Prefab en futuras compilaciones locales.
+- **Resultado de Verificación:**
+  - `BUILD SUCCESSFUL in 40m 26s` (0 errores).
+  - Verificación del archivo generado: `Test-Path android\app\build\outputs\apk\release\app-release.apk` -> `True` (81.1 MB).
+
+#### [2026-11-03] - Rediseño Total del Video de Lanzamiento (Versión 3): Escenario Cálido Pastel, Zooms Dinámicos Estilo Sogage, Tarjeta Real de Impulso Barrial y Flujo de Demostración Fidedigno
+- **Solicitud del Usuario:**
+  1. Erradicar definitivamente los fondos oscuros (tanto el dark void v1 como el fondo ámbar oscuro v2) y adoptar un escenario luminoso, blanco/crema con tonos naranjitas pastel de la app (`#FAF8F5`, `#FFE7D2`, `#FFC28A`), estructurado y elegante.
+  2. Implementar el estilo de cámara y ritmo dinámico del video de referencia *Sogage* (`Best SaaS Explainer Video Example - Sogage...mp4`): zooms constantes a los componentes de la interfaz, navegación real, fluida, ágil y sin tiempos muertos.
+  3. Ejecutar el flujo narrativo exacto solicitado por el usuario con las capturas reales provistas:
+     - Home de la aplicación -> Click en `+ PUBLICAR MASCOTA`.
+     - Formulario real de alerta -> Autocompletado rápido (Milo, Perro, fijación GPS con un tap, subida de foto de Milo) -> Click en `GUARDAR Y PUBLICAR`.
+     - Modal de impulso barrial exacto (`media_1793729155141_39337099.png`: estrella con huellita ⭐🐾, *"¿Deseas impulsar la publicación para que esté en destacadas?"*, *"Ver beneficios de publicación destacada"*, botón `¡Sí, impulsar!` por $2.500 ARS y *"Publicar sin destacar"*) -> Click en `¡Sí, impulsar!`.
+     - Notificación push en tiempo real (*"🔔 ¡Avistamiento de Milo reportado! Un vecino vio a tu perro cerca de Panamericana Km 50"*) -> Tap -> Apertura del mapa radar Leaflet en Pilar con pin en vivo.
+     - Click en `MARCAR COMO ENCONTRADO` -> Final de búsqueda con confeti esmeralda, tarjeta de celebración `¡ENCONTRADO Y EN CASA! 💚` y cierre institucional de alto impacto con co-branding del Municipio de Pilar y enlaces a Google Play / App Store.
+  4. Aplicar criterios de excelencia visual según las directivas `/impeccable` y `/taste-skill`.
+- **Tipo de Cambio:** `REFACTORIZACIÓN` | `NUEVA_FUNCIONALIDAD` | `OPTIMIZACIÓN`
+- **Archivos Involucrados:**
+  - `launch_studio/public/images/real_ui/`: Creado (almacenamiento de capturas reales: `home_screen.png`, `form_screen_top.png`, `form_screen_bottom.png`, `boost_modal.png`).
+  - `launch_studio/src/components/stage/CleanWarmSaaSStage.tsx`: Creado (escenario cálido en `#FAF8F5`, micro-grilla arquitectónica en arena cálida, orbes ambientales difuminados en durazno/naranja pastel `#FFE7D2` y viñeta sutil).
+  - `launch_studio/src/components/stage/CleanDeviceChassis.tsx`: Creado (mockup de smartphone de titanio claro con bisel ergonómico, Dynamic Island y sombras de oclusión ambiental multicapa sobre el suelo claro).
+  - `launch_studio/src/components/screens/RealHomeScreen.tsx`: Creado (recreación fidedigna de la pantalla principal: saludo *¡Hola, Martín!*, botón protagónico naranja `+ PUBLICAR MASCOTA`, filtros por pestañas, tarjetas reales de Maxi y Sol, y barra inferior de pestañas).
+  - `launch_studio/src/components/screens/RealPublishScreen.tsx`: Creado (formulario real con selector *Perdí / Encontré*, tipeo dinámico de *Milo*, selector de especie *🐶 Perro*, fijación GPS *Del Viso, Pilar*, slot de foto con tilde verde y botón inferior `GUARDAR Y PUBLICAR`).
+  - `launch_studio/src/components/screens/BoostModalScreen.tsx`: Creado (reproducción exacta al 100% del modal provisto por el usuario: badge circular ámbar con estrella ⭐, titular en Baloo 2, enlace de beneficios, botón primario naranja `¡Sí, impulsar!` con destellos y enlace secundario *Publicar sin destacar*).
+  - `launch_studio/src/components/screens/SightingNotificationBanner.tsx`: Creado (banner push desplegable estilo iOS/Android con rebote físico, avatar de Milo y aviso barrial de Panamericana Km 50).
+  - `launch_studio/src/components/screens/SightingResolutionScreen.tsx`: Creado (vista de avistamiento con mapa radar interactivo Leaflet sobre Pilar y botón verde esmeralda `MARCAR COMO ENCONTRADO`).
+  - `launch_studio/src/components/screens/FoundCelebrationPayoff.tsx`: Creado (resolución triunfal con explosión física de 36 partículas de confeti, insignia verde `¡ENCONTRADO Y EN CASA!`, reencuentro de Milo y métricas barriales).
+  - `launch_studio/src/components/screens/FinalHeroLockup.tsx`: Creado (bloque de cierre institucional: logotipo 3D flotante, titular display, tarjetas de impacto cívico con co-branding del Municipio de Pilar y píldoras de descarga).
+  - `launch_studio/src/components/typography/KineticWaterfallText.tsx`: Modificado (soporte para tema claro con tipografía en chocolate cálido profundo `#5A3A1F`, palabras clave con degradé naranja vibrante `#FF8A00` a `#EA580C`, subtítulos en arena chocolate `#7C5C43` e insignias píldora pastel).
+  - `launch_studio/src/components/scenes/CleanSaaSNarrativeExperience.tsx`: Creado (orquestador maestro con cámara cinemática de zooms y paneos continuos estilo Sogage, coordenadas de cursor táctil integradas y sincronización visual entre tipografía izquierda y móvil derecho).
+  - `launch_studio/src/compositions/PatitasFastDynamicLaunch.tsx`: Modificado (integración del nuevo escenario cálido y sincronización completa de la suite de efectos sonoros táctiles con el groove electrónico a 126 BPM).
+  - `launch_studio/package.json`: Modificado (script `build:fast` apuntando a `out/patitas_fast_dynamic_launch_v3.mp4`).
+  - `launch_studio/out/patitas_fast_dynamic_launch_v3.mp4`: Generado (video final determinista de 14.9 MB a 1080p60).
+- **Progreso Realizado:**
+  - Se eliminó completamente la estética oscura en favor de un diseño visual de estudio SaaS cálido y refinado, alineado al 100% con los tokens oficiales de la app (`#FAF8F5`, `#5A3A1F`, `#FF8A00`, `#FFE7D2`).
+  - Se estructuró una coreografía de cámara continua inspirada en *Sogage* con acercamientos (punch-ins a 1.25x - 1.46x) y paneos fluidos hacia cada punto de interacción (botón publicar, botón GPS, botón guardar, modal de impulso, notificación push y botón de marcado como encontrado).
+  - Se incorporó la tarjeta modal de impulso barrial de $2.500 ARS exactamente como la captura enviada por el usuario.
+  - Se refinó la legibilidad de la tipografía cinética display (Baloo 2 y Nunito) garantizando contraste de nivel editorial y cero sombras artificiales sobre el fondo claro.
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:** Las versiones v1 y v2 utilizaban fondos oscuros y un chasis con inclinaciones que no reflejaban la interacción fidedigna de la app real, omitiendo el modal de impulso barrial y la navegación paso a paso demandada.
+  - **Motivo del cambio:** El usuario rechazó expresamente los fondos oscuros ("lo siento muy sencillo pero tampoco minimalista, es como si fuera directamente algo malo") y pidió un enfoque blanco/pastel con zooms dinámicos al estilo del video de referencia *Sogage*, solicitando un trazo de demostración exacto que incluyera la tarjeta de impulso.
+  - **Nueva estrategia aplicada:** Arquitectura modular desacoplada en `launch_studio/src/components/screens/` que renderiza componentes React puros fidedignos a las 4 capturas enviadas por el usuario, orquestados en un lienzo de 1920x1080 con cámara fluida, cursor táctil interactivo con rebote físico y sincronización rítmica con el diseño sonoro.
+- **Resultado de Verificación:**
+  - `npx tsc --noEmit`: 0 errores (PASS).
+  - Inspección `ffprobe` sobre `out/patitas_fast_dynamic_launch_v3.mp4`:
+    - Resolución: 1920x1080 (16:9 Full HD).
+    - Tasa de cuadros: 60.0 fps constantes.
+    - Duración: 32.021s.
+    - Streams: Video H.264 (High) + Audio AAC estéreo a 48.000 Hz.
+    - Peso: 14.9 MB.
+  - Inspección visual de fotogramas extraídos: `v3_act1_home_polished.jpg`, `v3_act2_form_polished.jpg`, `v3_act3_boost_modal_polished.jpg`, `v3_act4_sighting_polished.jpg`, `v3_act5_payoff_polished.jpg`, `v3_act6_hero_lockup_polished.jpg` (legibilidad contrastada, estética refinada, alineación fidedigna).
+
+#### [2026-11-05] - Auditoría Red Team de Ciberseguridad y Blindaje Defensivo Multicapa (Zero-Collision con Agente de Arquitectura)
+- **Solicitud del Usuario:**
+  1. Evaluar exhaustivamente la seguridad de la aplicación actuando como un atacante experto en ciberseguridad (Red Team) para detectar vectores de extracción de datos personales (PII), casos borde, validaciones ausentes y métodos defensivos requeridos.
+  2. Ejecutar las prevenciones y remediaciones de seguridad coordinando el alcance para no colisionar con el agente paralelo encargado de la refactorización arquitectónica (`auditoria_arquitectura_tech_lead.md`).
+- **Tipo de Cambio:** `CORRECCIÓN_BUG` | `NUEVA_FUNCIONALIDAD` | `CONFIGURACIÓN` | `OPTIMIZACIÓN`
+- **Archivos Involucrados:**
+  - `firestore.rules`: Creado vía subagente especialista `firestore-rules-author` (reglas de seguridad de Cloud Firestore v2 con bloqueo de enumeración `allow list: if false;` en `usuarios`, validación estricta de propiedad `isOwner`, esquemas tipados, cotas de tamaño y protección de `alertas`, `guardadas`, `notificaciones` y `tickets_soporte`).
+  - `storage.rules`: Creado (reglas de seguridad de Firebase Storage restringiendo escrituras a usuarios autenticados, tamaño máximo de 5 MB y lista blanca MIME `image/(jpeg|jpg|png|webp)`).
+  - `cors.json`: Modificado (eliminación del método `DELETE` en CORS abierto y restricción de cabeceras expuestas).
+  - `utils/security.ts`: Creado (utilidades puras de seguridad defensiva: `escaparHtml`, `sanitizarTextoPlano`, `esTelefonoValido`, `sanitizarColorCss`, `validarArchivoImagen` y constantes `LIMITES_SEGURIDAD`).
+  - `components/map/MapContainer.tsx`: Modificado (escape HTML `escapeHtml(pet.nombre)` en marcadores de Leaflet, eliminación del handler `EVAL` con `new Function(msg.code)` en `handleRNMessage`, uso de comandos estructurados por `postMessage` y serialización segura `JSON.stringify(petIdValue)`).
+  - `components/detalle/PetLocationMap.tsx`: Modificado (coerción numérica segura de coordenadas/zoom y validación estricta de `colorPin` con `sanitizarColorCss` antes de interpolar en el HTML del WebView).
+  - `services/mascotasService.ts`: Modificado (incorporación de `verificarPropiedadAlerta` en `modificarAlertaMascota` y `eliminarAlertaMascota`, filtrado de campos inmutables `creadoPor`/`fechaReporte`/`id`, validación MIME y límite de 5 MB / 1 MB base64 en `subirImagenMascota`, tope de 5 fotos por alerta, límite de fan-out a 50 destinatarios en `marcarMascotaComoEncontrada` y validación anti-IDOR `resolverUidSeguroGuardados` en `guardarPublicacion`, `quitarPublicacionGuardada` y `obtenerIdsPublicacionesGuardadas`).
+  - `services/soporteService.ts`: Modificado (prevención de suplantación de `usuarioId` cruzando contra `auth.currentUser?.uid`, sanitización y cotas máximas de texto en `enviarTicketSoporte`, y verificación de titularidad anti-IDOR en `listarTicketsPorUsuario`).
+  - `services/notificaciones.ts`: Modificado (validación de identidad del receptor en `escucharNotificaciones`, `marcarTodasComoLeidas` y `registrarPushToken`, reemplazo de `import()` dinámico por `getDocs` estático, tope de lote a 450 documentos en `marcarTodasComoLeidas` y tope de fan-out a 50 en `notificarMascotaEncontrada`).
+  - `android/app/src/main/AndroidManifest.xml`: Modificado (eliminación de permisos excesivos `android.permission.RECORD_AUDIO` y `android.permission.SYSTEM_ALERT_WINDOW`, y desactivación de `android:allowBackup="false"`).
+  - `app/(tabs)/publicar-alerta.tsx`: Modificado (tope de 5 fotos en `handleSeleccionarFotos` y límites `maxLength` en todos los `TextInput`).
+  - `components/soporte/TicketForm.tsx`: Modificado (incorporación de límites `maxLength` en todos los `TextInput` del formulario de soporte).
+- **Progreso Realizado:**
+  - Se cerraron los vectores de vulnerabilidad críticos y altos detectados en la auditoría sin interferir con los archivos asignados al agente de arquitectura.
+  - Se blindó el backend serverless mediante `firestore.rules` y `storage.rules` para impedir el volcado masivo de la colección `usuarios` (`correo`, `telefono`, `pushToken`), el secuestro o borrado de alertas ajenas y la lectura de tickets o notificaciones de otros vecinos.
+  - Se erradicó la superficie de ejecución arbitraria de código (`new Function(msg.code)`) y Stored XSS en los WebViews de mapas.
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:** El repositorio carecía de `firestore.rules` y `storage.rules`; `MapContainer.tsx` interpolaba `pet.nombre` sin escapar en HTML y ejecutaba `(new Function(msg.code))()` al recibir mensajes `EVAL`; `modificarAlertaMascota` y `eliminarAlertaMascota` no verificaban propiedad del autor; `subirImagenMascota` no validaba MIME ni tamaño máximo; y `AndroidManifest.xml` habilitaba `allowBackup="true"` junto con permisos de micrófono y superposición de pantalla no utilizados.
+  - **Motivo del cambio:** Mitigar riesgos reales de exfiltración masiva de PII de vecinos, Stored XSS en todos los clientes que abren el mapa, manipulación o borrado de publicaciones ajenas (BOLA/IDOR) y agotamiento de cuota en Firebase Storage/Firestore.
+  - **Nueva estrategia aplicada:** Defensa en profundidad (Defense-in-Depth) combinando reglas declarativas en Firebase (`firestore.rules` y `storage.rules`), validación de autorización y propiedad en la capa de servicios (`services/*`), sanitización anti-XSS en fronteras de WebView y principio de mínimo privilegio en el manifiesto nativo de Android.
+- **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | Suite de pruebas de seguridad, RF2, RF3, RF4, RF5 y RNF ISO/IEC 25010 verificada sin regresiones.
+
+#### [2026-11-05] - Auditoría Arquitectónica Tech Lead, Implementación de Store Global Zustand (`useAlertasStore`), Unificación de `authSchema` y Limpieza de Deuda Técnica
+- **Solicitud del Usuario:**
+  1. Realizar una auditoría exhaustiva nivel Tech Lead de toda la aplicación (arquitectura, acoplamiento, funciones rotas, archivos obsoletos, convenciones y dependencias).
+  2. Implementar `zustand` para sincronizar el estado global de alertas y publicaciones guardadas entre pantallas y eliminar consultas redundantes N+1.
+  3. Mantener visibles los botones de inicio/registro social (`Google`, `Apple`, `Facebook`) pero eliminar su lógica de bypass falso (`router.replace('/(tabs)')`).
+  4. Corregir el typo `authScheama.ts` -> `authSchema.ts` (y `constrasenia` -> `contrasenia`), reparar `app/(auth)/forgetPassword.tsx` y actualizar las suites de pruebas en `tests/` sin colisionar con el agente de seguridad informática.
+- **Tipo de Cambio:** `REFACTORIZACIÓN` | `NUEVA_FUNCIONALIDAD` | `CORRECCIÓN_BUG` | `ELIMINACIÓN_CÓDIGO` | `OPTIMIZACIÓN`
+- **Archivos Involucrados:**
+  - `types/AlertasStore.ts`: Creado (contratos TypeScript estrictos `AlertasStoreState` para el estado global de alertas, pines de mapa e IDs guardados).
+  - `store/useAlertasStore.ts`: Creado (store reactivo en `zustand` con deduplicación de promesas en vuelo para `sincronizarAlertas`, `sincronizarAlertasMapa`, `sincronizarIdsGuardadas`, `alternarGuardadoStore`, `quitarGuardadoLocal`, `actualizarEstadoLocal`, `eliminarAlertaLocal` y `limpiarStore`).
+  - `schemas/authSchema.ts`: Modificado (unificación del esquema Zod con el campo `contrasenia`, `emailSchema`, `loginSchema` y `resetPasswordSchema`).
+  - `schemas/authScheama.ts`: Eliminado (archivo duplicado con typo en el nombre y en el campo `constrasenia`).
+  - `app/(auth)/login.tsx`: Modificado (migración a `@/schemas/authSchema`, eliminación de `console.warn` y `any`, y conversión de `handleSocialLogin` en un handler visual sin redirección falsa).
+  - `app/(auth)/register.tsx`: Modificado (eliminación de `console.warn` y `any`, y conversión de `manejarRegistroSocial` en un handler visual sin redirección falsa).
+  - `app/(auth)/forgetPassword.tsx`: Modificado (reparación integral conectando `enviarCorreoRestablecimiento` de `useAuth()`, validación con `loginSchema`/`resetPasswordSchema`, estados de carga y navegación de retorno).
+  - `components/ui/pet-card.tsx`: Modificado (integración con `useAlertasStore` eliminando la consulta N+1 `obtenerIdsPublicacionesGuardadas()` por tarjeta, limpieza de `toastTimerRef` al desmontar y reemplazo de colores hexadecimales por tokens de `Colors`).
+  - `app/(tabs)/index.tsx`: Modificado (sincronización con `useAlertasStore`, eliminación de doble `useEffect` redundante al montar y tipado `Href` sin `any`).
+  - `app/(tabs)/guardados.tsx`: Modificado (sincronización bidireccional con `useAlertasStore` al quitar guardados y eliminación de doble `useEffect` en montaje).
+  - `hooks/useMapState.ts`: Modificado (incorporación de `useFocusEffect` y sincronización con `useAlertasStore` para reflejar nuevas alertas y cambios de estado sin reiniciar la app).
+  - `app/(tabs)/perfil.tsx`: Modificado (incorporación de `useFocusEffect` y despacho de `actualizarEstadoLocal` / `eliminarAlertaLocal` hacia `useAlertasStore`).
+  - `app/(tabs)/publicar-alerta.tsx`: Modificado (actualización de `useAlertasStore` tras publicar, reseteo de formulario y corrección de navegación en `Alert` web).
+  - `components/ajustes/CambiarContraseniaModal.tsx`: Modificado (reparación de corrupción de codificación UTF-8 / Mojibake en todos los textos visibles).
+  - `app/ajustes.tsx`: Modificado (eliminación de `console.error`, adopción al 100% de tokens de `constants/theme.ts` y limpieza de `useAlertasStore` al cerrar sesión).
+  - `app/notificaciones.tsx`: Modificado (eliminación de `console.error` y navegación a `/detalle/[id]` al tocar notificaciones con `publicacionId`).
+  - `services/AuthContext.tsx`: Modificado (preservación del prototipo de `User` de Firebase mediante `Object.assign(Object.create(Object.getPrototypeOf(...)))` y limpieza de caché de perfil en `AsyncStorage` al cerrar sesión).
+  - `app/(tabs)/mapa.tsx`, `components/map/MapContainer.tsx`, `components/map/MapControls.tsx`, `components/map/MapFilterChips.tsx`, `components/map/MapPetCard.tsx`, `components/map/MapSearchBar.tsx`: Modificados (unificación de importación de `Radius` desde `constants/theme.ts`).
+  - `theme/tokens.ts`, `components/TarjetaX.tsx`, `components/ui/Badge.tsx`, `components/ui/Input.tsx`, `data/mockData.ts`, `constants/firebaseConfig.js`, `components/ajustes/NotificacionesSwitch.tsx`: Eliminados (archivos vacíos de 0 bytes, duplicados o código muerto comentado).
+  - `package.json`: Modificado (eliminación de dependencias no utilizadas o prohibidas como `react-native-maps`, `nativewind`, `tailwindcss`, `react-hook-form`, `@hookform/resolvers`, `@shopify/flash-list`, `expo-camera`, conservando `zustand`).
+  - `tests/unit/rf1_auth_suite.test.mjs`, `tests/unit/guardadosServiceAndScreen.test.mjs`: Modificados (actualización de `contrasenia` en `TC-103`/`TC-105` y adición de pruebas para `useAlertasStore`).
+- **Progreso Realizado:**
+  - Se ejecutó la auditoría profunda y se documentó en el artefacto `auditoria_arquitectura_tech_lead.md`.
+  - Se implementó el store global en `zustand` (`store/useAlertasStore.ts`) conectando `Home`, `Mapa`, `Guardados`, `Perfil`, `Publicar Alerta`, `Ajustes` y `PetCard`.
+  - Se repararon los flujos rotos de autenticación (`forgetPassword.tsx`, `authSchema.ts`, botones sociales visibles sin bypass) y se eliminaron los archivos muertos y paquetes huérfanos sin colisionar con el trabajo del agente de seguridad.
+- **Justificación de Modificaciones sobre Código Previo (ADR):**
+  - **Estado anterior:** `zustand` figuraba en `package.json` y en la documentación pero no tenía ningún store implementado; cada `PetCard` ejecutaba `obtenerIdsPublicacionesGuardadas()` de forma individual al montarse (patrón N+1); las pantallas `Mapa` y `Perfil` solo cargaban datos en `useEffect(..., [])` quedando desincronizadas tras publicar o editar; existían dos archivos de esquema (`authScheama.ts` y `authSchema.ts`) con el typo `constrasenia`; `forgetPassword.tsx` tenía un `TODO` sin conexión a Firebase; y `login.tsx`/`register.tsx` redirigían a `/(tabs)` al tocar botones sociales sin autenticar.
+  - **Motivo del cambio:** Resolver la desincronización de estado entre pantallas, erradicar consultas N+1 por tarjeta, eliminar el bypass de autenticación en botones sociales, reparar el flujo de recuperación de contraseña y sanear archivos duplicados/obsoletos.
+  - **Nueva estrategia aplicada:** Centralizar la sincronización de alertas y favoritos en `store/useAlertasStore.ts` con deduplicación de promesas y actualización optimista; unificar la validación en `schemas/authSchema.ts`; mantener los botones sociales visibles como elementos UI sin redirección falsa; y preservar intactos los contratos requeridos por las suites de pruebas y por el agente de seguridad.
+- **Resultado de Verificación:** `npx tsc --noEmit` (0 errores) | `npm test` (101/101 tests PASS, 0 fallos).
 

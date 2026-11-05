@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing } from '../../constants/theme';
-import { Radius } from '../../theme/tokens';
+import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 
 export interface MapSearchBarProps {
   value: string;

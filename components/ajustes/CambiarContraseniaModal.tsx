@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -67,27 +67,27 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
 
     // Validaciones previas
     if (!contraseniaActual.trim()) {
-      setMensajeError('Ingres├í tu contrase├▒a actual.');
+      setMensajeError('Ingresá tu contraseña actual.');
       return;
     }
 
     if (!nuevaContrasenia.trim()) {
-      setMensajeError('Ingres├í la nueva contrase├▒a.');
+      setMensajeError('Ingresá la nueva contraseña.');
       return;
     }
 
     if (nuevaContrasenia.length < 6) {
-      setMensajeError('La nueva contrase├▒a debe tener al menos 6 caracteres.');
+      setMensajeError('La nueva contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
     if (nuevaContrasenia === contraseniaActual) {
-      setMensajeError('La nueva contrase├▒a debe ser distinta a la actual.');
+      setMensajeError('La nueva contraseña debe ser distinta a la actual.');
       return;
     }
 
     if (nuevaContrasenia !== confirmarContrasenia) {
-      setMensajeError('Las contrase├▒as no coinciden. Verificalas.');
+      setMensajeError('Las contraseñas no coinciden. Verificalas.');
       return;
     }
 
@@ -95,8 +95,8 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
       setGuardando(true);
       await cambiarContrasenia(contraseniaActual, nuevaContrasenia);
       notificar(
-        '┬íContrase├▒a actualizada!',
-        'Tu contrase├▒a ha sido modificada con ├⌐xito. Usala en tu pr├│ximo inicio de sesi├│n.'
+        '¡Contraseña actualizada!',
+        'Tu contraseña ha sido modificada con éxito. Usala en tu próximo inicio de sesión.'
       );
       limpiarFormulario();
       alCerrar();
@@ -104,7 +104,7 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
       const mensaje =
         error instanceof Error
           ? error.message
-          : 'No se pudo actualizar la contrase├▒a. Reintent├í en unos momentos.';
+          : 'No se pudo actualizar la contraseña. Reintentá en unos momentos.';
       setMensajeError(mensaje);
     } finally {
       setGuardando(false);
@@ -114,8 +114,8 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
   const manejarEnviarRecuperacion = () => {
     const emailDestino = emailUsuario || '';
     const mensajeConfirmacion = emailDestino
-      ? `┬┐Deseas enviar un correo a ${emailDestino} con las instrucciones para restablecer tu contrase├▒a?`
-      : '┬┐Deseas enviar un correo con las instrucciones para restablecer tu contrase├▒a?';
+      ? `¿Deseas enviar un correo a ${emailDestino} con las instrucciones para restablecer tu contraseña?`
+      : '¿Deseas enviar un correo con las instrucciones para restablecer tu contraseña?';
 
     const ejecutarEnvio = async () => {
       try {
@@ -123,7 +123,7 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
         await enviarCorreoRestablecimiento(emailDestino);
         notificar(
           'Correo enviado',
-          `Revis├í tu casilla ${emailDestino ? `(${emailDestino})` : ''} para restablecer tu contrase├▒a.`
+          `Revisá tu casilla ${emailDestino ? `(${emailDestino})` : ''} para restablecer tu contraseña.`
         );
       } catch (error: unknown) {
         const mensaje =
@@ -143,7 +143,7 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
       return;
     }
 
-    Alert.alert('Restablecer contrase├▒a', mensajeConfirmacion, [
+    Alert.alert('Restablecer contraseña', mensajeConfirmacion, [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Enviar correo', onPress: () => void ejecutarEnvio() },
     ]);
@@ -171,9 +171,9 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
                 <Ionicons name="lock-closed" size={28} color={Colors.primary} />
               </View>
 
-              <Text style={styles.modalTitulo}>CAMBIAR CONTRASE├æA</Text>
+              <Text style={styles.modalTitulo}>CAMBIAR CONTRASEÑA</Text>
               <Text style={styles.modalSubtitulo}>
-                Ingres├í tu contrase├▒a actual y la nueva que quieras utilizar en tu cuenta.
+                Ingresá tu contraseña actual y la nueva que quieras utilizar en tu cuenta.
               </Text>
 
               {/* Mensaje de error inline */}
@@ -184,8 +184,8 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
                 </View>
               )}
 
-              {/* Campo: Contrase├▒a Actual */}
-              <Text style={styles.datoLabel}>Contrase├▒a actual</Text>
+              {/* Campo: Contraseña Actual */}
+              <Text style={styles.datoLabel}>Contraseña actual</Text>
               <View style={styles.inputContenedor}>
                 <TextInput
                   style={styles.input}
@@ -194,7 +194,7 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
                     setContraseniaActual(val);
                     if (mensajeError) setMensajeError(null);
                   }}
-                  placeholder="Tu contrase├▒a actual"
+                  placeholder="Tu contraseña actual"
                   placeholderTextColor={Colors.textMuted}
                   secureTextEntry={!verActual}
                   autoCapitalize="none"
@@ -213,7 +213,7 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
                 </Pressable>
               </View>
 
-              {/* Opci├│n de recuperaci├│n si olvid├│ su contrase├▒a actual */}
+              {/* Opción de recuperación si olvidó su contraseña actual */}
               <Pressable
                 style={styles.botonOlvido}
                 onPress={manejarEnviarRecuperacion}
@@ -223,13 +223,13 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
                   <ActivityIndicator size="small" color={Colors.primary} />
                 ) : (
                   <Text style={styles.textoBotonOlvido}>
-                    ┬┐Olvidaste tu contrase├▒a actual? Enviar correo
+                    ¿Olvidaste tu contraseña actual? Enviar correo
                   </Text>
                 )}
               </Pressable>
 
-              {/* Campo: Nueva Contrase├▒a */}
-              <Text style={styles.datoLabel}>Nueva contrase├▒a</Text>
+              {/* Campo: Nueva Contraseña */}
+              <Text style={styles.datoLabel}>Nueva contraseña</Text>
               <View style={styles.inputContenedor}>
                 <TextInput
                   style={styles.input}
@@ -238,7 +238,7 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
                     setNuevaContrasenia(val);
                     if (mensajeError) setMensajeError(null);
                   }}
-                  placeholder="M├¡nimo 6 caracteres"
+                  placeholder="Mínimo 6 caracteres"
                   placeholderTextColor={Colors.textMuted}
                   secureTextEntry={!verNueva}
                   autoCapitalize="none"
@@ -257,8 +257,8 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
                 </Pressable>
               </View>
 
-              {/* Campo: Confirmar Nueva Contrase├▒a */}
-              <Text style={styles.datoLabel}>Confirmar nueva contrase├▒a</Text>
+              {/* Campo: Confirmar Nueva Contraseña */}
+              <Text style={styles.datoLabel}>Confirmar nueva contraseña</Text>
               <View style={styles.inputContenedor}>
                 <TextInput
                   style={styles.input}
@@ -267,7 +267,7 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
                     setConfirmarContrasenia(val);
                     if (mensajeError) setMensajeError(null);
                   }}
-                  placeholder="Repet├¡ la nueva contrase├▒a"
+                  placeholder="Repetí la nueva contraseña"
                   placeholderTextColor={Colors.textMuted}
                   secureTextEntry={!verConfirmar}
                   autoCapitalize="none"
@@ -286,7 +286,7 @@ export const CambiarContraseniaModal: React.FC<CambiarContraseniaModalProps> = (
                 </Pressable>
               </View>
 
-              {/* Botones de acci├│n */}
+              {/* Botones de acción */}
               <View style={styles.filaBotonesModal}>
                 <Pressable
                   style={[styles.botonAccion, styles.botonCancelar]}

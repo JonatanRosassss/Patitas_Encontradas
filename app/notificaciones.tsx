@@ -48,12 +48,7 @@ export default function NotificacionesScreen() {
         setItems(notificaciones);
         setCargando(false);
       },
-      (error) => {
-        console.error(
-          "Error al escuchar notificaciones:",
-          error
-        );
-
+      (_error) => {
         setCargando(false);
 
         Alert.alert(
@@ -71,20 +66,19 @@ export default function NotificacionesScreen() {
   ).length;
 
   async function leerUna(item: Notificacion) {
-    if (item.leida) return;
+    if (!item.leida) {
+      try {
+        await marcarComoLeida(item.id);
+      } catch {
+        Alert.alert(
+          "Error",
+          "No se pudo marcar la notificación como leída."
+        );
+      }
+    }
 
-    try {
-      await marcarComoLeida(item.id);
-    } catch (error) {
-      console.error(
-        "Error al marcar notificación como leída:",
-        error
-      );
-
-      Alert.alert(
-        "Error",
-        "No se pudo marcar la notificación como leída."
-      );
+    if (item.publicacionId) {
+      router.push(`/detalle/${item.publicacionId}`);
     }
   }
 
@@ -93,12 +87,7 @@ export default function NotificacionesScreen() {
 
     try {
       await marcarTodasComoLeidas(usuario.uid);
-    } catch (error) {
-      console.error(
-        "Error al marcar todas como leídas:",
-        error
-      );
-
+    } catch {
       Alert.alert(
         "Error",
         "No se pudieron marcar todas las notificaciones como leídas."

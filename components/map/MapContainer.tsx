@@ -17,8 +17,7 @@ import {
   Platform,
 } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
-import { Colors, Typography, Spacing } from '../../constants/theme';
-import { Radius } from '../../theme/tokens';
+import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 import { Coordinates, MapPet, MapBridgeEvent } from '../../types/map';
 import { PILAR_DEFAULT_CENTER } from '../../data/mapMockData';
 
@@ -192,6 +191,17 @@ const buildLeafletHtml = (): string => `
       }
     }
 
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\//g, '&#x2F;');
+    }
+
     function createMarkerHtml(pet, isSelected) {
       var isPerdido = pet.estado === 1;
       var pinClass = isPerdido ? 'pin-perdido' : 'pin-encontrado';
@@ -201,7 +211,7 @@ const buildLeafletHtml = (): string => `
 
       return '<div class="custom-marker ' + (isSelected ? 'marker-selected' : '') + '">' +
         '<div class="marker-pin ' + pinClass + '">' + iconSvg + '</div>' +
-        '<div class="marker-label">' + pet.nombre + '</div>' +
+        '<div class="marker-label">' + escapeHtml(pet.nombre) + '</div>' +
       '</div>';
     }
 
@@ -220,12 +230,13 @@ const buildLeafletHtml = (): string => `
 
     window.mapBridge = {
       setMarkers: function(pets) {
-        if (!markersLayer) return;
+        if (!markersLayer || !Array.isArray(pets)) return;
         markersLayer.clearLayers();
         markersMap.clear();
 
         pets.forEach(function(pet) {
-          if (!pet.coordenadas || typeof pet.coordenadas.latitude !== 'number' || typeof pet.coordenadas.longitude !== 'number') return;
+          if (!pet || !pet.coordenadas || typeof pet.coordenadas.latitude !== 'number' || typeof pet.coordenadas.longitude !== 'number') return;
+          if (!Number.isFinite(pet.coordenadas.latitude) || !Number.isFinite(pet.coordenadas.longitude)) return;
           var isSelected = (pet.id === selectedMarkerId);
           var icon = L.divIcon({
             className: '',
@@ -252,8 +263,8 @@ const buildLeafletHtml = (): string => `
       },
 
       centerTo: function(lat, lng, zoom) {
-        if (!map) return;
-        map.flyTo([lat, lng], zoom || 16, { duration: 1.2 });
+        if (!map || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) return;
+        map.flyTo([Number(lat), Number(lng)], Number(zoom) || 16, { duration: 1.2 });
       },
 
       zoomIn: function() {
@@ -265,9 +276,11 @@ const buildLeafletHtml = (): string => `
       },
 
       setUserLocation: function(lat, lng) {
-        if (!map) return;
+        if (!map || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) return;
+        var safeLat = Number(lat);
+        var safeLng = Number(lng);
         if (userMarker) {
-          userMarker.setLatLng([lat, lng]);
+          userMarker.setLatLng([safeLat, safeLng]);
         } else {
           var userIcon = L.divIcon({
             className: '',
@@ -275,7 +288,7 @@ const buildLeafletHtml = (): string => `
             iconSize: [22, 22],
             iconAnchor: [11, 11]
           });
-          userMarker = L.marker([lat, lng], { icon: userIcon, zIndexOffset: 2000 }).addTo(map);
+          userMarker = L.marker([safeLat, safeLng], { icon: userIcon, zIndexOffset: 2000 }).addTo(map);
         }
       },
 
@@ -295,17 +308,13 @@ const buildLeafletHtml = (): string => `
       try {
         var rawData = event.data;
         var msg = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+        if (!msg || typeof msg.type !== 'string') return;
         if (msg.type === 'SET_MARKERS') window.mapBridge.setMarkers(msg.payload);
-        if (msg.type === 'CENTER') window.mapBridge.centerTo(msg.payload.lat, msg.payload.lng, msg.payload.zoom);
+        if (msg.type === 'CENTER' && msg.payload) window.mapBridge.centerTo(msg.payload.lat, msg.payload.lng, msg.payload.zoom);
         if (msg.type === 'ZOOM_IN') window.mapBridge.zoomIn();
         if (msg.type === 'ZOOM_OUT') window.mapBridge.zoomOut();
-        if (msg.type === 'SET_USER_LOCATION') window.mapBridge.setUserLocation(msg.payload.lat, msg.payload.lng);
-        if (msg.type === 'SELECT_PET') window.mapBridge.selectPet(msg.payload.id);
-        if (msg.type === 'EVAL' && msg.code) {
-          try {
-            (new Function(msg.code))();
-          } catch(e) {}
-        }
+        if (msg.type === 'SET_USER_LOCATION' && msg.payload) window.mapBridge.setUserLocation(msg.payload.lat, msg.payload.lng);
+        if (msg.type === 'SELECT_PET' && msg.payload) window.mapBridge.selectPet(msg.payload.id);
       } catch (e) {
         // Ignored in production
       }
@@ -350,65 +359,96 @@ export const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
       return () => clearTimeout(timer);
     }, []);
 
-    const runInWebView = useCallback((code: string) => {
-      if (Platform.OS === 'web') {
-        const iframe = iframeRef.current;
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage(
-            JSON.stringify({ type: 'EVAL', code }),
-            '*'
-          );
+    const sendBridgeCommand = useCallback(
+      (type: string, payload: unknown, nativeCode: string) => {
+        if (Platform.OS === 'web') {
+          const iframe = iframeRef.current;
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage(
+              JSON.stringify({ type, payload }),
+              '*'
+            );
+          }
+        } else {
+          webViewRef.current?.injectJavaScript(`${nativeCode}; true;`);
         }
-      } else {
-        webViewRef.current?.injectJavaScript(`${code}; true;`);
-      }
-    }, []);
+      },
+      []
+    );
 
     useImperativeHandle(
       ref,
       () => ({
         centerTo: (lat: number, lng: number, zoom = 16) => {
-          runInWebView(
-            `window.mapBridge && window.mapBridge.centerTo(${lat}, ${lng}, ${zoom})`
+          const safeLat = Number(lat);
+          const safeLng = Number(lng);
+          const safeZoom = Number(zoom) || 16;
+          if (!Number.isFinite(safeLat) || !Number.isFinite(safeLng)) return;
+          sendBridgeCommand(
+            'CENTER',
+            { lat: safeLat, lng: safeLng, zoom: safeZoom },
+            `window.mapBridge && window.mapBridge.centerTo(${safeLat}, ${safeLng}, ${safeZoom})`
           );
         },
         zoomIn: () => {
-          runInWebView(`window.mapBridge && window.mapBridge.zoomIn()`);
+          sendBridgeCommand(
+            'ZOOM_IN',
+            {},
+            `window.mapBridge && window.mapBridge.zoomIn()`
+          );
         },
         zoomOut: () => {
-          runInWebView(`window.mapBridge && window.mapBridge.zoomOut()`);
+          sendBridgeCommand(
+            'ZOOM_OUT',
+            {},
+            `window.mapBridge && window.mapBridge.zoomOut()`
+          );
         },
       }),
-      [runInWebView]
+      [sendBridgeCommand]
     );
 
     // Sync markers when pets array changes or map becomes ready
     useEffect(() => {
       if (isMapReady) {
-        runInWebView(
+        sendBridgeCommand(
+          'SET_MARKERS',
+          pets,
           `window.mapBridge && window.mapBridge.setMarkers(${JSON.stringify(
             pets
           )})`
         );
       }
-    }, [pets, isMapReady, runInWebView]);
+    }, [pets, isMapReady, sendBridgeCommand]);
 
     // Sync user location marker
     useEffect(() => {
-      if (isMapReady && userLocation) {
-        runInWebView(
-          `window.mapBridge && window.mapBridge.setUserLocation(${userLocation.latitude}, ${userLocation.longitude})`
+      if (
+        isMapReady &&
+        userLocation &&
+        Number.isFinite(userLocation.latitude) &&
+        Number.isFinite(userLocation.longitude)
+      ) {
+        sendBridgeCommand(
+          'SET_USER_LOCATION',
+          { lat: userLocation.latitude, lng: userLocation.longitude },
+          `window.mapBridge && window.mapBridge.setUserLocation(${Number(userLocation.latitude)}, ${Number(userLocation.longitude)})`
         );
       }
-    }, [userLocation, isMapReady, runInWebView]);
+    }, [userLocation, isMapReady, sendBridgeCommand]);
 
     // Sync selected pet
     useEffect(() => {
       if (isMapReady) {
-        const petId = selectedPet ? `'${selectedPet.id}'` : 'null';
-        runInWebView(`window.mapBridge && window.mapBridge.selectPet(${petId})`);
+        const petIdValue = selectedPet ? selectedPet.id : null;
+        const petIdJson = JSON.stringify(petIdValue);
+        sendBridgeCommand(
+          'SELECT_PET',
+          { id: petIdValue },
+          `window.mapBridge && window.mapBridge.selectPet(${petIdJson})`
+        );
       }
-    }, [selectedPet, isMapReady, runInWebView]);
+    }, [selectedPet, isMapReady, sendBridgeCommand]);
 
     const procesarEventoBridge = useCallback((data: MapBridgeEvent) => {
       switch (data.type) {

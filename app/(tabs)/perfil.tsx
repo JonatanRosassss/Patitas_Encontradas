@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { router } from 'expo-router';
+import React, { useState, useEffect, useCallback } from 'react';
+import { router, useFocusEffect } from 'expo-router';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import {
   eliminarAlertaMascota,
   marcarMascotaComoEncontrada,
 } from '@/services/mascotasService';
+import { useAlertasStore } from '@/store/useAlertasStore';
 import { obtenerImagenPrincipal, obtenerEtiquetaEspecie } from '@/utils/detalleMascota';
 
 export default function PerfilScreen() {
@@ -35,6 +36,8 @@ export default function PerfilScreen() {
     actualizarFotoPerfil,
     actualizarDatosPerfil,
   } = useAuth();
+  const eliminarAlertaLocal = useAlertasStore((state) => state.eliminarAlertaLocal);
+  const actualizarEstadoLocal = useAlertasStore((state) => state.actualizarEstadoLocal);
 
   const [fotoLocalTemporal, setFotoLocalTemporal] = useState<string | null>(null);
   const [guardandoFoto, setGuardandoFoto] = useState<boolean>(false);
@@ -66,7 +69,7 @@ export default function PerfilScreen() {
   }, [perfilUsuario, usuario]);
 
   // Cargar publicaciones reales del usuario desde Firestore
-  const cargarMisPublicaciones = async () => {
+  const cargarMisPublicaciones = useCallback(async () => {
     if (!usuario?.uid) {
       setCargandoPublicaciones(false);
       return;
@@ -80,11 +83,13 @@ export default function PerfilScreen() {
     } finally {
       setCargandoPublicaciones(false);
     }
-  };
+  }, [usuario?.uid]);
 
-  useEffect(() => {
-    cargarMisPublicaciones();
-  }, [usuario]);
+  useFocusEffect(
+    useCallback(() => {
+      void cargarMisPublicaciones();
+    }, [cargarMisPublicaciones])
+  );
 
   // Manejo de eliminación de publicaciones con soporte completo para Web y Native
   const confirmarEliminacion = (idAlerta: string, nombreMascota?: string) => {
@@ -94,13 +99,14 @@ export default function PerfilScreen() {
     const ejecutarEliminacion = async () => {
       try {
         await eliminarAlertaMascota(idAlerta);
+        eliminarAlertaLocal(idAlerta);
         setMisPublicaciones((prev) => prev.filter((p) => p.id !== idAlerta));
         if (Platform.OS === 'web') {
           window.alert('La publicación fue eliminada correctamente.');
         } else {
           Alert.alert('Éxito', 'La publicación fue eliminada correctamente.');
         }
-        cargarMisPublicaciones();
+        await cargarMisPublicaciones();
       } catch (error: unknown) {
         const msg = error instanceof Error ? error.message : 'No se pudo eliminar la publicación.';
         if (Platform.OS === 'web') {
@@ -113,7 +119,7 @@ export default function PerfilScreen() {
 
     if (Platform.OS === 'web') {
       if (typeof window !== 'undefined' && window.confirm(mensaje)) {
-        ejecutarEliminacion();
+        void ejecutarEliminacion();
       }
       return;
     }
@@ -126,7 +132,7 @@ export default function PerfilScreen() {
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: ejecutarEliminacion,
+          onPress: () => void ejecutarEliminacion(),
         },
       ]
     );
@@ -140,6 +146,7 @@ export default function PerfilScreen() {
     const ejecutar = async () => {
       try {
         await marcarMascotaComoEncontrada(idAlerta);
+        actualizarEstadoLocal(idAlerta, 'ENCONTRADO');
 
         if (Platform.OS === 'web') {
           window.alert('¡Publicación actualizada! La mascota figura como encontrada.');

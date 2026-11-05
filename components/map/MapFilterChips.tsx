@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { Colors, Typography, Spacing } from '../../constants/theme';
-import { Radius } from '../../theme/tokens';
+import { Colors, Typography, Spacing, Radius } from '../../constants/theme';
 import { MapFilterIndex } from '../../types/map';
 
 export interface MapFilterChipsProps {

@@ -134,8 +134,11 @@ export default function PantallaRegistro() {
         () => enrutador.replace('/(auth)/login')
       );
 
-    } catch (error: any) {
-      console.warn('Error al registrar usuario:', error?.message || error);
+    } catch (err: unknown) {
+      const error =
+        err && typeof err === 'object' && 'code' in err
+          ? (err as { code?: string })
+          : { code: '' };
 
       if (error.code === 'auth/email-already-in-use') {
         alertar(
@@ -161,18 +164,8 @@ export default function PantallaRegistro() {
     }
   };
 
-  const manejarRegistroSocial = (proveedor: string) => {
-    Alert.alert(
-      `Registro con ${proveedor} (Simulación)`,
-      `Cuenta creada e inicio de sesión exitoso mediante ${proveedor}.`,
-      [
-        {
-          text: 'Continuar',
-          onPress: () => enrutador.replace('/'),
-        },
-      ]
-    );
-  };
+  // Botones sociales visibles en la UI pero sin lógica de bypass
+  const manejarRegistroSocial = (_proveedor: string) => {};
 
   return (
     <KeyboardAvoidingView
